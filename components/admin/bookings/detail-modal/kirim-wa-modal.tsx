@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { toast } from "sonner"
-import { MessageCircle, Send, ExternalLink, X } from "lucide-react"
+import { MessageCircle, ExternalLink, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   ALL_TEMPLATES,
@@ -42,9 +41,7 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
     "konfirmasi_dp_diterima"
   )
   const [pesanCustom, setPesanCustom] = useState("")
-  const [sending, setSending] = useState(false)
 
-  // Generate preview pesan
   const templateData = {
     nama: booking.nama_client.split(" ")[0],
     tanggal_lengkap: formatTanggal(booking.tgl_foto),
@@ -59,42 +56,10 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
       ? pesanCustom
       : generatePesan(selectedTemplate, templateData)
 
-  // Mode 1: Buka WhatsApp Web (manual)
   function handleBukaWaWeb() {
     const nomor = formatNomor(booking.no_wa)
     const url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanPreview)}`
     window.open(url, "_blank", "noopener,noreferrer")
-  }
-
-  // Mode 2: Kirim otomatis via Fonnte
-  async function handleKirimOtomatis() {
-    if (!pesanPreview.trim()) {
-      toast.error("Pesan tidak boleh kosong")
-      return
-    }
-    setSending(true)
-    try {
-      const res = await fetch("/api/notifikasi/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          booking_id: booking.id,
-          jenis_template: selectedTemplate,
-          pesan_custom: selectedTemplate === "custom" ? pesanCustom : undefined,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.success) {
-        toast.error(data.error ?? "Gagal mengirim WA")
-        return
-      }
-      toast.success(`WhatsApp berhasil dikirim ke ${booking.no_wa}`)
-      onClose()
-    } catch {
-      toast.error("Terjadi kesalahan")
-    } finally {
-      setSending(false)
-    }
   }
 
   return (
@@ -174,29 +139,15 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
             </div>
           </div>
 
-          {/* Tombol aksi */}
-          <div className="flex gap-3 pt-1">
-            <Button
-              variant="outline"
-              className="flex-1 gap-2 border-green-600 text-green-700 hover:bg-green-50"
-              onClick={handleBukaWaWeb}
-              disabled={!pesanPreview.trim()}
-            >
-              <ExternalLink className="w-4 h-4" />
-              WA Web (Manual)
-            </Button>
-            <Button
-              className="flex-1 gap-2 bg-green-600 hover:bg-green-700 text-white"
-              onClick={handleKirimOtomatis}
-              disabled={sending || !pesanPreview.trim()}
-            >
-              <Send className="w-4 h-4" />
-              {sending ? "Mengirim..." : "Kirim Otomatis"}
-            </Button>
-          </div>
-          <p className="text-xs text-center text-gray-400">
-            &quot;Kirim Otomatis&quot; memerlukan Fonnte token dikonfigurasi
-          </p>
+          {/* Tombol */}
+          <Button
+            className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleBukaWaWeb}
+            disabled={!pesanPreview.trim()}
+          >
+            <ExternalLink className="w-4 h-4" />
+            Buka WhatsApp
+          </Button>
         </div>
       </div>
     </div>
