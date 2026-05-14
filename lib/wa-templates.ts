@@ -4,6 +4,7 @@ export type JenisTemplate =
   | "konfirmasi_dp_diterima"
   | "reminder_h1"
   | "foto_siap_diambil"
+  | "kirim_link_foto"
   | "follow_up_review"
 
 // Jenis enum di Supabase notifikasi_log
@@ -25,6 +26,7 @@ export const TEMPLATE_LABELS: Record<JenisTemplate, string> = {
   konfirmasi_dp_diterima: "Konfirmasi DP Diterima",
   reminder_h1: "Reminder H-1",
   foto_siap_diambil: "Foto Siap Diambil",
+  kirim_link_foto: "Kirim Link Hasil Foto",
   follow_up_review: "Follow-up Review",
 }
 
@@ -35,6 +37,7 @@ export interface TemplateData {
   paket: string
   sisa: string
   jumlah_foto?: string
+  link_foto?: string
 }
 
 // Ambil estimasi jumlah foto dari nama paket
@@ -67,6 +70,9 @@ const TEMPLATES: Record<JenisTemplate, (d: TemplateData) => string> = {
   foto_siap_diambil: (d) =>
     `Halo Kak ${d.nama} ✨\nFoto Anda sudah selesai diedit! 📸\nUntuk paket ${d.paket} dengan ${d.jumlah_foto ?? "foto pilihan"}.\nBisa diambil di studio jam 10-21 WIB, atau kirim via GoSend (ongkir client).`,
 
+  kirim_link_foto: (d) =>
+    `Halo Kak ${d.nama} 🎉\nBerikut link hasil foto Anda:\n\n📁 ${d.link_foto ?? "[link belum diisi]"}\n\nLink aktif selama 30 hari.\nTerima kasih sudah foto di Desara Studio! 🙏`,
+
   follow_up_review: (d) =>
     `Halo Kak ${d.nama} 💝\nTerima kasih sudah memilih Desara Studio!\nMohon bantuannya kasih review di:\n[Link Google Maps]\nBonus diskon 10% untuk booking next!`,
 }
@@ -79,5 +85,6 @@ export const ALL_TEMPLATES: JenisTemplate[] = [
   "konfirmasi_dp_diterima",
   "reminder_h1",
   "foto_siap_diambil",
+  "kirim_link_foto",
   "follow_up_review",
 ]

@@ -41,6 +41,7 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
     "konfirmasi_dp_diterima"
   )
   const [pesanCustom, setPesanCustom] = useState("")
+  const [linkFoto, setLinkFoto] = useState("")
 
   const templateData = {
     nama: booking.nama_client.split(" ")[0],
@@ -49,6 +50,7 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
     paket: booking.nama_paket,
     sisa: formatSisa(booking.total_tagihan, booking.dp_dibayar),
     jumlah_foto: getJumlahFoto(booking.nama_paket),
+    link_foto: linkFoto,
   }
 
   const pesanPreview =
@@ -112,6 +114,22 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
               <option value="custom">Pesan Custom</option>
             </select>
           </div>
+
+          {/* Input link foto */}
+          {selectedTemplate === "kirim_link_foto" && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1.5 block">
+                Link Google Drive
+              </label>
+              <input
+                type="url"
+                value={linkFoto}
+                onChange={(e) => setLinkFoto(e.target.value)}
+                placeholder="https://drive.google.com/..."
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30"
+              />
+            </div>
+          )}
 
           {/* Input custom */}
           {selectedTemplate === "custom" && (
