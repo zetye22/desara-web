@@ -46,13 +46,11 @@ export async function GET(request: NextRequest) {
   const existingList = ((bookings ?? []) as ExistingBooking[])
     .filter((b) => !excludeId || b.id !== excludeId)
 
-  function cekBentrok(slotMulai: number, durasi: number): ExistingBooking | null {
-    const slotSelesai = slotMulai + durasi
+  // Slot terisi jika ada booking lain yang MULAI di jam yang sama
+  // (bukan overlap — setiap slot 30 menit boleh 1 client mulai, durasi tidak memblok slot berikutnya)
+  function cekBentrok(slotMulai: number): ExistingBooking | null {
     for (const b of existingList) {
-      const bMulai   = timeToMinutes(b.jam_mulai)
-      const bSelesai = timeToMinutes(b.jam_selesai)
-      // Overlap: existing mulai sebelum slot selesai, DAN existing selesai setelah slot mulai
-      if (bMulai < slotSelesai && bSelesai > slotMulai) return b
+      if (timeToMinutes(b.jam_mulai) === slotMulai) return b
     }
     return null
   }
@@ -68,8 +66,12 @@ export async function GET(request: NextRequest) {
 
   if (jamMulaiParam) {
     // Cek 1 slot spesifik
-    const slotMulai = timeToMinutes(jamMulaiParam)
-    const bentrok   = cekBentrok(slotMulai, durasiMenit)
+    const slotMulai   = timeToMinutes(jamMulaiParam)
+    const slotSelesai = slotMulai + durasiMenit
+    if (slotSelesai > timeToMinutes("21:00")) {
+      return NextResponse.json({ available: false, alasan: "Melebihi jam operasional", bentrok_dengan: null })
+    }
+    const bentrok = cekBentrok(slotMulai)
     return NextResponse.json({
       available: !bentrok,
       alasan: bentrok
@@ -97,7 +99,7 @@ export async function GET(request: NextRequest) {
       return { jam: slotJam, available: false, alasan: "Slot sudah lewat", bentrok_dengan: null }
     }
 
-    const bentrok = cekBentrok(slotMulai, durasiMenit)
+    const bentrok = cekBentrok(slotMulai)
     return {
       jam: slotJam,
       available: !bentrok,
