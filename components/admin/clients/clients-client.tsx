@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { RefreshCw, DatabaseZap } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { InsightsCards } from "./insights-cards"
 import { ClientFilters } from "./filters"
 import { ClientTable } from "./client-table"
 import { ClientDetailModal } from "./client-detail-modal"
 import { ExportButton } from "./export-button"
+import { createClient as createSupabaseClient } from "@/lib/supabase/client"
 import type { Client, Insights, FilterState } from "./types"
 import { DEFAULT_FILTERS } from "./types"
 
@@ -64,6 +66,29 @@ export function ClientsClient() {
   useEffect(() => { fetchClients() }, [fetchClients])
   useEffect(() => { fetchInsights() }, [fetchInsights])
 
+  // Realtime: client dihapus atau diupdate langsung tercermin di list
+  useEffect(() => {
+    const supabase = createSupabaseClient()
+    const channel = supabase
+      .channel("admin-clients-realtime")
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "clients" }, (payload) => {
+        const deleted = payload.old as { id?: string; nama?: string }
+        if (!deleted.id) return
+        setClients((prev) => prev.filter((c) => c.id !== deleted.id))
+        setDetailClient((cur) => (cur?.id === deleted.id ? null : cur))
+        setSelectedIds((prev) => { const next = new Set(prev); next.delete(deleted.id!); return next })
+        fetchInsights()
+        toast.info(`Client ${deleted.nama ?? ""} dihapus`)
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "clients" }, (payload) => {
+        const updated = payload.new as Client
+        setClients((prev) => prev.map((c) => c.id === updated.id ? { ...c, ...updated } : c))
+        setDetailClient((cur) => (cur?.id === updated.id ? { ...cur, ...updated } : cur))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [fetchInsights])
+
   // Reset selected saat filter berubah
   useEffect(() => { setSelectedIds(new Set()) }, [filters])
 
@@ -87,6 +112,13 @@ export function ClientsClient() {
   function handleClientUpdated(updated: Client) {
     setClients((prev) => prev.map((c) => c.id === updated.id ? updated : c))
     setDetailClient(updated)
+    fetchInsights()
+  }
+
+  function handleClientDeleted(id: string) {
+    setClients((prev) => prev.filter((c) => c.id !== id))
+    setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next })
+    setDetailClient(null)
     fetchInsights()
   }
 
@@ -186,6 +218,7 @@ export function ClientsClient() {
           client={detailClient}
           onClose={() => setDetailClient(null)}
           onUpdated={handleClientUpdated}
+          onDeleted={handleClientDeleted}
         />
       )}
 

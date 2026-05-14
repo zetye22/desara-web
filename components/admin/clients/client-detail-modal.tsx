@@ -12,6 +12,7 @@ interface ClientDetailModalProps {
   client: Client
   onClose: () => void
   onUpdated: (c: Client) => void
+  onDeleted: (id: string) => void
 }
 
 type Tab = "info" | "riwayat" | "stats" | "catatan"
@@ -40,7 +41,7 @@ interface FreshStats {
   last_booking_date: string | null
 }
 
-export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailModalProps) {
+export function ClientDetailModal({ client, onClose, onUpdated, onDeleted }: ClientDetailModalProps) {
   const [tab, setTab] = useState<Tab>("info")
   const [bookings, setBookings] = useState<ClientBooking[]>([])
   const [loadingBookings, setLoadingBookings] = useState(false)
@@ -113,8 +114,13 @@ export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailMo
       const res = await fetch(`/api/clients/${client.id}?mode=${deleteMode}`, { method: "DELETE" })
       const data = await res.json()
       if (!res.ok) { toast.error(data.error ?? "Gagal hapus"); return }
-      toast.success(deleteMode === "anonymize" ? "Data client dianonimkan" : "Client dihapus")
-      onClose()
+      if (deleteMode === "anonymize") {
+        toast.success("Data client dianonimkan")
+        onClose()
+      } else {
+        toast.success("Client dan semua booking terkait dihapus")
+        onDeleted(client.id)
+      }
     } catch {
       toast.error("Terjadi kesalahan")
     }
