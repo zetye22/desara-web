@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { WifiOff, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import DetailModal from "./detail-modal"
@@ -103,10 +102,9 @@ export default function BookingListClient({
 }: BookingListClientProps) {
   const router = useRouter()
 
-  const [bookings, setBookings]             = useState<BookingRow[]>(initialBookings)
-  const [addonLapanganIds, setAddonIds]     = useState<Set<string>>(initialAddonIds)
-  const [liveStatus, setLiveStatus]         = useState<"connecting" | "live" | "offline">("connecting")
-  const selectedBookingRef                  = useRef<BookingRow | null>(null)
+  const [bookings, setBookings]         = useState<BookingRow[]>(initialBookings)
+  const [addonLapanganIds, setAddonIds] = useState<Set<string>>(initialAddonIds)
+  const selectedBookingRef              = useRef<BookingRow | null>(null)
 
   // Sync dari server props (setelah router.refresh())
   useEffect(() => { setBookings(initialBookings) }, [initialBookings])
@@ -174,11 +172,7 @@ export default function BookingListClient({
         }
       })
 
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED")   setLiveStatus("live")
-        if (status === "CLOSED")       setLiveStatus("offline")
-        if (status === "CHANNEL_ERROR") setLiveStatus("offline")
-      })
+      .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [router])
@@ -285,18 +279,6 @@ export default function BookingListClient({
         })}
         </div>
 
-        {/* Live indicator */}
-        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-          liveStatus === "live"
-            ? "border-green-200 bg-green-50 text-green-700"
-            : liveStatus === "offline"
-            ? "border-red-200 bg-red-50 text-red-600"
-            : "border-gray-200 bg-gray-50 text-gray-500"
-        }`}>
-          {liveStatus === "live"    && <><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" /></span> Live</>}
-          {liveStatus === "offline" && <><WifiOff className="w-3 h-3" /> Offline</>}
-          {liveStatus === "connecting" && <><Loader2 className="w-3 h-3 animate-spin" /> Connecting…</>}
-        </div>
       </div>
 
       {/* ===== Filter Bar ===== */}
