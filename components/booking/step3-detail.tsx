@@ -1,8 +1,9 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ChevronRight, ChevronLeft, Check, AlertCircle } from "lucide-react"
+import { ChevronRight, ChevronLeft, Check, AlertCircle, UserCheck, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -127,10 +128,47 @@ export function Step3Detail() {
   const maxOrangPaket = paket?.maxOrang ?? null
   const maxOrang = maxOrangPaket ? maxOrangPaket + addons.tambahanOrang : null
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<DetailFormValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<DetailFormValues>({
     resolver: zodResolver(detailSchema),
     defaultValues: { namaClient, noWa, email, jumlahOrang, catatan },
   })
+
+  // State lookup client
+  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "not_found">("idle")
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const noWaValue = watch("noWa")
+
+  // Auto-fill nama & email dari data client saat nomor WA diketik
+  useEffect(() => {
+    const digits = (noWaValue ?? "").replace(/\D/g, "")
+    if (digits.length < 9) {
+      setLookupStatus("idle")
+      return
+    }
+
+    setLookupStatus("loading")
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/clients/lookup?no_wa=${encodeURIComponent(noWaValue)}`)
+        const data = await res.json()
+        if (data.found) {
+          setValue("namaClient", data.nama, { shouldValidate: true })
+          if (data.email) setValue("email", data.email, { shouldValidate: true })
+          setLookupStatus("found")
+        } else {
+          setLookupStatus("not_found")
+        }
+      } catch {
+        setLookupStatus("idle")
+      }
+    }, 700)
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [noWaValue, setValue])
 
   const orangInput = watch("jumlahOrang")
   const orangMelebihi = maxOrangPaket && orangInput > (maxOrang ?? Infinity)
@@ -149,18 +187,37 @@ export function Step3Detail() {
       <PilihBackground />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+        {/* Nomor WA — diisi duluan agar bisa auto-fill */}
+        <div>
+          <Label htmlFor="noWa">Nomor WhatsApp *</Label>
+          <div className="relative mt-1.5">
+            <Input
+              id="noWa"
+              placeholder="081234567890"
+              className={lookupStatus === "found" ? "border-green-400 pr-9" : "pr-9"}
+              {...register("noWa")}
+            />
+            {lookupStatus === "loading" && (
+              <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
+            )}
+            {lookupStatus === "found" && (
+              <UserCheck className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+            )}
+          </div>
+          {errors.noWa && <p className="text-xs text-red-500 mt-1">{errors.noWa.message}</p>}
+          {lookupStatus === "found" && (
+            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+              <UserCheck className="w-3 h-3" />
+              Data Anda ditemukan dan sudah diisi otomatis. Silakan koreksi jika ada perubahan.
+            </p>
+          )}
+        </div>
+
         <div>
           <Label htmlFor="namaClient">Nama Lengkap *</Label>
           <Input id="namaClient" placeholder="Nama sesuai identitas" className="mt-1.5"
             {...register("namaClient")} />
           {errors.namaClient && <p className="text-xs text-red-500 mt-1">{errors.namaClient.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="noWa">Nomor WhatsApp *</Label>
-          <Input id="noWa" placeholder="081234567890" className="mt-1.5"
-            {...register("noWa")} />
-          {errors.noWa && <p className="text-xs text-red-500 mt-1">{errors.noWa.message}</p>}
         </div>
 
         <div>
