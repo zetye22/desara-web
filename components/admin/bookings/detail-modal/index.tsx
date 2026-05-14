@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { CalendarClock } from "lucide-react"
+import { CalendarClock, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import TabAddon from "./tab-addon"
 import TabRiwayat from "./tab-riwayat"
 import TabStaff from "./tab-staff"
+import KirimWaModal from "./kirim-wa-modal"
 import RescheduleModal from "@/components/admin/bookings/reschedule-modal"
 
 // Tipe data
@@ -129,6 +130,7 @@ export default function DetailModal({
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [updatingBayar, setUpdatingBayar] = useState(false)
   const [updatingLunas, setUpdatingLunas] = useState(false)
+  const [showWaModal, setShowWaModal] = useState(false)
   const [showReschedule, setShowReschedule] = useState(false)
   const [selectedSesi, setSelectedSesi] = useState<string>(
     booking?.status_sesi ?? "pending"
@@ -295,6 +297,14 @@ export default function DetailModal({
             >
               <CalendarClock className="w-3.5 h-3.5" />
               Reschedule
+            </button>
+            <button
+              onClick={() => setShowWaModal(true)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-green-500/20 text-green-300 hover:bg-green-500/30 transition"
+              title="Kirim WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              Kirim WA
             </button>
             <button
               onClick={onClose}
@@ -726,6 +736,14 @@ export default function DetailModal({
           )}
         </div>
       </div>
+
+      {/* Modal Kirim WA */}
+      {showWaModal && (
+        <KirimWaModal
+          booking={booking}
+          onClose={() => setShowWaModal(false)}
+        />
+      )}
 
       {/* Modal Reschedule */}
       {showReschedule && (
