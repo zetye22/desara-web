@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { Navbar } from "@/components/landing/navbar"
 import { Hero } from "@/components/landing/hero"
 import { PaketSection } from "@/components/landing/paket-section"
@@ -11,8 +13,6 @@ import { SEMUA_PAKET, ADD_ONS, BACKGROUNDS } from "@/lib/constants"
 import type { KatalogData, PaketKatalog, AddonKatalog, AddonItem } from "@/lib/katalog-types"
 import type { KategoriSesi } from "@/types"
 
-// Revalidasi halaman setiap 5 menit agar perubahan settings cepat tampil
-export const revalidate = 300
 
 const ADDON_KEY_MAP: Record<string, keyof AddonKatalog> = {
   addon_tambahan_waktu: "tambahanWaktu",
