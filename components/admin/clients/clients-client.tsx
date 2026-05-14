@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Radio, RefreshCw, DatabaseZap } from "lucide-react"
+import { RefreshCw, DatabaseZap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InsightsCards } from "./insights-cards"
 import { ClientFilters } from "./filters"
 import { ClientTable } from "./client-table"
 import { ClientDetailModal } from "./client-detail-modal"
-import { BroadcastModal } from "./broadcast-modal"
 import { ExportButton } from "./export-button"
 import type { Client, Insights, FilterState } from "./types"
 import { DEFAULT_FILTERS } from "./types"
@@ -23,7 +22,6 @@ export function ClientsClient() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [detailClient, setDetailClient] = useState<Client | null>(null)
-  const [showBroadcast, setShowBroadcast] = useState(false)
   const [syncing, setSyncing] = useState(false)
 
   const fetchClients = useCallback(async () => {
@@ -117,8 +115,6 @@ export function ClientsClient() {
     }
   }
 
-  const selectedClients = clients.filter((c) => selectedIds.has(c.id))
-
   return (
     <div className="space-y-4">
       {/* Insights */}
@@ -162,17 +158,6 @@ export function ClientsClient() {
         <div className="flex-1" />
 
         <ExportButton clients={clients} disabled={loading} />
-
-        {selectedIds.size > 0 && (
-          <Button
-            size="sm"
-            onClick={() => setShowBroadcast(true)}
-            className="bg-green-600 hover:bg-green-700 gap-1.5"
-          >
-            <Radio className="w-4 h-4" />
-            Broadcast ({selectedIds.size})
-          </Button>
-        )}
       </div>
 
       {/* Tabel */}
@@ -204,13 +189,6 @@ export function ClientsClient() {
         />
       )}
 
-      {/* Broadcast modal */}
-      {showBroadcast && (
-        <BroadcastModal
-          clients={selectedClients}
-          onClose={() => { setShowBroadcast(false); setSelectedIds(new Set()) }}
-        />
-      )}
     </div>
   )
 }

@@ -68,9 +68,10 @@ Memudahkan dalam pekerjaan admin.
 ### Staff
 - Manager: [Uti Hirzy]
 - Admin: Erni (upah Rp 50.000/hari saat ada jadwal)
-- Photographer 1: Eji (upah Rp 50.000/client)
-- Photographer 2: Tyo (upah Rp 35.000/client)
-- Editor: Edwin (upah Rp 30.000/client)
+- Photographer 1: EZY (upah Rp 50.000/client)
+- Photographer 2: TYO (upah Rp 35.000/client)
+- Editor: EDWIN (upah Rp 30.000/client)
+- Freelance: FREELANCE (upah variabel per booking)
 
 ### Biaya Tetap Bulanan
 - Wifi: Rp 300.000
