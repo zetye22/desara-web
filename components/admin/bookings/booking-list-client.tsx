@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { WifiOff, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import DetailModal from "./detail-modal"
@@ -97,104 +98,104 @@ function labelBayar(status: string) {
 
 export default function BookingListClient({
   initialBookings,
-  addonLapanganIds,
+  addonLapanganIds: initialAddonIds,
   adminName,
 }: BookingListClientProps) {
   const router = useRouter()
 
-  // State data — di-sync dari server props + update realtime
-  const [bookings, setBookings] = useState<BookingRow[]>(initialBookings)
+  const [bookings, setBookings]             = useState<BookingRow[]>(initialBookings)
+  const [addonLapanganIds, setAddonIds]     = useState<Set<string>>(initialAddonIds)
+  const [liveStatus, setLiveStatus]         = useState<"connecting" | "live" | "offline">("connecting")
+  const selectedBookingRef                  = useRef<BookingRow | null>(null)
 
-  // Sync saat server props berubah (setelah router.refresh())
-  useEffect(() => {
-    setBookings(initialBookings)
-  }, [initialBookings])
+  // Sync dari server props (setelah router.refresh())
+  useEffect(() => { setBookings(initialBookings) }, [initialBookings])
+  useEffect(() => { setAddonIds(initialAddonIds) }, [initialAddonIds])
 
-  // Realtime subscription: status booking berubah langsung kelihatan
+  // ── Realtime subscription ──────────────────────────────────────
   useEffect(() => {
     const supabase = createClient()
+
     const channel = supabase
       .channel("admin-bookings-realtime")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "bookings" },
-        (payload) => {
-          const updated = payload.new as Partial<BookingRow> & { id: string }
-          setBookings((prev) =>
-            prev.map((b) =>
-              b.id === updated.id
-                ? {
-                    ...b,
-                    status_sesi:        updated.status_sesi        ?? b.status_sesi,
-                    status_pembayaran:  updated.status_pembayaran  ?? b.status_pembayaran,
-                    dp_dibayar:         updated.dp_dibayar         ?? b.dp_dibayar,
-                    total_tagihan:      updated.total_tagihan       ?? b.total_tagihan,
-                    subtotal_addon:     updated.subtotal_addon      ?? b.subtotal_addon,
-                    catatan:            updated.catatan             ?? b.catatan,
-                  }
-                : b
+
+      // ── Booking UPDATE ──
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "bookings" }, (payload) => {
+        const u = payload.new as Partial<BookingRow> & { id: string }
+        setBookings((prev) => prev.map((b) => b.id === u.id ? { ...b, ...u } : b))
+        setSelectedBooking((sel) => sel?.id === u.id ? { ...sel, ...u } : sel)
+      })
+
+      // ── Booking INSERT ──
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "bookings" }, async (payload) => {
+        const newRow = payload.new as { id: string }
+        try {
+          const res  = await fetch(`/api/bookings/${newRow.id}`)
+          const data = await res.json()
+          if (res.ok && data.booking) {
+            setBookings((prev) => [data.booking, ...prev])
+            toast.success(
+              `📸 Booking baru masuk: ${data.booking.nama_client} — ${data.booking.kode_booking}`,
+              { duration: 7000 }
             )
-          )
-          // Sync modal kalau sedang buka
-          setSelectedBooking((sel) => {
-            if (!sel || sel.id !== updated.id) return sel
-            return {
-              ...sel,
-              status_sesi:        updated.status_sesi        ?? sel.status_sesi,
-              status_pembayaran:  updated.status_pembayaran  ?? sel.status_pembayaran,
-              dp_dibayar:         updated.dp_dibayar         ?? sel.dp_dibayar,
-              total_tagihan:      updated.total_tagihan       ?? sel.total_tagihan,
-              subtotal_addon:     updated.subtotal_addon      ?? sel.subtotal_addon,
-              catatan:            updated.catatan             ?? sel.catatan,
-            }
-          })
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "bookings" },
-        async (payload) => {
-          const newRow = payload.new as { id: string }
-          try {
-            const res  = await fetch(`/api/bookings/${newRow.id}`)
-            const data = await res.json()
-            if (res.ok && data.booking) {
-              setBookings((prev) => [data.booking, ...prev])
-              toast.success(
-                `Booking baru: ${data.booking.nama_client} — ${data.booking.kode_booking}`,
-                { duration: 6000 }
-              )
-            } else {
-              router.refresh()
-            }
-          } catch {
+          } else {
             router.refresh()
           }
+        } catch {
+          router.refresh()
         }
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "bookings" },
-        (payload) => {
-          const deleted = payload.old as { id?: string }
-          if (deleted.id) setBookings((prev) => prev.filter((b) => b.id !== deleted.id))
+      })
+
+      // ── Booking DELETE ──
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "bookings" }, (payload) => {
+        const del = payload.old as { id?: string; kode_booking?: string }
+        if (!del.id) return
+        setBookings((prev) => prev.filter((b) => b.id !== del.id))
+        setSelectedBooking((sel) => sel?.id === del.id ? null : sel)
+        toast.info(`Booking ${del.kode_booking ?? ""} dihapus`)
+      })
+
+      // ── Addon lapangan INSERT/DELETE ──
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "booking_addons" }, (payload) => {
+        const row = payload.new as { booking_id?: string; source?: string }
+        if (row.source === "lapangan" && row.booking_id) {
+          setAddonIds((prev) => new Set([...Array.from(prev), row.booking_id!]))
         }
-      )
-      .subscribe()
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "booking_addons" }, (payload) => {
+        const row = payload.old as { booking_id?: string; source?: string }
+        if (row.source === "lapangan" && row.booking_id) {
+          setAddonIds((prev) => {
+            const next = new Set(Array.from(prev))
+            // Hanya hapus flag jika tidak ada addon lapangan lain
+            next.delete(row.booking_id!)
+            return next
+          })
+        }
+      })
+
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED")   setLiveStatus("live")
+        if (status === "CLOSED")       setLiveStatus("offline")
+        if (status === "CHANNEL_ERROR") setLiveStatus("offline")
+      })
 
     return () => { supabase.removeChannel(channel) }
   }, [router])
 
   // State filter
-  const [search, setSearch] = useState("")
-  const [dateFrom, setDateFrom] = useState("")
-  const [dateTo, setDateTo] = useState("")
+  const [search, setSearch]         = useState("")
+  const [dateFrom, setDateFrom]     = useState("")
+  const [dateTo, setDateTo]         = useState("")
   const [filterSesi, setFilterSesi] = useState("")
   const [filterBayar, setFilterBayar] = useState("")
   const [filterAddon, setFilterAddon] = useState("")
 
   // State modal
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null)
+
+  // Sync ref agar closure realtime bisa akses nilai terkini
+  useEffect(() => { selectedBookingRef.current = selectedBooking }, [selectedBooking])
 
   // Filter data client-side
   const filtered = useMemo(() => {
@@ -242,8 +243,9 @@ export default function BookingListClient({
 
   return (
     <div className="space-y-4">
-      {/* ===== Quick Filter Chips ===== */}
-      <div className="flex flex-wrap gap-2">
+      {/* ===== Header: Quick Filter + Live Indicator ===== */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
         {[
           { label: "Semua", value: "", count: bookings.filter(b => b.status_sesi !== "cancel").length },
           { label: "Pending", value: "pending", count: countPending, urgent: countPending > 0 },
@@ -281,6 +283,20 @@ export default function BookingListClient({
             </button>
           )
         })}
+        </div>
+
+        {/* Live indicator */}
+        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+          liveStatus === "live"
+            ? "border-green-200 bg-green-50 text-green-700"
+            : liveStatus === "offline"
+            ? "border-red-200 bg-red-50 text-red-600"
+            : "border-gray-200 bg-gray-50 text-gray-500"
+        }`}>
+          {liveStatus === "live"    && <><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" /></span> Live</>}
+          {liveStatus === "offline" && <><WifiOff className="w-3 h-3" /> Offline</>}
+          {liveStatus === "connecting" && <><Loader2 className="w-3 h-3 animate-spin" /> Connecting…</>}
+        </div>
       </div>
 
       {/* ===== Filter Bar ===== */}
