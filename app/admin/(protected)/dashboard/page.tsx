@@ -34,6 +34,7 @@ export default async function DashboardPage() {
     { data: bookingPendingDp },
     { data: booking7Hari },
     { data: bookingAction },
+    { data: backgrounds },
   ] = await Promise.all([
     supabase.from("bookings")
       .select("id,kode_booking,nama_client,no_wa,paket_id,nama_paket,tgl_foto,jam_mulai,jam_selesai,jumlah_orang,background_dipilih,status_sesi,status_pembayaran,total_tagihan,dp_dibayar,kategori_sesi,catatan,created_at")
@@ -73,6 +74,8 @@ export default async function DashboardPage() {
       .select("id,kode_booking,nama_client,no_wa,tgl_foto,jam_mulai,nama_paket,status_sesi,status_pembayaran,created_at")
       .or(`tgl_foto.eq.${besok},status_sesi.eq.selesai_edit,and(status_pembayaran.eq.belum_dp,created_at.lte.${jakartaDate(-7)})`)
       .neq("status_sesi", "cancel"),
+
+    supabase.from("studio_backgrounds").select("id,nama").order("urutan", { ascending: true }),
   ])
 
   // ── KPI ──────────────────────────────────────────────────────
@@ -148,7 +151,7 @@ export default async function DashboardPage() {
               <p className="text-sm font-semibold text-gray-700 mb-3">
                 Jadwal Hari Ini — {formatTanggal(hariIni + "T00:00:00")}
               </p>
-              <BookingTodayTable bookings={bHari} />
+              <BookingTodayTable bookings={bHari} backgrounds={backgrounds ?? []} />
             </div>
           </div>
 

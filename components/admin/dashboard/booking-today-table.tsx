@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { CalendarDays } from "lucide-react"
-import { BACKGROUNDS } from "@/lib/constants"
 import { BookingDetailModal } from "./booking-detail-modal"
 import type { BookingRow } from "./types"
+
+interface BgItem { id: string; nama: string }
 
 const STATUS_CFG: Record<string, { label: string; cls: string }> = {
   booked:       { label: "Booked",       cls: "bg-gray-100 text-gray-600" },
@@ -15,7 +16,7 @@ const STATUS_CFG: Record<string, { label: string; cls: string }> = {
   cancel:       { label: "Cancel",       cls: "bg-red-100 text-red-700" },
 }
 
-export function BookingTodayTable({ bookings }: { bookings: BookingRow[] }) {
+export function BookingTodayTable({ bookings, backgrounds }: { bookings: BookingRow[]; backgrounds: BgItem[] }) {
   const [selected, setSelected] = useState<BookingRow | null>(null)
 
   if (bookings.length === 0) {
@@ -46,7 +47,7 @@ export function BookingTodayTable({ bookings }: { bookings: BookingRow[] }) {
             {bookings.map((b) => {
               const s = STATUS_CFG[b.status_sesi] ?? { label: b.status_sesi, cls: "bg-gray-100 text-gray-600" }
               const bgNama = (b.background_dipilih ?? [])
-                .map((id) => BACKGROUNDS.find((bg) => bg.id === id)?.nama ?? id)
+                .map((id) => backgrounds.find((bg) => bg.id === id)?.nama ?? id)
                 .join(", ")
               return (
                 <tr
@@ -98,7 +99,7 @@ export function BookingTodayTable({ bookings }: { bookings: BookingRow[] }) {
         })}
       </div>
 
-      <BookingDetailModal booking={selected} onClose={() => setSelected(null)} />
+      <BookingDetailModal booking={selected} onClose={() => setSelected(null)} backgrounds={backgrounds} />
     </>
   )
 }

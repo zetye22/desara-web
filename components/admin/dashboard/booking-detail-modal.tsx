@@ -3,8 +3,9 @@
 import { X, Phone, Calendar, Clock, Users, Image as ImageIcon, CreditCard, FileImage } from "lucide-react"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { BACKGROUNDS } from "@/lib/constants"
 import type { BookingRow } from "./types"
+
+interface BgItem { id: string; nama: string }
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   booked:       { label: "Booked",       cls: "bg-gray-100 text-gray-700" },
@@ -24,13 +25,14 @@ const BAYAR_LABEL: Record<string, { label: string; cls: string }> = {
 interface Props {
   booking: BookingRow | null
   onClose: () => void
+  backgrounds: BgItem[]
 }
 
-export function BookingDetailModal({ booking, onClose }: Props) {
+export function BookingDetailModal({ booking, onClose, backgrounds }: Props) {
   if (!booking) return null
 
   const bgNama = (booking.background_dipilih ?? [])
-    .map((id) => BACKGROUNDS.find((b) => b.id === id)?.nama ?? id)
+    .map((id) => backgrounds.find((b) => b.id === id)?.nama ?? id)
     .join(", ")
 
   const sStatus = STATUS_LABEL[booking.status_sesi] ?? { label: booking.status_sesi, cls: "bg-gray-100 text-gray-600" }
