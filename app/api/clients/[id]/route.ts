@@ -76,7 +76,7 @@ export async function PATCH(
   return NextResponse.json({ success: true, client: data })
 }
 
-// DELETE — hapus/anonymize client
+// DELETE — hapus/anonymize client beserta semua booking terkait
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -91,13 +91,34 @@ export async function DELETE(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient() as any
 
+  // Ambil no_wa client sebelum dihapus, untuk cari booking terkait
+  const { data: clientData, error: fetchErr } = await supabase
+    .from("clients")
+    .select("no_wa")
+    .eq("id", params.id)
+    .single()
+
+  if (fetchErr || !clientData) {
+    return NextResponse.json({ error: "Client tidak ditemukan" }, { status: 404 })
+  }
+
+  const noWa = clientData.no_wa as string
+
   if (mode === "anonymize") {
-    // Anonymize: hapus data personal, simpan statistik
+    const anonTag = `DIHAPUS_${params.id.slice(0, 8)}`
+
+    // Anonimkan data personal di semua booking terkait
+    await supabase
+      .from("bookings")
+      .update({ nama_client: anonTag, no_wa: anonTag, email: null })
+      .eq("no_wa", noWa)
+
+    // Anonimkan record client: hapus data personal, simpan statistik
     const { error } = await supabase
       .from("clients")
       .update({
-        nama:    `Client_${params.id.slice(0, 8)}`,
-        no_wa:   `DIHAPUS_${params.id.slice(0, 8)}`,
+        nama:    anonTag,
+        no_wa:   anonTag,
         email:   null,
         catatan: null,
         tags:    [],
@@ -107,7 +128,9 @@ export async function DELETE(
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true, mode: "anonymized" })
   } else {
-    // Hard delete
+    // Hard delete: hapus semua booking terkait dulu, lalu hapus client
+    await supabase.from("bookings").delete().eq("no_wa", noWa)
+
     const { error } = await supabase.from("clients").delete().eq("id", params.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true, mode: "deleted" })

@@ -209,13 +209,25 @@ export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailMo
                       <AlertTriangle className="w-4 h-4" />
                       <p className="text-xs font-medium">Pilih metode penghapusan</p>
                     </div>
+
+                    {/* Warning jumlah booking terdampak */}
+                    {client.total_booking > 0 && (
+                      <div className="rounded-md bg-red-100 border border-red-300 px-2.5 py-2 text-xs text-red-800">
+                        <strong>Perhatian:</strong> Client ini memiliki{" "}
+                        <strong>{client.total_booking} riwayat booking</strong>.{" "}
+                        {deleteMode === "hard"
+                          ? "Semua booking akan ikut terhapus permanen."
+                          : "Data nama & nomor WA di semua booking akan dianonimkan."}
+                      </div>
+                    )}
+
                     <div className="space-y-1">
                       <label className="flex items-start gap-2 cursor-pointer">
                         <input type="radio" name="deleteMode" value="anonymize" checked={deleteMode === "anonymize"}
                           onChange={() => setDeleteMode("anonymize")} className="mt-0.5" />
                         <div>
                           <p className="text-xs font-medium text-gray-700">Anonimkan (Disarankan)</p>
-                          <p className="text-xs text-gray-500">Hapus nama & WA, simpan statistik booking</p>
+                          <p className="text-xs text-gray-500">Hapus nama & WA dari client dan semua bookingnya, statistik tetap tersimpan</p>
                         </div>
                       </label>
                       <label className="flex items-start gap-2 cursor-pointer">
@@ -223,7 +235,7 @@ export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailMo
                           onChange={() => setDeleteMode("hard")} className="mt-0.5" />
                         <div>
                           <p className="text-xs font-medium text-gray-700">Hapus Permanen</p>
-                          <p className="text-xs text-gray-500">Hapus semua data client dari database</p>
+                          <p className="text-xs text-gray-500">Hapus client dan semua booking terkait secara permanen dari database</p>
                         </div>
                       </label>
                     </div>
