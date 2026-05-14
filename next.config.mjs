@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standalone output diperlukan untuk deploy di Hostinger Node.js
-  output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
