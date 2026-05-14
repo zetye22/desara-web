@@ -1,6 +1,6 @@
 "use client"
 
-import { X, Phone, Calendar, Clock, Users, Image, CreditCard, FileImage } from "lucide-react"
+import { X, Phone, Calendar, Clock, Users, Image as ImageIcon, CreditCard, FileImage } from "lucide-react"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { BACKGROUNDS } from "@/lib/constants"
@@ -78,8 +78,8 @@ export function BookingDetailModal({ booking, onClose }: Props) {
           <Section title="Detail Sesi">
             <InfoRow icon={<Calendar className="w-4 h-4" />} label="Tanggal" value={formatTanggal(booking.tgl_foto + "T00:00:00")} />
             <InfoRow icon={<Clock className="w-4 h-4" />} label="Jam" value={`${booking.jam_mulai.slice(0,5)} – ${booking.jam_selesai.slice(0,5)} WIB`} />
-            <InfoRow icon={<Image className="w-4 h-4" />} label="Paket" value={booking.nama_paket} />
-            <InfoRow icon={<Image className="w-4 h-4" />} label="Background" value={bgNama || "—"} />
+            <InfoRow icon={<ImageIcon className="w-4 h-4" />} label="Paket" value={booking.nama_paket} />
+            <InfoRow icon={<ImageIcon className="w-4 h-4" />} label="Background" value={bgNama || "—"} />
           </Section>
 
           {/* Keuangan */}

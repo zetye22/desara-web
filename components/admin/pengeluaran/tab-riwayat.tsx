@@ -36,8 +36,6 @@ export function TabRiwayat({ data, loading }: TabRiwayatProps) {
   const rataRata = data.length > 0 ? Math.round(totalSemua / data.length) : 0
 
   const maxBulan = data.reduce((max, d) => d.total > max.total ? d : max, data[0] ?? { bulanLabel: "—", total: 0 })
-  const minBulan = data.filter(d => d.total > 0)
-    .reduce((min, d) => d.total < min.total ? d : min, data.find(d => d.total > 0) ?? { bulanLabel: "—", total: 0 })
 
   if (loading) {
     return (

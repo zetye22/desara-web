@@ -21,7 +21,7 @@ interface TabelPengeluaranProps {
   onRefresh: () => void
 }
 
-export function TabelPengeluaran({ data, periode: _periode, onRefresh: _onRefresh }: TabelPengeluaranProps) {
+export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
   const [showGajiDetail, setShowGajiDetail] = useState(false)
 
   return (

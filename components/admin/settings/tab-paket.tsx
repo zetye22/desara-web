@@ -381,7 +381,7 @@ export function TabPaket({ items, isOwner, onRefresh }: TabPaketProps) {
               <div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={formHargaMulaiDari} onChange={(e) => setFormHargaMulaiDari(e.target.checked)} className="rounded" />
-                  <span className="text-sm text-gray-700">Tampilkan label "Mulai dari" di harga</span>
+                  <span className="text-sm text-gray-700">Tampilkan label &quot;Mulai dari&quot; di harga</span>
                 </label>
                 <p className="text-xs text-gray-400 mt-1 ml-6">Cocok untuk paket dengan harga fleksibel</p>
               </div>

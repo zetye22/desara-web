@@ -273,7 +273,7 @@ export function TabAddon({ items, isOwner, onRefresh }: TabAddonProps) {
               </div>
 
               <p className="text-xs text-gray-400">
-                Add-on ini akan tampil di bagian "Add-On Tambahan" di halaman depan website.
+                Add-on ini akan tampil di bagian &quot;Add-On Tambahan&quot; di halaman depan website.
               </p>
             </div>
 

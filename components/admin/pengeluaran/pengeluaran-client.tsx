@@ -165,10 +165,6 @@ export function PengeluaranClient() {
     loadBulan(bulanAktif)
   }
 
-  function handleRefreshRiwayat() {
-    loadRiwayat()
-  }
-
   return (
     <div className="space-y-5">
       {/* Tab navigation */}
