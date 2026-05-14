@@ -19,6 +19,7 @@ export const TEMPLATE_TO_JENIS: Record<JenisTemplate, JenisNotifikasi> = {
   konfirmasi_dp_diterima: "konfirmasi",
   reminder_h1: "reminder_h1",
   foto_siap_diambil: "foto_siap",
+  kirim_link_foto: "custom",
   follow_up_review: "follow_up",
 }
 
