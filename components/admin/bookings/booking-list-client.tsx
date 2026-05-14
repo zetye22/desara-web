@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import DetailModal from "./detail-modal"
@@ -152,7 +153,24 @@ export default function BookingListClient({
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "bookings" },
-        () => { router.refresh() }   // booking baru → refresh penuh untuk dapat data join
+        async (payload) => {
+          const newRow = payload.new as { id: string }
+          try {
+            const res  = await fetch(`/api/bookings/${newRow.id}`)
+            const data = await res.json()
+            if (res.ok && data.booking) {
+              setBookings((prev) => [data.booking, ...prev])
+              toast.success(
+                `Booking baru: ${data.booking.nama_client} — ${data.booking.kode_booking}`,
+                { duration: 6000 }
+              )
+            } else {
+              router.refresh()
+            }
+          } catch {
+            router.refresh()
+          }
+        }
       )
       .on(
         "postgres_changes",
