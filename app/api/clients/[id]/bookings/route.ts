@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 
-// GET — riwayat booking satu client berdasarkan no_wa
+// GET — riwayat booking satu client + statistik aktual dari bookings
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
@@ -13,7 +13,7 @@ export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient() as any
 
-  // Ambil no_wa dari clients table dulu
+  // Ambil no_wa dari clients table
   const { data: client, error: clientError } = await supabase
     .from("clients")
     .select("no_wa")
@@ -26,12 +26,26 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("bookings")
-    .select("id, tgl_foto, paket, nama_client, total_tagihan, dp_dibayar, status, created_at")
+    .select("id, kode_booking, tgl_foto, nama_paket, nama_client, total_tagihan, dp_dibayar, status_sesi, status_pembayaran, created_at")
     .eq("no_wa", client.no_wa)
     .order("tgl_foto", { ascending: false })
     .limit(50)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ bookings: data ?? [] })
+  const bookings = data ?? []
+
+  // Hitung statistik aktual dari data booking (bukan dari kolom cached di clients)
+  const bookingAktif = bookings.filter((b: { status_sesi: string }) => b.status_sesi !== "cancel")
+  const totalBooking  = bookingAktif.length
+  const totalSpending = bookingAktif.reduce((s: number, b: { total_tagihan: number }) => s + b.total_tagihan, 0)
+  const lastBookingDate = bookingAktif.length > 0
+    ? bookingAktif.reduce((latest: string, b: { tgl_foto: string }) =>
+        b.tgl_foto > latest ? b.tgl_foto : latest, bookingAktif[0].tgl_foto)
+    : null
+
+  return NextResponse.json({
+    bookings,
+    stats: { total_booking: totalBooking, total_spending: totalSpending, last_booking_date: lastBookingDate },
+  })
 }

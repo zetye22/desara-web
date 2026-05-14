@@ -34,10 +34,18 @@ const STATUS_COLOR: Record<string, string> = {
   cancel: "bg-red-100 text-red-700",
 }
 
+interface FreshStats {
+  total_booking: number
+  total_spending: number
+  last_booking_date: string | null
+}
+
 export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailModalProps) {
   const [tab, setTab] = useState<Tab>("info")
   const [bookings, setBookings] = useState<ClientBooking[]>([])
   const [loadingBookings, setLoadingBookings] = useState(false)
+  const [freshStats, setFreshStats] = useState<FreshStats | null>(null)
+  const [bookingsLoaded, setBookingsLoaded] = useState(false)
 
   // Edit states
   const [editTags, setEditTags] = useState<string[]>(client.tags ?? [])
@@ -51,19 +59,23 @@ export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailMo
   const [deleteMode, setDeleteMode] = useState<"anonymize" | "hard">("anonymize")
 
   const loadBookings = useCallback(async () => {
-    if (bookings.length > 0) return
+    if (bookingsLoaded) return
     setLoadingBookings(true)
     try {
       const res = await fetch(`/api/clients/${client.id}/bookings`)
       const data = await res.json()
-      if (res.ok) setBookings(data.bookings ?? [])
+      if (res.ok) {
+        setBookings(data.bookings ?? [])
+        if (data.stats) setFreshStats(data.stats)
+        setBookingsLoaded(true)
+      }
     } finally {
       setLoadingBookings(false)
     }
-  }, [client.id, bookings.length])
+  }, [client.id, bookingsLoaded])
 
   useEffect(() => {
-    if (tab === "riwayat") loadBookings()
+    if (tab === "riwayat" || tab === "stats") loadBookings()
   }, [tab, loadBookings])
 
   function toggleTag(tag: string) {
@@ -264,13 +276,16 @@ export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailMo
                   {bookings.map((b) => (
                     <div key={b.id} className="rounded-lg border border-gray-100 p-3">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium text-[#0d1f3c]">{b.paket}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLOR[b.status] ?? "bg-gray-100 text-gray-600"}`}>
-                          {STATUS_LABEL[b.status] ?? b.status}
+                        <div>
+                          <p className="text-sm font-medium text-[#0d1f3c]">{b.nama_paket}</p>
+                          <p className="text-xs text-gray-400">{b.kode_booking}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLOR[b.status_sesi] ?? "bg-gray-100 text-gray-600"}`}>
+                          {STATUS_LABEL[b.status_sesi] ?? b.status_sesi}
                         </span>
                       </div>
                       <p className="text-xs text-gray-500">
-                        {new Date(b.tgl_foto).toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                        {new Date(b.tgl_foto + "T00:00:00").toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
                       </p>
                       <p className="text-xs text-[#C9A84C] font-medium mt-1">{formatRupiah(b.total_tagihan)}</p>
                     </div>
@@ -282,24 +297,35 @@ export function ClientDetailModal({ client, onClose, onUpdated }: ClientDetailMo
 
           {tab === "stats" && (
             <div className="space-y-3">
-              <StatCard label="Total Booking" value={`${client.total_booking}x`} />
-              <StatCard label="Total Spending" value={formatRupiah(client.total_spending)} highlight />
-              <StatCard
-                label="Rata-rata per Booking"
-                value={client.total_booking > 0
-                  ? formatRupiah(Math.round(client.total_spending / client.total_booking))
-                  : "—"}
-              />
-              <StatCard
-                label="Terakhir Booking"
-                value={client.last_booking_date
-                  ? new Date(client.last_booking_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
-                  : "Belum pernah"}
-              />
-              <StatCard
-                label="Bergabung Sejak"
-                value={new Date(client.created_at).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
-              />
+              {loadingBookings ? (
+                <div className="py-8 text-center text-gray-400 text-sm">Menghitung statistik...</div>
+              ) : (() => {
+                const totalBooking  = freshStats?.total_booking  ?? client.total_booking
+                const totalSpending = freshStats?.total_spending ?? client.total_spending
+                const lastDate      = freshStats?.last_booking_date ?? client.last_booking_date
+                return (
+                  <>
+                    <StatCard label="Total Booking" value={`${totalBooking}x`} />
+                    <StatCard label="Total Spending" value={formatRupiah(totalSpending)} highlight />
+                    <StatCard
+                      label="Rata-rata per Booking"
+                      value={totalBooking > 0
+                        ? formatRupiah(Math.round(totalSpending / totalBooking))
+                        : "—"}
+                    />
+                    <StatCard
+                      label="Terakhir Booking"
+                      value={lastDate
+                        ? new Date(lastDate + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+                        : "Belum pernah"}
+                    />
+                    <StatCard
+                      label="Bergabung Sejak"
+                      value={new Date(client.created_at).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                    />
+                  </>
+                )
+              })()}
             </div>
           )}
 

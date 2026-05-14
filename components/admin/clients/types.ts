@@ -15,12 +15,14 @@ export interface Client {
 
 export interface ClientBooking {
   id: string
+  kode_booking: string
   tgl_foto: string
-  paket: string
+  nama_paket: string
   nama_client: string
   total_tagihan: number
   dp_dibayar: number
-  status: string
+  status_sesi: string
+  status_pembayaran: string
   created_at: string
 }
 
