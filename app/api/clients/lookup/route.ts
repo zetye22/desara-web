@@ -18,7 +18,7 @@ function normalisasiWa(no: string): string[] {
     variants.push("0" + digits.slice(2)) // "08xxx"
     variants.push("+" + digits)     // "+628xxx"
   }
-  return [...new Set(variants)]
+  return Array.from(new Set(variants))
 }
 
 export async function GET(request: NextRequest) {
