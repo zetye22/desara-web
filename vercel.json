@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/reminder-h1",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/follow-up",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/generate-pengeluaran-tetap",
+      "schedule": "5 17 1 * *"
+    },
+    {
+      "path": "/api/cron/cancel-stale-pending",
+      "schedule": "0 */2 * * *"
+    }
+  ]
+}

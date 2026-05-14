@@ -1,0 +1,10 @@
+# Normalize line endings — semua file teks pakai LF di repository
+* text=auto eol=lf
+
+# File biner — jangan diubah
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary

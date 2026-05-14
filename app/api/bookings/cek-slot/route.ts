@@ -1,0 +1,118 @@
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { timeToMinutes, generateSlotJam } from "@/lib/time-utils"
+
+const SLOT_JAM = generateSlotJam()
+
+type ExistingBooking = {
+  id: string
+  kode_booking: string
+  jam_mulai: string
+  jam_selesai: string
+  nama_client: string
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const tanggal         = searchParams.get("tanggal")
+  const jamMulaiParam   = searchParams.get("jam_mulai")
+  // Terima "durasi_menit" (baru) dan "durasi" (lama) agar backward-compatible
+  const durasiMenit     = parseInt(
+    searchParams.get("durasi_menit") ?? searchParams.get("durasi") ?? "0"
+  )
+  const excludeId       = searchParams.get("exclude_booking_id") ?? null
+
+  if (!tanggal || !durasiMenit) {
+    return NextResponse.json(
+      { error: "Parameter kurang: tanggal dan durasi_menit wajib diisi" },
+      { status: 400 }
+    )
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createAdminClient() as any
+
+  const { data: bookings, error } = await supabase
+    .from("bookings")
+    .select("id, kode_booking, jam_mulai, jam_selesai, nama_client")
+    .eq("tgl_foto", tanggal)
+    .neq("status_sesi", "cancel")
+    .neq("status_sesi", "pending")
+
+  if (error) {
+    return NextResponse.json({ error: "Gagal cek ketersediaan" }, { status: 500 })
+  }
+
+  const existingList = ((bookings ?? []) as ExistingBooking[])
+    .filter((b) => !excludeId || b.id !== excludeId)
+
+  function cekBentrok(slotMulai: number, durasi: number): ExistingBooking | null {
+    const slotSelesai = slotMulai + durasi
+    for (const b of existingList) {
+      const bMulai   = timeToMinutes(b.jam_mulai)
+      const bSelesai = timeToMinutes(b.jam_selesai)
+      // Overlap: existing mulai sebelum slot selesai, DAN existing selesai setelah slot mulai
+      if (bMulai < slotSelesai && bSelesai > slotMulai) return b
+    }
+    return null
+  }
+
+  // Waktu sekarang di Jakarta
+  const nowJkt      = new Date()
+  const jakartaDate = nowJkt.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" })
+  const jakartaTime = nowJkt.toLocaleTimeString("en-GB", {
+    timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit",
+  })
+  const isToday    = tanggal === jakartaDate
+  const nowMinutes = timeToMinutes(jakartaTime)
+
+  if (jamMulaiParam) {
+    // Cek 1 slot spesifik
+    const slotMulai = timeToMinutes(jamMulaiParam)
+    const bentrok   = cekBentrok(slotMulai, durasiMenit)
+    return NextResponse.json({
+      available: !bentrok,
+      alasan: bentrok
+        ? `Slot bentrok dengan booking ${bentrok.kode_booking} (${bentrok.jam_mulai}–${bentrok.jam_selesai})`
+        : null,
+      bentrok_dengan: bentrok
+        ? {
+            kode_booking: bentrok.kode_booking,
+            jam: `${bentrok.jam_mulai}–${bentrok.jam_selesai}`,
+            nama_client: bentrok.nama_client,
+          }
+        : null,
+    })
+  }
+
+  // Return semua slot untuk grid
+  const slots = SLOT_JAM.map((slotJam) => {
+    const slotMulai   = timeToMinutes(slotJam)
+    const slotSelesai = slotMulai + durasiMenit
+
+    if (slotSelesai > timeToMinutes("21:00")) {
+      return { jam: slotJam, available: false, alasan: "Melebihi jam operasional", bentrok_dengan: null }
+    }
+    if (isToday && slotMulai <= nowMinutes) {
+      return { jam: slotJam, available: false, alasan: "Slot sudah lewat", bentrok_dengan: null }
+    }
+
+    const bentrok = cekBentrok(slotMulai, durasiMenit)
+    return {
+      jam: slotJam,
+      available: !bentrok,
+      alasan: bentrok
+        ? `Sudah ada booking ${bentrok.jam_mulai}–${bentrok.jam_selesai}`
+        : null,
+      bentrok_dengan: bentrok
+        ? {
+            kode_booking: bentrok.kode_booking,
+            jam: `${bentrok.jam_mulai}–${bentrok.jam_selesai}`,
+            nama_client: bentrok.nama_client,
+          }
+        : null,
+    }
+  })
+
+  return NextResponse.json({ slots })
+}
