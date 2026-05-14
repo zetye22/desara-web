@@ -1,28 +1,23 @@
-const { createServer } = require("http")
-const { parse } = require("url")
-const next = require("next")
+const { spawn } = require("child_process")
+const path = require("path")
 
-// Jaga server tetap jalan walau ada error header streaming
-process.on("uncaughtException", (err) => {
-  if (err.code === "ERR_HTTP_HEADERS_SENT") return
-  console.error("Uncaught exception:", err)
+const nextBin = path.join(__dirname, "node_modules", "next", "dist", "bin", "next")
+const port = process.env.PORT || "3000"
+
+const child = spawn(process.execPath, [nextBin, "start"], {
+  stdio: "inherit",
+  env: {
+    ...process.env,
+    NODE_ENV: "production",
+    PORT: String(port),
+  },
+})
+
+child.on("exit", (code) => process.exit(code || 0))
+child.on("error", (err) => {
+  console.error("Gagal jalankan Next.js:", err.message)
   process.exit(1)
 })
 
-const port = parseInt(process.env.PORT || "3000", 10)
-
-// Paksa pakai hostname 0.0.0.0 — hindari Hostinger memaksa Unix socket
-const app = next({ dev: false, hostname: "0.0.0.0", port })
-const handle = app.getRequestHandler()
-
-app.prepare().then(() => {
-  createServer((req, res) => {
-    const parsedUrl = parse(req.url, true)
-    handle(req, res, parsedUrl)
-  }).listen(port, "0.0.0.0", () => {
-    console.log(`> Ready on http://0.0.0.0:${port}`)
-  })
-}).catch((err) => {
-  console.error("Gagal start server:", err)
-  process.exit(1)
-})
+process.on("SIGTERM", () => child.kill("SIGTERM"))
+process.on("SIGINT", () => child.kill("SIGINT"))
