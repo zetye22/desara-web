@@ -4,6 +4,7 @@ import { createBookingSchema } from "@/lib/booking-server-schema"
 import { SEMUA_PAKET } from "@/lib/constants"
 import { hitungHarga } from "@/lib/harga-booking"
 import { timeToMinutes, minutesToTime } from "@/lib/time-utils"
+import { kirimNotifBookingBaru } from "@/lib/email"
 
 // Rate limiter sederhana — max 3 booking per IP per 10 menit
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
@@ -222,6 +223,20 @@ export async function POST(request: NextRequest) {
   if (addonRows.length > 0) {
     await supabase.from("booking_addons").insert(addonRows)
   }
+
+  // Kirim notifikasi email ke admin (fire-and-forget)
+  kirimNotifBookingBaru({
+    kode_booking:  inserted.kode_booking,
+    nama_client:   data.nama_client,
+    no_wa:         data.no_wa,
+    tgl_foto:      data.tgl_foto,
+    jam_mulai:     data.jam_mulai,
+    jam_selesai:   jamSelesai,
+    nama_paket:    paket.nama,
+    total_tagihan: rincian.total,
+    dp_minimum:    rincian.dpMinimum,
+    catatan:       data.catatan ?? null,
+  }).catch(() => {})
 
   return NextResponse.json({
     success:      true,
