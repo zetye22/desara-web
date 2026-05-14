@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { MessageCircle, CalendarClock } from "lucide-react"
@@ -137,6 +137,21 @@ export default function DetailModal({
   )
   const [dpForm, setDpForm] = useState({ nominal: 100000, catatan: "" })
   const [lunasForm, setLunasForm] = useState({ metode: "transfer" })
+
+  // Background list — untuk resolve UUID → nama
+  const [backgrounds, setBackgrounds] = useState<{ id: string; nama: string }[]>([])
+  useEffect(() => {
+    fetch("/api/settings/background")
+      .then((r) => r.json())
+      .then((d) => setBackgrounds(d.items ?? []))
+      .catch(() => {})
+  }, [])
+
+  const bgMap = useMemo(() => {
+    const m = new Map<string, string>()
+    backgrounds.forEach((b) => m.set(b.id, b.nama))
+    return m
+  }, [backgrounds])
 
   // Local state pembayaran — update langsung setelah API sukses
   const [localBayar, setLocalBayar] = useState(booking?.status_pembayaran ?? "belum_dp")
@@ -383,7 +398,9 @@ export default function DetailModal({
                   label="Background Dipilih"
                   value={
                     booking.background_dipilih?.length > 0
-                      ? booking.background_dipilih.join(", ")
+                      ? booking.background_dipilih
+                          .map((id) => bgMap.get(id) ?? id)
+                          .join(", ")
                       : "-"
                   }
                 />
