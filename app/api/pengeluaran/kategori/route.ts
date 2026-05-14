@@ -19,7 +19,17 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ items: data ?? [] })
+  // Deduplikasi berdasarkan nama (case-insensitive), simpan record pertama
+  const seen = new Set<string>()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const unique = (data ?? []).filter((k: any) => {
+    const key = k.nama?.toLowerCase().trim()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  return NextResponse.json({ items: unique })
 }
 
 // POST — tambah kategori baru
@@ -48,6 +58,18 @@ export async function POST(request: NextRequest) {
   const TIPE_VALID = ["operasional", "hpp", "aset"]
   if (tipe && !TIPE_VALID.includes(tipe)) {
     return NextResponse.json({ error: "Tipe tidak valid" }, { status: 400 })
+  }
+
+  // Cek duplikat sebelum insert
+  const { data: existing } = await supabase
+    .from("kategori_pengeluaran")
+    .select("id")
+    .ilike("nama", nama.trim())
+    .limit(1)
+    .maybeSingle()
+
+  if (existing) {
+    return NextResponse.json({ error: `Kategori "${nama}" sudah ada` }, { status: 409 })
   }
 
   const { data: item, error } = await supabase
