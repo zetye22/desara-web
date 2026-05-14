@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react"
+import { ChevronLeft, ChevronRight, MessageCircle, Trash2 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import type { Client } from "./types"
 import { getClientBadges } from "./types"
@@ -15,6 +15,7 @@ interface ClientTableProps {
   onSelectAll: () => void
   onPageChange: (p: number) => void
   onOpenDetail: (c: Client) => void
+  onDelete: (id: string, nama: string) => void
 }
 
 export function ClientTable({
@@ -27,6 +28,7 @@ export function ClientTable({
   onSelectAll,
   onPageChange,
   onOpenDetail,
+  onDelete,
 }: ClientTableProps) {
   const allSelected = clients.length > 0 && clients.every((c) => selectedIds.has(c.id))
 
@@ -113,15 +115,24 @@ export function ClientTable({
                     </div>
                   </td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <a
-                      href={`https://wa.me/${c.no_wa.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors inline-flex"
-                      title="Chat WA"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                    </a>
+                    <div className="flex items-center gap-1">
+                      <a
+                        href={`https://wa.me/${c.no_wa.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors inline-flex"
+                        title="Chat WA"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                      <button
+                        onClick={() => onDelete(c.id, c.nama)}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        title="Hapus client"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )

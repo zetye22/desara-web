@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Radio, RefreshCw } from "lucide-react"
+import { Radio, RefreshCw, DatabaseZap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InsightsCards } from "./insights-cards"
 import { ClientFilters } from "./filters"
@@ -24,6 +24,7 @@ export function ClientsClient() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [detailClient, setDetailClient] = useState<Client | null>(null)
   const [showBroadcast, setShowBroadcast] = useState(false)
+  const [syncing, setSyncing] = useState(false)
 
   const fetchClients = useCallback(async () => {
     setLoading(true)
@@ -91,6 +92,31 @@ export function ClientsClient() {
     fetchInsights()
   }
 
+  async function handleDelete(id: string, nama: string) {
+    if (!window.confirm(`Hapus client "${nama}" secara permanen? Data booking tetap tersimpan.`)) return
+    const res = await fetch(`/api/clients/${id}?mode=hard`, { method: "DELETE" })
+    if (res.ok) {
+      setClients((prev) => prev.filter((c) => c.id !== id))
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next })
+      fetchInsights()
+    }
+  }
+
+  async function handleSync() {
+    setSyncing(true)
+    try {
+      const res = await fetch("/api/clients/sync", { method: "POST" })
+      const data = await res.json()
+      if (res.ok) {
+        await fetchClients()
+        await fetchInsights()
+        alert(`Sinkronisasi selesai — ${data.updated} client diperbarui.`)
+      }
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   const selectedClients = clients.filter((c) => selectedIds.has(c.id))
 
   return (
@@ -119,6 +145,18 @@ export function ClientsClient() {
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
+        </Button>
+
+        <Button
+          size="sm"
+          onClick={handleSync}
+          variant="ghost"
+          className="gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          disabled={syncing}
+          title="Sinkronkan statistik client (booking & spending) dari data booking"
+        >
+          <DatabaseZap className={`w-3.5 h-3.5 ${syncing ? "animate-pulse" : ""}`} />
+          {syncing ? "Sinkronisasi..." : "Sync Data"}
         </Button>
 
         <div className="flex-1" />
@@ -153,6 +191,7 @@ export function ClientsClient() {
           onSelectAll={handleSelectAll}
           onPageChange={(p) => setFilters((f) => ({ ...f, page: p }))}
           onOpenDetail={setDetailClient}
+          onDelete={handleDelete}
         />
       )}
 
