@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { sendWhatsApp } from "@/lib/fonnte"
 
 // GET /api/cron/cancel-stale-pending
 // Auto-cancel booking pending yang tidak dikonfirmasi dalam 24 jam
@@ -58,34 +57,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: updateErr.message }, { status: 500 })
   }
 
-  // Kirim WA ke setiap client (fire-and-forget)
-  for (const booking of stalePending as {
-    nama_client: string; no_wa: string; nama_paket: string
-    tgl_foto: string; jam_mulai: string; jam_selesai: string
-  }[]) {
-    void sendAutoCancelWA(booking, jamBatas)
-  }
-
   return NextResponse.json({
     cancelled: stalePending.length,
     ids,
     message: `${stalePending.length} booking pending di-cancel otomatis`,
   })
-}
-
-async function sendAutoCancelWA(
-  booking: { nama_client: string; no_wa: string; nama_paket: string; tgl_foto: string; jam_mulai: string; jam_selesai: string },
-  jamBatas: number
-) {
-  const tglFormatted = new Date(booking.tgl_foto + "T00:00:00").toLocaleDateString("id-ID", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
-  })
-  const pesan =
-    `Halo Kak ${booking.nama_client.split(" ")[0]},\n` +
-    `Booking kamu otomatis dibatalkan karena DP belum dikonfirmasi dalam ${jamBatas} jam.\n\n` +
-    `📅 ${tglFormatted} · ${booking.jam_mulai}–${booking.jam_selesai}\n` +
-    `📦 ${booking.nama_paket}\n\n` +
-    `Mau booking lagi? Hubungi kami ya. Terima kasih 🙏`
-
-  await sendWhatsApp(booking.no_wa, pesan).catch(() => null)
 }

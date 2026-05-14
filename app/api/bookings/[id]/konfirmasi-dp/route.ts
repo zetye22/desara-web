@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 import { timeToMinutes } from "@/lib/time-utils"
 import { OPERASIONAL } from "@/lib/constants"
-import { kirimNotifikasi } from "@/lib/notifikasi-server"
 
 export async function POST(
   request: NextRequest,
@@ -88,21 +87,6 @@ export async function POST(
     .eq("id", params.id)
 
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
-
-  // 5. Kirim WA notifikasi via infrastruktur yang sudah ada (fire-and-forget)
-  void kirimNotifikasi(
-    {
-      id:            params.id,
-      nama_client:   booking.nama_client,
-      no_wa:         booking.no_wa,
-      tgl_foto:      booking.tgl_foto,
-      jam_mulai:     booking.jam_mulai,
-      nama_paket:    booking.nama_paket,
-      total_tagihan: booking.total_tagihan,
-      dp_dibayar:    nominal,
-    },
-    "konfirmasi_dp_diterima"
-  )
 
   return NextResponse.json({
     success:           true,

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
-import { kirimNotifikasi, fetchBookingForNotif } from "@/lib/notifikasi-server"
 
 const VALID_STATUS_SESI = ["pending", "booked", "selesai_foto", "selesai_edit", "diambil", "cancel"]
 
@@ -48,33 +47,5 @@ export async function PATCH(
     return NextResponse.json({ error: "Gagal update status" }, { status: 500 })
   }
 
-  // Auto-trigger WA (fire-and-forget, tidak blokir response)
-  if (process.env.FONNTE_API_TOKEN) {
-    void triggerAutoWA(params.id, body)
-  }
-
   return NextResponse.json({ success: true })
-}
-
-// Kirim WA otomatis sesuai status yang baru diset
-async function triggerAutoWA(
-  bookingId: string,
-  body: { status_sesi?: string; status_pembayaran?: string }
-) {
-  try {
-    const booking = await fetchBookingForNotif(bookingId)
-    if (!booking) return
-
-    // DP dikonfirmasi → kirim konfirmasi ke client
-    if (body.status_pembayaran === "dp_ok") {
-      await kirimNotifikasi(booking, "konfirmasi_dp_diterima")
-    }
-
-    // Foto selesai edit → kirim notifikasi siap ambil
-    if (body.status_sesi === "selesai_edit") {
-      await kirimNotifikasi(booking, "foto_siap_diambil")
-    }
-  } catch {
-    // Jangan crash API jika WA gagal
-  }
 }

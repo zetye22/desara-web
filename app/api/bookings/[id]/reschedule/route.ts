@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 import { timeToMinutes, minutesToTime } from "@/lib/time-utils"
-import { sendWhatsApp } from "@/lib/fonnte"
 
 export async function PATCH(
   request: NextRequest,
@@ -122,28 +121,5 @@ export async function PATCH(
     }).eq("id", params.id)
   }
 
-  // 7. Kirim WA ke client (fire-and-forget)
-  void sendRescheduleWA(booking, tgl_foto_baru, jam_mulai_baru, jamSelesaiBaru)
-
   return NextResponse.json({ success: true, jam_selesai_baru: jamSelesaiBaru })
-}
-
-async function sendRescheduleWA(
-  booking: { nama_client: string; no_wa: string; nama_paket: string },
-  tglBaru: string,
-  jamMulaiBaru: string,
-  jamSelesaiBaru: string
-) {
-  const tglFormatted = new Date(tglBaru + "T00:00:00").toLocaleDateString("id-ID", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
-  })
-  const pesan =
-    `Halo Kak ${booking.nama_client.split(" ")[0]} 🙏\n` +
-    `Jadwal foto kamu telah diubah:\n\n` +
-    `📅 *Jadwal Baru:* ${tglFormatted}\n` +
-    `⏰ *Jam:* ${jamMulaiBaru}–${jamSelesaiBaru} WIB\n` +
-    `📦 *Paket:* ${booking.nama_paket}\n\n` +
-    `Mohon maaf atas ketidaknyamanannya. Terima kasih 🙏`
-
-  await sendWhatsApp(booking.no_wa, pesan).catch(() => null)
 }
