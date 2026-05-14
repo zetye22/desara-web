@@ -1,8 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/server"
 import { PortfolioSection } from "./portfolio-section"
 
-// Server Component — fetch portfolio aktif dari DB, revalidate setiap 60 detik
-export const revalidate = 60
+// Server Component — fetch portfolio aktif dari DB, revalidate setiap 30 detik
+export const revalidate = 30
 
 export async function PortfolioSectionWrapper() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,5 +14,8 @@ export async function PortfolioSectionWrapper() {
     .eq("aktif", true)
     .order("urutan", { ascending: true })
 
-  return <PortfolioSection initialItems={data ?? []} />
+  // Jika tidak ada foto di admin, sembunyikan section portfolio dari halaman depan
+  if (!data || data.length === 0) return null
+
+  return <PortfolioSection initialItems={data} />
 }

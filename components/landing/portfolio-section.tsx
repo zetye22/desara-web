@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { PORTFOLIO_ITEMS, type PortfolioItem } from "@/lib/portfolio"
 import { KATEGORI_LABEL } from "@/lib/constants"
 import type { KategoriSesi } from "@/types"
+import type { PortfolioItem } from "@/lib/portfolio"
 
 // Data dari database Supabase (hanya field yang dibutuhkan di landing page)
 interface DbPortfolioItem {
@@ -190,17 +190,14 @@ interface PortfolioSectionProps {
 }
 
 export function PortfolioSection({ initialItems }: PortfolioSectionProps) {
-  // Gunakan data dari DB jika ada, fallback ke dummy data jika DB kosong
-  const items: PortfolioItem[] =
-    initialItems && initialItems.length > 0
-      ? initialItems.map((i) => ({
-          id: i.id,
-          src: i.image_url,
-          alt: i.alt_text,
-          kategori: i.kategori as KategoriSesi,
-          caption: i.caption ?? undefined,
-        }))
-      : PORTFOLIO_ITEMS
+  // Hanya tampilkan data dari DB — tidak ada fallback ke dummy data
+  const items: PortfolioItem[] = (initialItems ?? []).map((i) => ({
+    id: i.id,
+    src: i.image_url,
+    alt: i.alt_text,
+    kategori: i.kategori as KategoriSesi,
+    caption: i.caption ?? undefined,
+  }))
 
   // Schema.org ImageGallery untuk SEO
   const SCHEMA = {
