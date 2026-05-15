@@ -13,15 +13,6 @@ import type {
 const HARGA_CETAK_12R = 150000
 const HARGA_CETAK_20R = 400000
 
-// Biaya tetap bulanan
-const BIAYA_TETAP = [
-  { nama: "Wifi", nominal: 300000 },
-  { nama: "PDAM", nominal: 100000 },
-  { nama: "IPL", nominal: 200000 },
-  { nama: "Listrik", nominal: 500000 },
-]
-const TOTAL_BIAYA_TETAP = BIAYA_TETAP.reduce((sum, b) => sum + b.nominal, 0)
-
 // Format label bulan dari "YYYY-MM" → "Jan 2026"
 function labelBulan(periode: string): string {
   const [year, month] = periode.split("-").map(Number)
@@ -43,7 +34,8 @@ function hitungLaporan(
   bookings: BookingRingkas[],
   pengeluaranRows: PengeluaranRow[],
   periode: string,
-  addons: AddonRow[] = []
+  addons: AddonRow[] = [],
+  biayaTetap: { nama: string; nominal: number }[] = []
 ): Omit<LaporanData, "tren6Bulan" | "comparison"> {
   // ── Pemasukan ──────────────────────────────────────────────────────────────
   const mapKategori = new Map<string, { jumlah: number; total: number; totalAddon: number }>()
@@ -197,8 +189,8 @@ function hitungLaporan(
     editorHpp.reduce((s, e) => s + e.total, 0) +
     cetakHpp.reduce((s, c) => s + c.total, 0)
 
-  // ── Operasional (biaya tetap bulanan saja) ─────────────────────────────────
-  const totalOperasional = TOTAL_BIAYA_TETAP
+  // ── Operasional (dari pengeluaran_tetap aktif di database) ────────────────
+  const totalOperasional = biayaTetap.reduce((s, b) => s + b.nominal, 0)
 
   // ── Pengeluaran Lainnya (non-gaji) ─────────────────────────────────────────
   const totalLainnya = lainnyaRows.reduce((s, p) => s + p.nominal, 0)
@@ -227,7 +219,7 @@ function hitungLaporan(
         cetak: cetakHpp,
       },
       operasional: {
-        biayaTetap: BIAYA_TETAP,
+        biayaTetap,
       },
       gajiPegawaiTetap: {
         items: gajiRows.map((p) => ({ deskripsi: p.deskripsi ?? "", nominal: p.nominal })),
@@ -245,6 +237,19 @@ function hitungLaporan(
     detailAddonLapangan,
     addonInsight,
   }
+}
+
+// Ambil biaya tetap aktif dari pengeluaran_tetap
+async function fetchBiayaTetap(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any
+): Promise<{ nama: string; nominal: number }[]> {
+  const { data } = await supabase
+    .from("pengeluaran_tetap")
+    .select("nama, nominal")
+    .eq("aktif", true)
+    .order("urutan", { ascending: true })
+  return (data ?? []) as { nama: string; nominal: number }[]
 }
 
 // Ambil bookings dari Supabase untuk satu periode
@@ -364,12 +369,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Ambil data paralel: bookings + pengeluaran + tren 6 bulan
+    // Ambil data paralel: bookings + pengeluaran + biaya tetap + tren 6 bulan
     const periode6Bulan = Array.from({ length: 6 }, (_, i) => periodeSebelumnya(periode, 5 - i))
 
-    const [bookings, pengeluaran, ...tren6Results] = await Promise.all([
+    const [bookings, pengeluaran, biayaTetap, ...tren6Results] = await Promise.all([
       fetchBookings(supabase, periode),
       fetchPengeluaran(supabase, periode),
+      fetchBiayaTetap(supabase),
       ...periode6Bulan.map(async (p) => {
         const [b, e] = await Promise.all([
           fetchBookings(supabase, p),
@@ -384,11 +390,11 @@ export async function GET(request: NextRequest) {
     const addons = await fetchAddonsByBookingIds(supabase, bookingIds)
 
     // Hitung laporan utama dengan addon detail
-    const laporan = hitungLaporan(bookings, pengeluaran, periode, addons)
+    const laporan = hitungLaporan(bookings, pengeluaran, periode, addons, biayaTetap)
 
     // Hitung tren 6 bulan (tanpa addon detail untuk performa)
     const tren6Bulan = tren6Results.map((t) => {
-      const l = hitungLaporan(t.bookings, t.pengeluaran, t.periode)
+      const l = hitungLaporan(t.bookings, t.pengeluaran, t.periode, [], biayaTetap)
       return {
         periode: t.periode,
         label: labelBulan(t.periode),
@@ -406,7 +412,7 @@ export async function GET(request: NextRequest) {
         fetchBookings(supabase, periodeLalu),
         fetchPengeluaran(supabase, periodeLalu),
       ])
-      const laporanLalu = hitungLaporan(bookingsLalu, pengeluaranLalu, periodeLalu)
+      const laporanLalu = hitungLaporan(bookingsLalu, pengeluaranLalu, periodeLalu, [], biayaTetap)
 
       const deltaPemasukan = laporan.pemasukan.total - laporanLalu.pemasukan.total
       const deltaPengeluaran = laporan.pengeluaran.total - laporanLalu.pengeluaran.total
