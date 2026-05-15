@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Users, ImageIcon,
-  TrendingUp, Settings, LogOut, X, Receipt, UserCog, LayoutTemplate,
+  TrendingUp, Settings, LogOut, X, Receipt, LayoutTemplate,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { href: "/admin/clients",     label: "Data Client", icon: Users },
   { href: "/admin/portfolio",   label: "Portfolio",   icon: ImageIcon },
   { href: "/admin/pengeluaran", label: "Pengeluaran", icon: Receipt },
-  { href: "/admin/pegawai",     label: "Pegawai",     icon: UserCog },
   { href: "/admin/konten",      label: "Konten Web",  icon: LayoutTemplate },
   { href: "/admin/keuangan",    label: "Laporan",     icon: TrendingUp },
   { href: "/admin/settings",    label: "Pengaturan",  icon: Settings },
