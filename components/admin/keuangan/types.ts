@@ -67,14 +67,9 @@ export interface LaporanData {
     operasional: {
       biayaTetap: { nama: string; nominal: number }[]
     }
-    gajiPegawaiTetap: {
-      items: { deskripsi: string; nominal: number }[]
-      total: number
-    }
     lainnya: PengeluaranRow[]
     totalHpp: number
     totalOperasional: number
-    totalGaji: number
     totalLainnya: number
     total: number
   }

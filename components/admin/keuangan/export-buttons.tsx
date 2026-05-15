@@ -176,29 +176,6 @@ export function ExportButtons({ data, periode }: ExportButtonsProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       y = (doc as any).lastAutoTable.finalY + 8
 
-      // ── Gaji Pegawai Tetap ───────────────────────────────────────────────
-      if (data.pengeluaran.gajiPegawaiTetap.items.length > 0) {
-        doc.setFont("helvetica", "bold")
-        doc.text("GAJI PEGAWAI TETAP", 14, y)
-        y += 5
-
-        autoTable(doc, {
-          startY: y,
-          head: [["Pegawai", "Nominal"]],
-          body: data.pengeluaran.gajiPegawaiTetap.items.map((g) => [g.deskripsi, fmtRupiah(g.nominal)]),
-          foot: [["Subtotal Gaji", fmtRupiah(data.pengeluaran.gajiPegawaiTetap.total)]],
-          theme: "grid",
-          headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: "bold" },
-          footStyles: { fillColor: [240, 240, 240], fontStyle: "bold" },
-          columnStyles: { 1: { halign: "right" } },
-          margin: { left: 14, right: 14 },
-          styles: { fontSize: 9 },
-        })
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        y = (doc as any).lastAutoTable.finalY + 8
-      }
-
       // ── Operasional ─────────────────────────────────────────────────────
       doc.setFont("helvetica", "bold")
       doc.text("BIAYA OPERASIONAL", 14, y)
@@ -289,11 +266,6 @@ export function ExportButtons({ data, periode }: ExportButtonsProps) {
         ]),
         ["Subtotal HPP", "", "", data.pengeluaran.totalHpp],
         [],
-        ["=== GAJI PEGAWAI TETAP ==="],
-        ["Pegawai", "Nominal (Rp)"],
-        ...data.pengeluaran.gajiPegawaiTetap.items.map((g) => [g.deskripsi, g.nominal]),
-        ["Subtotal Gaji", data.pengeluaran.gajiPegawaiTetap.total],
-        [],
         ["=== OPERASIONAL ==="],
         ["Item", "Total (Rp)"],
         ...data.pengeluaran.operasional.biayaTetap.map((b) => [b.nama, b.nominal]),
@@ -323,7 +295,6 @@ export function ExportButtons({ data, periode }: ExportButtonsProps) {
         [],
         ["Total Pengeluaran", data.pengeluaran.total],
         ["  - HPP", data.pengeluaran.totalHpp],
-        ["  - Gaji Pegawai Tetap", data.pengeluaran.totalGaji],
         ["  - Operasional", data.pengeluaran.totalOperasional],
         ["  - Lain-lain", data.pengeluaran.totalLainnya],
         [],

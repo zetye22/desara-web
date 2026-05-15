@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronDown, ChevronUp } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import type { LaporanData, PengeluaranRow } from "./types"
 
@@ -22,8 +20,6 @@ interface TabelPengeluaranProps {
 }
 
 export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
-  const [showGajiDetail, setShowGajiDetail] = useState(false)
-
   return (
     <>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden space-y-0">
@@ -116,89 +112,11 @@ export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
           </div>
         </div>
 
-        {/* ─── B. Gaji Pegawai Tetap ───────────────────────────────────────── */}
-        <div>
-          <div className="px-5 py-3 bg-indigo-50 border-y border-indigo-100 flex items-center justify-between">
-            <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
-              B. Gaji Pegawai Tetap
-            </p>
-            {data.gajiPegawaiTetap.items.length > 0 && (
-              <button
-                onClick={() => setShowGajiDetail(!showGajiDetail)}
-                className="flex items-center gap-1 text-xs text-indigo-600 hover:underline"
-              >
-                {showGajiDetail ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                {showGajiDetail ? "Sembunyikan" : "Detail"}
-              </button>
-            )}
-          </div>
-
-          {data.gajiPegawaiTetap.items.length === 0 ? (
-            <div className="px-5 py-4 text-sm text-gray-400 text-center">
-              Belum ada gaji di-generate bulan ini.{" "}
-              <a href="/admin/pengeluaran" className="text-indigo-600 hover:underline">Generate dari Pengeluaran</a>
-            </div>
-          ) : (
-            <>
-              {/* Desktop */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  {showGajiDetail && (
-                    <>
-                      <thead>
-                        <tr className="bg-gray-50 text-gray-400 text-xs uppercase">
-                          <th className="px-5 py-2.5 text-left font-medium">Pegawai</th>
-                          <th className="px-5 py-2.5 text-right font-medium">Nominal</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {data.gajiPegawaiTetap.items.map((item, i) => (
-                          <tr key={i} className="hover:bg-gray-50">
-                            <td className="px-5 py-2.5 text-gray-700">{item.deskripsi}</td>
-                            <td className="px-5 py-2.5 text-right font-medium text-gray-700">{formatRupiah(item.nominal)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </>
-                  )}
-                  <tfoot>
-                    <tr className="bg-indigo-50 font-semibold text-indigo-700">
-                      <td className="px-5 py-3">
-                        Subtotal Gaji
-                        {!showGajiDetail && (
-                          <span className="font-normal text-indigo-500 ml-1">
-                            ({data.gajiPegawaiTetap.items.length} pegawai)
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3 text-right">{formatRupiah(data.gajiPegawaiTetap.total)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-
-              {/* Mobile */}
-              <div className="sm:hidden divide-y divide-gray-100">
-                {showGajiDetail && data.gajiPegawaiTetap.items.map((item, i) => (
-                  <div key={i} className="px-5 py-3 flex justify-between">
-                    <span className="text-sm text-gray-700">{item.deskripsi}</span>
-                    <span className="text-sm font-medium">{formatRupiah(item.nominal)}</span>
-                  </div>
-                ))}
-                <div className="px-5 py-3 bg-indigo-50 flex justify-between font-semibold text-indigo-700">
-                  <span>Subtotal Gaji ({data.gajiPegawaiTetap.items.length} pegawai)</span>
-                  <span>{formatRupiah(data.gajiPegawaiTetap.total)}</span>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* ─── C. Biaya Operasional ────────────────────────────────────────── */}
+        {/* ─── B. Biaya Operasional ────────────────────────────────────────── */}
         <div>
           <div className="px-5 py-3 bg-orange-50 border-y border-orange-100">
             <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">
-              C. Biaya Operasional
+              B. Biaya Operasional
             </p>
           </div>
 
@@ -245,11 +163,11 @@ export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
           </div>
         </div>
 
-        {/* ─── D. Pengeluaran Lain ─────────────────────────────────────────── */}
+        {/* ─── C. Pengeluaran Lain ─────────────────────────────────────────── */}
         <div>
           <div className="px-5 py-3 bg-gray-50 border-y border-gray-200">
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-              D. Pengeluaran Lainnya
+              C. Pengeluaran Lainnya
             </p>
           </div>
 

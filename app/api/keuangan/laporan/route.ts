@@ -35,11 +35,9 @@ function hitungLaporan(
   pengeluaranRows: PengeluaranRow[],
   periode: string,
   addons: AddonRow[] = [],
-  posTetap: PosTetapItem[] = []
+  posTetap: { nama: string; nominal: number }[] = []
 ): Omit<LaporanData, "tren6Bulan" | "comparison"> {
-  // Pisahkan pos tetap: gaji vs operasional
-  const biayaTetap = posTetap.filter((p) => p.kategoriNama !== "Gaji")
-  const gajiTetap  = posTetap.filter((p) => p.kategoriNama === "Gaji")
+  const biayaTetap = posTetap
   // ── Pemasukan ──────────────────────────────────────────────────────────────
   const mapKategori = new Map<string, { jumlah: number; total: number; totalAddon: number }>()
   let totalPemasukan = 0
@@ -105,9 +103,6 @@ function hitungLaporan(
     jumlahBookingAdaAddon,
     totalBooking: bookings.length,
   }
-
-  // ── Gaji pegawai tetap dari pengeluaran_tetap (kategori Gaji) ─────────────
-  const totalGaji   = gajiTetap.reduce((s, p) => s + p.nominal, 0)
 
   // ── Pengeluaran manual (semua dari tabel pengeluaran = lainnya) ────────────
   const lainnyaRows = pengeluaranRows
@@ -195,7 +190,7 @@ function hitungLaporan(
   // ── Pengeluaran Lainnya (non-gaji) ─────────────────────────────────────────
   const totalLainnya = lainnyaRows.reduce((s, p) => s + p.nominal, 0)
 
-  const totalPengeluaran = totalHpp + totalOperasional + totalGaji + totalLainnya
+  const totalPengeluaran = totalHpp + totalOperasional + totalLainnya
 
   // ── Laba & Margin ───────────────────────────────────────────────────────────
   const laba = totalPemasukan - totalPengeluaran
@@ -221,14 +216,9 @@ function hitungLaporan(
       operasional: {
         biayaTetap,
       },
-      gajiPegawaiTetap: {
-        items: gajiTetap.map((p) => ({ deskripsi: p.nama, nominal: p.nominal })),
-        total: totalGaji,
-      },
       lainnya: lainnyaRows,
       totalHpp,
       totalOperasional,
-      totalGaji,
       totalLainnya,
       total: totalPengeluaran,
     },
@@ -239,28 +229,17 @@ function hitungLaporan(
   }
 }
 
-interface PosTetapItem {
-  nama: string
-  nominal: number
-  kategoriNama: string | null
-}
-
-// Ambil semua pos tetap aktif dari pengeluaran_tetap (dengan kategori)
+// Ambil semua pos tetap aktif dari pengeluaran_tetap
 async function fetchPosTetap(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
-): Promise<PosTetapItem[]> {
+): Promise<{ nama: string; nominal: number }[]> {
   const { data } = await supabase
     .from("pengeluaran_tetap")
-    .select("nama, nominal, kategori_pengeluaran(nama)")
+    .select("nama, nominal")
     .eq("aktif", true)
     .order("urutan", { ascending: true })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data ?? []).map((d: any) => ({
-    nama:          d.nama,
-    nominal:       d.nominal,
-    kategoriNama:  d.kategori_pengeluaran?.nama ?? null,
-  }))
+  return (data ?? []) as { nama: string; nominal: number }[]
 }
 
 // Ambil bookings dari Supabase untuk satu periode
