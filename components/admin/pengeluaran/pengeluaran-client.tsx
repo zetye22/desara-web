@@ -41,8 +41,6 @@ export function PengeluaranClient() {
   const [riwayat, setRiwayat] = useState<RiwayatBulan[]>([])
   const [loadingRiwayat, setLoadingRiwayat] = useState(false)
 
-  // IDs pos tetap yang sudah di-generate untuk bulanAktif
-  const [sudahDigenerate, setSudahDigenerate] = useState<Set<string>>(new Set())
 
   // ── Load kategori ──────────────────────────────────────────
   const loadKategori = useCallback(async () => {
@@ -68,16 +66,7 @@ export function PengeluaranClient() {
     try {
       const res = await fetch(`/api/pengeluaran?bulan=${bulan}`)
       const data = await res.json()
-      if (res.ok) {
-        const items: Pengeluaran[] = data.items ?? []
-        setPengeluaranBulan(items)
-
-        // Cek mana saja recurring_id yang sudah ada
-        const generatedIds = new Set<string>(
-          items.filter((i) => i.is_recurring && i.recurring_id).map((i) => i.recurring_id!)
-        )
-        setSudahDigenerate(generatedIds)
-      }
+      if (res.ok) setPengeluaranBulan(data.items ?? [])
     } catch { /* silent */ } finally {
       setLoadingBulan(false)
     }
@@ -158,7 +147,6 @@ export function PengeluaranClient() {
 
   function handleRefreshTetap() {
     loadPosTetap()
-    loadBulan(bulanAktif) // refresh sudahDigenerate juga
   }
 
   function handleRefreshBulan() {
@@ -194,8 +182,6 @@ export function PengeluaranClient() {
         <TabTetap
           items={posTetap}
           kategoriList={kategoriList}
-          bulanAktif={bulanAktif}
-          sudahDigenerate={sudahDigenerate}
           onRefresh={handleRefreshTetap}
         />
       )}
