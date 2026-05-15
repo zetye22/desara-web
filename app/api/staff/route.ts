@@ -43,5 +43,6 @@ export async function GET() {
   return NextResponse.json({
     photographers: all.filter((s: { role: string }) => s.role === "photographer"),
     editors:       all.filter((s: { role: string }) => s.role === "editor"),
+    all,
   })
 }
