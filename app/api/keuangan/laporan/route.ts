@@ -35,8 +35,11 @@ function hitungLaporan(
   pengeluaranRows: PengeluaranRow[],
   periode: string,
   addons: AddonRow[] = [],
-  biayaTetap: { nama: string; nominal: number }[] = []
+  posTetap: PosTetapItem[] = []
 ): Omit<LaporanData, "tren6Bulan" | "comparison"> {
+  // Pisahkan pos tetap: gaji vs operasional
+  const biayaTetap = posTetap.filter((p) => p.kategoriNama !== "Gaji")
+  const gajiTetap  = posTetap.filter((p) => p.kategoriNama === "Gaji")
   // ── Pemasukan ──────────────────────────────────────────────────────────────
   const mapKategori = new Map<string, { jumlah: number; total: number; totalAddon: number }>()
   let totalPemasukan = 0
@@ -103,14 +106,11 @@ function hitungLaporan(
     totalBooking: bookings.length,
   }
 
-  // ── Pisahkan gaji pegawai tetap dari pengeluaran lainnya ───────────────────
-  const gajiRows = pengeluaranRows.filter(
-    (p) => p.kategori_pengeluaran?.nama === "Gaji"
-  )
-  const lainnyaRows = pengeluaranRows.filter(
-    (p) => p.kategori_pengeluaran?.nama !== "Gaji"
-  )
-  const totalGaji = gajiRows.reduce((s, p) => s + p.nominal, 0)
+  // ── Gaji pegawai tetap dari pengeluaran_tetap (kategori Gaji) ─────────────
+  const totalGaji   = gajiTetap.reduce((s, p) => s + p.nominal, 0)
+
+  // ── Pengeluaran manual (semua dari tabel pengeluaran = lainnya) ────────────
+  const lainnyaRows = pengeluaranRows
 
   // ── HPP Fotografer (dari snapshot upah di bookings) ─────────────────────────
   const pgMap = new Map<string, { jumlah: number; total: number }>()
@@ -222,7 +222,7 @@ function hitungLaporan(
         biayaTetap,
       },
       gajiPegawaiTetap: {
-        items: gajiRows.map((p) => ({ deskripsi: p.deskripsi ?? "", nominal: p.nominal })),
+        items: gajiTetap.map((p) => ({ deskripsi: p.nama, nominal: p.nominal })),
         total: totalGaji,
       },
       lainnya: lainnyaRows,
@@ -239,17 +239,28 @@ function hitungLaporan(
   }
 }
 
-// Ambil biaya tetap aktif dari pengeluaran_tetap
-async function fetchBiayaTetap(
+interface PosTetapItem {
+  nama: string
+  nominal: number
+  kategoriNama: string | null
+}
+
+// Ambil semua pos tetap aktif dari pengeluaran_tetap (dengan kategori)
+async function fetchPosTetap(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
-): Promise<{ nama: string; nominal: number }[]> {
+): Promise<PosTetapItem[]> {
   const { data } = await supabase
     .from("pengeluaran_tetap")
-    .select("nama, nominal")
+    .select("nama, nominal, kategori_pengeluaran(nama)")
     .eq("aktif", true)
     .order("urutan", { ascending: true })
-  return (data ?? []) as { nama: string; nominal: number }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []).map((d: any) => ({
+    nama:          d.nama,
+    nominal:       d.nominal,
+    kategoriNama:  d.kategori_pengeluaran?.nama ?? null,
+  }))
 }
 
 // Ambil bookings dari Supabase untuk satu periode
@@ -369,13 +380,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Ambil data paralel: bookings + pengeluaran + biaya tetap + tren 6 bulan
+    // Ambil data paralel: bookings + pengeluaran + pos tetap + tren 6 bulan
     const periode6Bulan = Array.from({ length: 6 }, (_, i) => periodeSebelumnya(periode, 5 - i))
 
-    const [bookings, pengeluaran, biayaTetap, ...tren6Results] = await Promise.all([
+    const [bookings, pengeluaran, posTetap, ...tren6Results] = await Promise.all([
       fetchBookings(supabase, periode),
       fetchPengeluaran(supabase, periode),
-      fetchBiayaTetap(supabase),
+      fetchPosTetap(supabase),
       ...periode6Bulan.map(async (p) => {
         const [b, e] = await Promise.all([
           fetchBookings(supabase, p),
@@ -390,11 +401,11 @@ export async function GET(request: NextRequest) {
     const addons = await fetchAddonsByBookingIds(supabase, bookingIds)
 
     // Hitung laporan utama dengan addon detail
-    const laporan = hitungLaporan(bookings, pengeluaran, periode, addons, biayaTetap)
+    const laporan = hitungLaporan(bookings, pengeluaran, periode, addons, posTetap)
 
     // Hitung tren 6 bulan (tanpa addon detail untuk performa)
     const tren6Bulan = tren6Results.map((t) => {
-      const l = hitungLaporan(t.bookings, t.pengeluaran, t.periode, [], biayaTetap)
+      const l = hitungLaporan(t.bookings, t.pengeluaran, t.periode, [], posTetap)
       return {
         periode: t.periode,
         label: labelBulan(t.periode),
@@ -412,7 +423,7 @@ export async function GET(request: NextRequest) {
         fetchBookings(supabase, periodeLalu),
         fetchPengeluaran(supabase, periodeLalu),
       ])
-      const laporanLalu = hitungLaporan(bookingsLalu, pengeluaranLalu, periodeLalu, [], biayaTetap)
+      const laporanLalu = hitungLaporan(bookingsLalu, pengeluaranLalu, periodeLalu, [], posTetap)
 
       const deltaPemasukan = laporan.pemasukan.total - laporanLalu.pemasukan.total
       const deltaPengeluaran = laporan.pengeluaran.total - laporanLalu.pengeluaran.total
