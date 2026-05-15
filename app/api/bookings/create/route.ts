@@ -105,11 +105,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Gagal memverifikasi ketersediaan slot" }, { status: 500 })
   }
 
-  // 1 slot = 1 client: cek apakah ada booking yang overlap waktunya
+  // Bentrok hanya jika ada booking lain yang mulai di jam yang SAMA PERSIS
+  // (konsisten dengan cek-slot: durasi tidak memblok slot berikutnya)
   const bentrok = (existingBookings ?? []).find((b: { jam_mulai: string; jam_selesai: string }) => {
-    const bMulai   = timeToMinutes(b.jam_mulai)
-    const bSelesai = timeToMinutes(b.jam_selesai)
-    return bMulai < selesaiMin && bSelesai > mulaiMenit
+    return timeToMinutes(b.jam_mulai) === mulaiMenit
   }) as { kode_booking: string; jam_mulai: string; jam_selesai: string } | undefined
 
   if (bentrok) {
