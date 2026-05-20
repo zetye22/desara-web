@@ -1,12 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/generate-pengeluaran-tetap",
-      "schedule": "5 17 1 * *"
-    },
-    {
       "path": "/api/cron/cancel-stale-pending",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
