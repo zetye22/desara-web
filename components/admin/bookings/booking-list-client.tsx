@@ -30,6 +30,8 @@ interface BookingRow {
   kategori_sesi: string
   catatan: string | null
   created_at: string
+  email?: string | null
+  bukti_transfer_url?: string | null
   // Multi-staff
   photographer_1_id?: string | null
   photographer_2_id?: string | null

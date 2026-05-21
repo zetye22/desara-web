@@ -469,18 +469,35 @@ export default function DetailModal({
 
               {/* Bukti transfer */}
               <div>
-                <p className="mb-1 text-xs font-medium text-gray-500">Bukti Transfer</p>
+                <p className="mb-2 text-xs font-medium text-gray-500">Bukti Transfer</p>
                 {booking.bukti_transfer_url ? (
-                  <a
-                    href={booking.bukti_transfer_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
-                  >
-                    Lihat Bukti Transfer ↗
-                  </a>
+                  <div className="space-y-2">
+                    <a
+                      href={booking.bukti_transfer_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={booking.bukti_transfer_url}
+                        alt="Bukti Transfer"
+                        className="w-full max-h-56 object-contain rounded-xl border border-gray-200 bg-gray-50 cursor-zoom-in hover:opacity-90 transition-opacity"
+                      />
+                    </a>
+                    <a
+                      href={booking.bukti_transfer_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                    >
+                      Buka ukuran penuh ↗
+                    </a>
+                  </div>
                 ) : (
-                  <p className="text-xs text-gray-400 italic">Belum ada bukti transfer diunggah</p>
+                  <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 py-6 text-center">
+                    <p className="text-xs text-gray-400">Belum ada bukti transfer diunggah</p>
+                  </div>
                 )}
               </div>
 

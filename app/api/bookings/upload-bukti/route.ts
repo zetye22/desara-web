@@ -69,15 +69,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Gagal upload file" }, { status: 500 })
   }
 
+  // Ambil public URL dari storage
+  const { data: { publicUrl } } = supabase.storage
+    .from("bukti-transfer")
+    .getPublicUrl(uploaded.path)
+
   // Update URL di database
   const { error: updateError } = await supabase
     .from("bookings")
-    .update({ bukti_transfer_url: uploaded.path })
+    .update({ bukti_transfer_url: publicUrl })
     .eq("kode_booking", kodeBooking)
 
   if (updateError) {
     return NextResponse.json({ error: "Upload berhasil tapi gagal update database" }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, path: uploaded.path })
+  return NextResponse.json({ success: true, url: publicUrl })
 }
