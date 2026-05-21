@@ -16,7 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Desara Home Studio",
-  description: "Sistem Booking & Manajemen Desara Home Studio",
+  description: "Studio foto profesional di Samarinda. Tersedia paket wisuda, prewedding, keluarga, portrait, dan group.",
 }
 
 export default function RootLayout({
