@@ -1,207 +1,150 @@
 "use client"
 
 import {
-  LineChart, Line,
+  AreaChart, Area,
   BarChart, Bar,
-  PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts"
 import type { LaporanData } from "./types"
 
-// Format Rupiah untuk tooltip chart
-const fmtRupiah = (v: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(v)
+const fmt = (v: number) =>
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(v)
 
-// Format singkat untuk axis Y
-const fmtSingkat = (v: number) => {
+const fmtShort = (v: number) => {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}jt`
   if (v >= 1_000) return `${(v / 1_000).toFixed(0)}rb`
   return String(v)
 }
 
-const WARNA_PIE = ["#0d1f3c", "#C9A84C", "#94A3B8"]
-
-interface ChartsProps {
-  data: LaporanData
-}
-
-// Tooltip custom Rupiah
-function TooltipRupiah({
-  active,
-  payload,
-  label,
-}: {
+function CustomTooltip({ active, payload, label }: {
   active?: boolean
   payload?: { name: string; value: number; color: string }[]
   label?: string
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-lg px-4 py-3 text-sm">
-      {label && <p className="font-semibold text-gray-700 mb-1">{label}</p>}
-      {payload.map((entry) => (
-        <p key={entry.name} style={{ color: entry.color }}>
-          {entry.name}: {fmtRupiah(entry.value)}
-        </p>
+    <div className="bg-white border border-gray-200 rounded-xl shadow-xl px-4 py-3 text-xs min-w-[160px]">
+      {label && <p className="font-semibold text-gray-600 mb-2">{label}</p>}
+      {payload.map((e) => (
+        <div key={e.name} className="flex items-center justify-between gap-4 mb-1">
+          <span style={{ color: e.color }} className="font-medium">{e.name}</span>
+          <span className="font-bold text-gray-800">{fmt(e.value)}</span>
+        </div>
       ))}
     </div>
   )
 }
 
+interface ChartsProps { data: LaporanData }
+
 export function Charts({ data }: ChartsProps) {
-  // Data pie distribusi pengeluaran
   const pieData = [
-    { name: "HPP", value: data.pengeluaran.totalHpp },
-    { name: "Operasional", value: data.pengeluaran.totalOperasional },
-    { name: "Lain-lain", value: data.pengeluaran.totalLainnya },
+    { nama: "HPP", value: data.pengeluaran.totalHpp, fill: "#0d1f3c" },
+    { nama: "Operasional", value: data.pengeluaran.totalOperasional, fill: "#C9A84C" },
+    { nama: "Lainnya", value: data.pengeluaran.totalLainnya, fill: "#94A3B8" },
   ].filter((d) => d.value > 0)
 
-  // Data bar distribusi pemasukan (paket vs addon)
-  const barData = [
-    { nama: "Paket", revenue: data.pemasukan.totalPaket },
-    { nama: "Add-on Awal", revenue: data.pemasukan.addonBookingAwal },
-    { nama: "Add-on Lapangan", revenue: data.pemasukan.addonLapangan },
-  ].filter((d) => d.revenue > 0)
+  const totalPengeluaran = data.pengeluaran.total
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {/* ── Chart 1: Tren Profit 6 Bulan ──────────────────────────────── */}
-      <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 className="font-semibold text-[#0d1f3c] text-sm mb-4">
-          Tren Profit 6 Bulan Terakhir
-        </h3>
+      {/* Tren 6 Bulan */}
+      <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-[#0d1f3c]">Tren 6 Bulan Terakhir</p>
+          <p className="text-xs text-gray-400 mt-0.5">Pemasukan, pengeluaran & laba bersih</p>
+        </div>
         {data.tren6Bulan.length === 0 ? (
-          <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">
+          <div className="h-[200px] flex items-center justify-center text-gray-300 text-sm">
             Belum ada data tren
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={data.tren6Bulan} margin={{ top: 5, right: 10, bottom: 5, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tickFormatter={fmtSingkat}
-                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                axisLine={false}
-                tickLine={false}
-                width={50}
-              />
-              <Tooltip content={<TooltipRupiah />} />
-              <Legend
-                wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="pemasukan"
-                name="Pemasukan"
-                stroke="#0d1f3c"
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="pengeluaran"
-                name="Pengeluaran"
-                stroke="#F97316"
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="laba"
-                name="Laba"
-                stroke="#16A34A"
-                strokeWidth={2}
-                strokeDasharray="4 2"
-                dot={{ r: 3 }}
-                activeDot={{ r: 5 }}
-              />
-            </LineChart>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={data.tren6Bulan} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="gPemasukan" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0d1f3c" stopOpacity={0.12} />
+                  <stop offset="95%" stopColor="#0d1f3c" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gLaba" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#16A34A" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#16A34A" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+              <YAxis tickFormatter={fmtShort} tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={44} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area type="monotone" dataKey="pemasukan" name="Pemasukan" stroke="#0d1f3c" strokeWidth={2} fill="url(#gPemasukan)" dot={{ r: 3, fill: "#0d1f3c" }} activeDot={{ r: 5 }} />
+              <Area type="monotone" dataKey="pengeluaran" name="Pengeluaran" stroke="#F97316" strokeWidth={2} fill="none" dot={{ r: 3, fill: "#F97316" }} activeDot={{ r: 5 }} />
+              <Area type="monotone" dataKey="laba" name="Laba" stroke="#16A34A" strokeWidth={2} fill="url(#gLaba)" dot={{ r: 3, fill: "#16A34A" }} activeDot={{ r: 5 }} />
+            </AreaChart>
           </ResponsiveContainer>
         )}
       </div>
 
-      {/* ── Chart 3: Distribusi Pengeluaran (Pie) ─────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 className="font-semibold text-[#0d1f3c] text-sm mb-4">
-          Distribusi Pengeluaran
-        </h3>
+      {/* Distribusi Pengeluaran */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-[#0d1f3c]">Komposisi Pengeluaran</p>
+          <p className="text-xs text-gray-400 mt-0.5">Bulan ini</p>
+        </div>
         {pieData.length === 0 ? (
-          <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">
+          <div className="h-[200px] flex items-center justify-center text-gray-300 text-sm">
             Belum ada pengeluaran
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="45%"
-                outerRadius={75}
-                dataKey="value"
-                label={({ percent }: { percent?: number }) => percent != null ? `${(percent * 100).toFixed(0)}%` : ""}
-                labelLine={false}
-              >
-                {pieData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={WARNA_PIE[index % WARNA_PIE.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [fmtRupiah(Number(value)), ""]}
-              />
-              <Legend
-                wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="space-y-3 mt-2">
+            {pieData.map((d) => {
+              const pct = totalPengeluaran > 0 ? (d.value / totalPengeluaran) * 100 : 0
+              return (
+                <div key={d.nama}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: d.fill }} />
+                      <span className="text-xs text-gray-600 font-medium">{d.nama}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-gray-700">
+                        {new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(d.value)}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-1">({pct.toFixed(0)}%)</span>
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: d.fill }} />
+                  </div>
+                </div>
+              )
+            })}
+            <div className="pt-3 border-t border-gray-100 flex justify-between items-center">
+              <span className="text-xs text-gray-500 font-medium">Total Pengeluaran</span>
+              <span className="text-sm font-bold text-[#0d1f3c]">
+                {new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(totalPengeluaran)}
+              </span>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* ── Chart 2: Distribusi Pemasukan (Bar) ───────────────────────── */}
-      <div className="lg:col-span-3 bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 className="font-semibold text-[#0d1f3c] text-sm mb-4">
-          Distribusi Sumber Pemasukan
-        </h3>
-        {barData.length === 0 ? (
-          <div className="h-[200px] flex items-center justify-center text-gray-400 text-sm">
-            Belum ada data revenue
+      {/* Bar: Pemasukan per Kategori */}
+      <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-[#0d1f3c]">Revenue per Kategori Sesi</p>
+          <p className="text-xs text-gray-400 mt-0.5">Berdasarkan tanggal foto bulan ini</p>
+        </div>
+        {data.pemasukan.perKategori.length === 0 ? (
+          <div className="h-[160px] flex items-center justify-center text-gray-300 text-sm">
+            Tidak ada booking di periode ini
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={barData} margin={{ top: 5, right: 10, bottom: 5, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis
-                dataKey="nama"
-                tick={{ fontSize: 12, fill: "#6B7280" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tickFormatter={fmtSingkat}
-                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                axisLine={false}
-                tickLine={false}
-                width={50}
-              />
-              <Tooltip
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [fmtRupiah(Number(value)), "Revenue"]}
-                cursor={{ fill: "#f9f5ed" }}
-              />
-              <Bar dataKey="revenue" name="Revenue" fill="#C9A84C" radius={[4, 4, 0, 0]} />
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={data.pemasukan.perKategori} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} barSize={40}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <XAxis dataKey="kategori" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} />
+              <YAxis tickFormatter={fmtShort} tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={44} />
+              <Tooltip formatter={(v: unknown) => [fmt(Number(v)), "Revenue"]} cursor={{ fill: "#f8f5f0" }} />
+              <Bar dataKey="total" name="Revenue" fill="#C9A84C" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

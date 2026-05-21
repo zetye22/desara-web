@@ -96,7 +96,7 @@ export function TabTetap({ items, kategoriList, onRefresh }: TabTetapProps) {
       </div>
 
       {/* Tabel pos aktif */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-5 py-3 bg-blue-50 border-b border-blue-100">
           <p className="text-xs font-semibold text-[#0d1f3c] uppercase tracking-wide">
             Pos Tetap Aktif ({aktifItems.length})
@@ -189,7 +189,7 @@ export function TabTetap({ items, kategoriList, onRefresh }: TabTetapProps) {
 
       {/* Pos nonaktif */}
       {nonaktifItems.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
           <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               Pos Nonaktif ({nonaktifItems.length})

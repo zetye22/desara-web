@@ -10,7 +10,7 @@ export function WeeklyChart({ data }: { data: ChartPoint[] }) {
   const max = Math.max(...data.map((d) => d.jumlah), 1)
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div className="bg-white rounded-xl border border-gray-100 p-5">
       <p className="text-sm font-semibold text-gray-700 mb-4">Booking 7 Hari Terakhir</p>
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={data} barSize={28} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>

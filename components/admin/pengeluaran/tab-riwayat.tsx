@@ -57,15 +57,15 @@ export function TabRiwayat({ data, loading }: TabRiwayatProps) {
     <div className="space-y-5">
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
           <p className="text-xs text-gray-500 font-medium">Total 12 Bulan</p>
           <p className="text-xl font-bold text-[#0d1f3c] mt-0.5">{formatRupiah(totalSemua)}</p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
           <p className="text-xs text-gray-500 font-medium">Rata-rata/Bulan</p>
           <p className="text-xl font-bold text-[#0d1f3c] mt-0.5">{formatRupiah(rataRata)}</p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <div className="rounded-xl border border-gray-100 bg-white px-4 py-3">
           <p className="text-xs text-gray-500 font-medium">Tertinggi</p>
           <p className="text-lg font-bold text-red-600 mt-0.5">{formatRupiah(maxBulan.total)}</p>
           <p className="text-xs text-gray-400">{maxBulan.bulanLabel}</p>
@@ -73,7 +73,7 @@ export function TabRiwayat({ data, loading }: TabRiwayatProps) {
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
         <h3 className="text-sm font-semibold text-[#0d1f3c] mb-4">Tren Pengeluaran 12 Bulan</h3>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -94,7 +94,7 @@ export function TabRiwayat({ data, loading }: TabRiwayatProps) {
       </div>
 
       {/* Tabel riwayat bulanan */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100">
           <h3 className="text-sm font-semibold text-[#0d1f3c]">Rincian Per Bulan</h3>
         </div>

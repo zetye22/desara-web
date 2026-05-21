@@ -80,15 +80,15 @@ export function SettingsClient({ isOwner }: SettingsClientProps) {
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Sidebar tab navigation (desktop) */}
       <aside className="lg:w-52 shrink-0">
-        <nav className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <nav className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
               className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-left transition-colors border-l-2 ${
                 activeTab === id
-                  ? "bg-blue-50 border-[#0d1f3c] text-[#0d1f3c]"
-                  : "border-transparent text-gray-600 hover:bg-gray-50 hover:text-[#0d1f3c]"
+                  ? "bg-gray-50 border-[#0d1f3c] text-[#0d1f3c]"
+                  : "border-transparent text-gray-500 hover:bg-gray-50 hover:text-[#0d1f3c]"
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />

@@ -64,7 +64,7 @@ export function ActionRequired({ items: initialItems }: { items: ActionItem[] })
 
   if (items.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+      <div className="bg-white rounded-xl border border-gray-100 p-6 text-center">
         <CheckCircle2 className="w-10 h-10 text-green-400 mx-auto mb-2" />
         <p className="text-sm font-medium text-gray-600">Semua up-to-date! 🎉</p>
         <p className="text-xs text-gray-400 mt-0.5">Tidak ada tindakan yang diperlukan</p>
@@ -73,7 +73,7 @@ export function ActionRequired({ items: initialItems }: { items: ActionItem[] })
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-50 flex items-center gap-2">
         <Bell className="w-4 h-4 text-orange-500" />
         <p className="text-sm font-semibold text-gray-700">Action Required</p>

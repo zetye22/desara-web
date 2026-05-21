@@ -89,29 +89,40 @@ function KpiCard({
   subtitleColor?: SubColor
   color: BadgeColor
 }) {
+  const accentBar: Record<BadgeColor, string> = {
+    blue:   "bg-blue-500",
+    green:  "bg-emerald-500",
+    indigo: "bg-[#C9A84C]",
+    orange: "bg-orange-500",
+  }
   const iconBg: Record<BadgeColor, string> = {
     blue:   "bg-blue-50 text-blue-600",
-    green:  "bg-green-50 text-green-600",
-    indigo: "bg-indigo-50 text-indigo-600",
+    green:  "bg-emerald-50 text-emerald-600",
+    indigo: "bg-amber-50 text-amber-600",
     orange: "bg-orange-50 text-orange-600",
   }
   const subCls: Record<SubColor, string> = {
-    green:  "text-green-600",
+    green:  "text-emerald-600",
     red:    "text-red-500",
     gray:   "text-gray-400",
     orange: "text-orange-500",
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-      <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl mb-4 ${iconBg[color]}`}>
-        {icon}
-      </div>
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-[#0d1f3c] leading-tight mb-1 truncate">{value}</p>
-      <div className={`flex items-center gap-1 text-xs ${subCls[subtitleColor]}`}>
-        {subtitleIcon}
-        <span>{subtitle}</span>
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className={`h-1 w-full ${accentBar[color]}`} />
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{label}</p>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg[color]}`}>
+            {icon}
+          </div>
+        </div>
+        <p className="text-2xl font-bold text-[#0d1f3c] leading-tight mb-1 truncate">{value}</p>
+        <div className={`flex items-center gap-1 text-xs ${subCls[subtitleColor]}`}>
+          {subtitleIcon}
+          <span>{subtitle}</span>
+        </div>
       </div>
     </div>
   )

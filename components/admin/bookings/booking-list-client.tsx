@@ -373,31 +373,15 @@ export default function BookingListClient({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Kode
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Nama Client
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Tanggal
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Jam
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Paket
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Status Sesi
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600">
-                  Status Bayar
-                </th>
-                <th className="px-4 py-3 text-right font-semibold text-gray-600">
-                  Total
-                </th>
+              <tr className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide border-b border-gray-100">
+                <th className="px-4 py-3 text-left font-medium">Kode</th>
+                <th className="px-4 py-3 text-left font-medium">Nama Client</th>
+                <th className="px-4 py-3 text-left font-medium">Tanggal</th>
+                <th className="px-4 py-3 text-left font-medium">Jam</th>
+                <th className="px-4 py-3 text-left font-medium">Paket</th>
+                <th className="px-4 py-3 text-left font-medium">Status Sesi</th>
+                <th className="px-4 py-3 text-left font-medium">Status Bayar</th>
+                <th className="px-4 py-3 text-right font-medium">Total</th>
               </tr>
             </thead>
             <tbody>

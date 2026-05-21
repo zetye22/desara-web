@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Save } from "lucide-react"
+import { X, Save, Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import type { Pengeluaran, KategoriPengeluaran } from "./types"
 
@@ -82,7 +81,7 @@ export function ModalPengeluaran({ item, kategoriList, defaultBulan, onClose, on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden"
+        className="w-full max-w-md rounded-xl bg-white shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -103,7 +102,7 @@ export function ModalPengeluaran({ item, kategoriList, defaultBulan, onClose, on
               type="date"
               value={tanggal}
               onChange={(e) => setTanggal(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full h-9 rounded-lg border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
               required
             />
           </div>
@@ -114,7 +113,7 @@ export function ModalPengeluaran({ item, kategoriList, defaultBulan, onClose, on
             <select
               value={kategoriId}
               onChange={(e) => setKategoriId(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full h-9 rounded-lg border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
             >
               <option value="">-- Pilih kategori --</option>
               {kategoriList.map((k) => (
@@ -131,7 +130,7 @@ export function ModalPengeluaran({ item, kategoriList, defaultBulan, onClose, on
               value={deskripsi}
               onChange={(e) => setDeskripsi(e.target.value)}
               placeholder="Contoh: Bayar tagihan listrik April..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full h-9 rounded-lg border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
             />
           </div>
 
@@ -145,7 +144,7 @@ export function ModalPengeluaran({ item, kategoriList, defaultBulan, onClose, on
                 value={nominalFormatted}
                 onChange={(e) => handleNominalChange(e.target.value)}
                 placeholder="0"
-                className="w-full rounded-lg border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+                className="w-full h-9 rounded-lg border border-gray-200 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
                 required
               />
             </div>
@@ -162,19 +161,28 @@ export function ModalPengeluaran({ item, kategoriList, defaultBulan, onClose, on
               value={catatan}
               onChange={(e) => setCatatan(e.target.value)}
               placeholder="Catatan opsional..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full h-9 rounded-lg border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
             />
           </div>
 
           {/* Tombol */}
           <div className="flex gap-3 pt-1">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={saving}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="flex-1 h-9 border border-gray-200 text-gray-600 text-sm rounded-xl hover:bg-gray-50 bg-white disabled:opacity-50"
+            >
               Batal
-            </Button>
-            <Button type="submit" className="flex-1 bg-[#0d1f3c] hover:bg-[#1a3561] gap-2" disabled={saving}>
-              <Save className="w-4 h-4" />
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 h-9 px-4 bg-[#0d1f3c] text-white text-sm rounded-xl font-medium hover:bg-[#162d56] disabled:opacity-50 flex items-center justify-center gap-1.5"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               {saving ? "Menyimpan..." : "Simpan"}
-            </Button>
+            </button>
           </div>
         </form>
       </div>

@@ -4,7 +4,7 @@ import type { QuickStats } from "./types"
 
 export function QuickStatsSidebar({ stats }: { stats: QuickStats }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
+    <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-4">
       <p className="text-sm font-semibold text-gray-700">Statistik Bulan Ini</p>
 
       <StatItem

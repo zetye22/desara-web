@@ -7,6 +7,10 @@ import type {
   AddonRow,
   DetailAddonLapangan,
   AddonInsight,
+  TransaksiHarian,
+  KasStudio,
+  BagiHasil,
+  PembayaranRow,
 } from "@/components/admin/keuangan/types"
 
 // HPP cetak yang include di paket
@@ -36,7 +40,7 @@ function hitungLaporan(
   periode: string,
   addons: AddonRow[] = [],
   posTetap: { nama: string; nominal: number }[] = []
-): Omit<LaporanData, "tren6Bulan" | "comparison"> {
+): Omit<LaporanData, "tren6Bulan" | "comparison" | "kas" | "saldoBerjalan" | "pembayaran"> {
   const biayaTetap = posTetap
   // ── Pemasukan ──────────────────────────────────────────────────────────────
   const mapKategori = new Map<string, { jumlah: number; total: number; totalAddon: number }>()
@@ -340,6 +344,228 @@ async function fetchAddonsByBookingIds(
   return data ?? []
 }
 
+// Ambil atau buat data kas_studio untuk periode tertentu
+async function fetchKasStudio(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  periode: string
+): Promise<{ saldo_awal: number; persen_investor: number }> {
+  const { data } = await supabase
+    .from("kas_studio")
+    .select("saldo_awal, persen_investor")
+    .eq("periode", periode)
+    .single()
+  return {
+    saldo_awal: data?.saldo_awal ?? 0,
+    persen_investor: data?.persen_investor ?? 50,
+  }
+}
+
+// ── Tipe lokal untuk entri pengeluaran kas ─────────────────────────────────
+type KasKeluar = {
+  tanggal: string
+  keterangan: string
+  nominal: number
+  kategori?: string
+}
+
+// Build HPP keluar dari bookings + addons (per tgl_foto)
+function buildHppKeluar(bookings: BookingRingkas[], addons: AddonRow[]): KasKeluar[] {
+  const entries: KasKeluar[] = []
+
+  const addonByBooking = new Map<string, AddonRow[]>()
+  for (const a of addons) {
+    if (!addonByBooking.has(a.booking_id)) addonByBooking.set(a.booking_id, [])
+    addonByBooking.get(a.booking_id)!.push(a)
+  }
+
+  for (const b of bookings) {
+    if (b.upah_pg1 > 0 && b.pg1) {
+      entries.push({ tanggal: b.tgl_foto, keterangan: `Upah Fotografer ${b.pg1.nama}`, nominal: b.upah_pg1, kategori: "upah" })
+    }
+    if (b.upah_pg2 > 0 && b.pg2) {
+      entries.push({ tanggal: b.tgl_foto, keterangan: `Upah Fotografer ${b.pg2.nama}`, nominal: b.upah_pg2, kategori: "upah" })
+    }
+    if (b.upah_editor > 0 && b.ed) {
+      entries.push({ tanggal: b.tgl_foto, keterangan: `Upah Editor ${b.ed.nama}`, nominal: b.upah_editor, kategori: "upah" })
+    }
+    if (b.nama_paket.includes("Silver")) {
+      entries.push({ tanggal: b.tgl_foto, keterangan: "HPP Cetak 12R (Paket Silver)", nominal: HARGA_CETAK_12R, kategori: "cetak" })
+    }
+    if (b.nama_paket.includes("Gold")) {
+      entries.push({ tanggal: b.tgl_foto, keterangan: "HPP Cetak 20R (Paket Gold)", nominal: HARGA_CETAK_20R, kategori: "cetak" })
+    }
+    const bAddons = addonByBooking.get(b.id) ?? []
+    for (const a of bAddons) {
+      if (a.jenis === "cetak_12r") {
+        entries.push({ tanggal: b.tgl_foto, keterangan: `HPP Cetak 12R Add-on (${a.qty}x)`, nominal: a.qty * HARGA_CETAK_12R, kategori: "cetak" })
+      } else if (a.jenis === "cetak_20r") {
+        entries.push({ tanggal: b.tgl_foto, keterangan: `HPP Cetak 20R Add-on (${a.qty}x)`, nominal: a.qty * HARGA_CETAK_20R, kategori: "cetak" })
+      }
+    }
+  }
+  return entries
+}
+
+// Build biaya tetap keluar (tanggal = hari pertama bulan)
+function buildTetapKeluar(posTetap: { nama: string; nominal: number }[], periode: string): KasKeluar[] {
+  const tgl = `${periode}-01`
+  return posTetap.map((p) => ({ tanggal: tgl, keterangan: p.nama, nominal: p.nominal, kategori: "tetap" }))
+}
+
+// Ambil semua pembayaran (DP & pelunasan) yang masuk di periode tertentu (cash basis)
+async function fetchPembayaran(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  periode: string
+): Promise<PembayaranRow[]> {
+  const [yearStr, monthStr] = periode.split("-")
+  const year = Number(yearStr)
+  const month = Number(monthStr)
+  const tglMulai = `${yearStr}-${monthStr}-01`
+  const lastDay = new Date(year, month, 0).getDate()
+  const tglAkhir = `${yearStr}-${monthStr}-${String(lastDay).padStart(2, "0")}`
+
+  // DP masuk bulan ini
+  const { data: dpRows } = await supabase
+    .from("bookings")
+    .select("id, kode_booking, nama_client, nama_paket, dp_dibayar, tgl_dp, tgl_foto")
+    .gte("tgl_dp", tglMulai)
+    .lte("tgl_dp", tglAkhir)
+    .neq("status_sesi", "cancel")
+    .not("tgl_dp", "is", null)
+
+  // Pelunasan masuk bulan ini (tgl_pelunasan ada = bayar sisa / full)
+  const { data: lunasRows } = await supabase
+    .from("bookings")
+    .select("id, kode_booking, nama_client, nama_paket, total_tagihan, dp_dibayar, tgl_pelunasan, tgl_foto")
+    .gte("tgl_pelunasan", tglMulai)
+    .lte("tgl_pelunasan", tglAkhir)
+    .neq("status_sesi", "cancel")
+    .not("tgl_pelunasan", "is", null)
+
+  const hasil: PembayaranRow[] = []
+
+  for (const r of (dpRows ?? [])) {
+    hasil.push({
+      id: r.id + "_dp",
+      kode_booking: r.kode_booking,
+      nama_client: r.nama_client,
+      nama_paket: r.nama_paket,
+      tipe: "dp",
+      nominal: r.dp_dibayar ?? 0,
+      tanggal: r.tgl_dp,
+      tgl_foto: r.tgl_foto,
+    })
+  }
+
+  for (const r of (lunasRows ?? [])) {
+    const sisaBayar = (r.total_tagihan ?? 0) - (r.dp_dibayar ?? 0)
+    if (sisaBayar > 0) {
+      hasil.push({
+        id: r.id + "_lunas",
+        kode_booking: r.kode_booking,
+        nama_client: r.nama_client,
+        nama_paket: r.nama_paket,
+        tipe: "pelunasan",
+        nominal: sisaBayar,
+        tanggal: r.tgl_pelunasan,
+        tgl_foto: r.tgl_foto,
+      })
+    }
+  }
+
+  return hasil.sort((a, b) => a.tanggal.localeCompare(b.tanggal))
+}
+
+// Hitung saldo berjalan dari semua transaksi kas (pemasukan + seluruh pengeluaran)
+function hitungSaldoBerjalan(
+  saldoAwal: number,
+  pembayaran: PembayaranRow[],
+  keluarEntries: KasKeluar[]
+): TransaksiHarian[] {
+  type Entry = {
+    tanggal: string
+    keterangan: string
+    tipe: "masuk" | "keluar"
+    nominal: number
+    kode_booking?: string
+    nama_client?: string
+    kategori?: string
+  }
+
+  const entries: Entry[] = []
+
+  for (const p of pembayaran) {
+    entries.push({
+      tanggal: p.tanggal,
+      keterangan: p.tipe === "dp"
+        ? `DP — ${p.nama_client} (${p.nama_paket})`
+        : `Pelunasan — ${p.nama_client} (${p.nama_paket})`,
+      tipe: "masuk",
+      nominal: p.nominal,
+      kode_booking: p.kode_booking,
+      nama_client: p.nama_client,
+    })
+  }
+
+  for (const k of keluarEntries) {
+    entries.push({
+      tanggal: k.tanggal,
+      keterangan: k.keterangan,
+      tipe: "keluar",
+      nominal: k.nominal,
+      kategori: k.kategori,
+    })
+  }
+
+  entries.sort((a, b) => {
+    if (a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal)
+    if (a.tipe === "masuk" && b.tipe === "keluar") return -1
+    if (a.tipe === "keluar" && b.tipe === "masuk") return 1
+    return 0
+  })
+
+  let saldo = saldoAwal
+  return entries.map((e) => {
+    saldo = e.tipe === "masuk" ? saldo + e.nominal : saldo - e.nominal
+    return { ...e, saldo }
+  })
+}
+
+// Hitung bagi hasil investor
+function hitungBagiHasil(laba: number, persenInvestor: number): BagiHasil {
+  const isRugi = laba <= 0
+  const bagianInvestor = isRugi ? 0 : Math.round(laba * (persenInvestor / 100))
+  const bagianStudio   = isRugi ? 0 : laba - bagianInvestor
+  return { laba, persenInvestor, bagianInvestor, bagianStudio, isRugi }
+}
+
+// Hitung kas studio lengkap (semua pengeluaran: HPP + biaya tetap + manual)
+function hitungKas(
+  saldoAwal: number,
+  persenInvestor: number,
+  pembayaran: PembayaranRow[],
+  keluarEntries: KasKeluar[]
+): KasStudio {
+  const totalMasuk  = pembayaran.reduce((s, p) => s + p.nominal, 0)
+  const totalKeluar = keluarEntries.reduce((s, e) => s + e.nominal, 0)
+  const saldoAkhir  = saldoAwal + totalMasuk - totalKeluar
+  const laba        = totalMasuk - totalKeluar
+  const bagiHasil   = hitungBagiHasil(laba, persenInvestor)
+  const saldoSetelahBagiHasil = saldoAkhir - bagiHasil.bagianInvestor
+
+  return {
+    saldoAwal,
+    totalMasuk,
+    totalKeluar,
+    saldoAkhir,
+    bagiHasil,
+    saldoSetelahBagiHasil,
+    persenInvestor,
+  }
+}
+
 export async function GET(request: NextRequest) {
   // Cek autentikasi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -359,13 +585,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Ambil data paralel: bookings + pengeluaran + pos tetap + tren 6 bulan
+    // Ambil data paralel: bookings + pengeluaran + pos tetap + kas + pembayaran + tren 6 bulan
     const periode6Bulan = Array.from({ length: 6 }, (_, i) => periodeSebelumnya(periode, 5 - i))
 
-    const [bookings, pengeluaran, posTetap, ...tren6Results] = await Promise.all([
+    const [bookings, pengeluaran, posTetap, kasData, pembayaran, ...tren6Results] = await Promise.all([
       fetchBookings(supabase, periode),
       fetchPengeluaran(supabase, periode),
       fetchPosTetap(supabase),
+      fetchKasStudio(supabase, periode),
+      fetchPembayaran(supabase, periode),
       ...periode6Bulan.map(async (p) => {
         const [b, e] = await Promise.all([
           fetchBookings(supabase, p),
@@ -381,6 +609,20 @@ export async function GET(request: NextRequest) {
 
     // Hitung laporan utama dengan addon detail
     const laporan = hitungLaporan(bookings, pengeluaran, periode, addons, posTetap)
+
+    // Hitung saldo berjalan & kas studio (cash basis, semua jenis pengeluaran)
+    const manualKeluar: KasKeluar[] = pengeluaran.map((p) => ({
+      tanggal: p.tanggal,
+      keterangan: p.deskripsi ?? p.kategori ?? "Pengeluaran",
+      nominal: p.nominal,
+      kategori: p.kategori,
+    }))
+    const hppKeluar    = buildHppKeluar(bookings, addons)
+    const tetapKeluar  = buildTetapKeluar(posTetap, periode)
+    const allKeluar: KasKeluar[] = [...manualKeluar, ...hppKeluar, ...tetapKeluar]
+
+    const saldoBerjalan = hitungSaldoBerjalan(kasData.saldo_awal, pembayaran, allKeluar)
+    const kas = hitungKas(kasData.saldo_awal, kasData.persen_investor, pembayaran, allKeluar)
 
     // Hitung tren 6 bulan (tanpa addon detail untuk performa)
     const tren6Bulan = tren6Results.map((t) => {
@@ -429,6 +671,9 @@ export async function GET(request: NextRequest) {
 
     const result: LaporanData = {
       ...laporan,
+      kas,
+      saldoBerjalan,
+      pembayaran,
       tren6Bulan,
       comparison,
     }

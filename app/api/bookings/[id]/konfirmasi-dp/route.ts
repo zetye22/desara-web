@@ -79,6 +79,10 @@ export async function POST(
     status_sesi:       "booked",
     tgl_dp:            tglDpJkt,
   }
+  // Kalau langsung lunas saat konfirmasi DP, set juga tgl_pelunasan
+  if (statusPembayaran === "lunas") {
+    updatePayload.tgl_pelunasan = tglDpJkt
+  }
   if (body.catatan) updatePayload.catatan = body.catatan
 
   const { error: updateErr } = await supabase

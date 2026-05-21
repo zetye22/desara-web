@@ -88,11 +88,11 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevBulan}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-gray-600" />
           </button>
-          <div className="px-4 py-2 rounded-lg border border-gray-200 bg-white min-w-[160px] text-center">
+          <div className="px-4 py-2 rounded-lg border border-gray-100 bg-white min-w-[160px] text-center">
             <span className="text-sm font-semibold text-[#0d1f3c]">{bulanLabel}</span>
             {isCurrentMonth && (
               <span className="ml-2 text-xs text-blue-600 font-medium">(Bulan ini)</span>
@@ -101,7 +101,7 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
           <button
             onClick={handleNextBulan}
             disabled={isCurrentMonth}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4 text-gray-600" />
           </button>
@@ -136,7 +136,7 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
           className={`shrink-0 text-xs px-3 py-1.5 rounded-full border transition-colors ${
             filterKategori === ""
               ? "bg-[#0d1f3c] text-white border-[#0d1f3c]"
-              : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              : "border-gray-100 text-gray-600 hover:bg-gray-50"
           }`}
         >
           Semua ({items.length})
@@ -151,7 +151,7 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
               className={`shrink-0 text-xs px-3 py-1.5 rounded-full border transition-colors ${
                 filterKategori === k.id
                   ? "text-white border-transparent"
-                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "border-gray-100 text-gray-600 hover:bg-gray-50"
               }`}
               style={filterKategori === k.id ? { backgroundColor: k.warna, borderColor: k.warna } : {}}
             >
@@ -175,7 +175,7 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
       )}
 
       {/* Tabel utama */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         {loading ? (
           <div className="px-5 py-10 text-center text-gray-400 text-sm">
             <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-gray-300" />

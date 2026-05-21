@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 
 // POST /api/bookings/[id]/lunas
-// Tandai booking sudah lunas — set dp_dibayar = total_tagihan, status_pembayaran = "lunas"
+// Tandai booking sudah lunas — set status_pembayaran = "lunas" dan tgl_pelunasan
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -24,7 +24,7 @@ export async function POST(
   // Ambil total_tagihan dari booking
   const { data: booking, error: fetchError } = await supabase
     .from("bookings")
-    .select("id, total_tagihan, status_pembayaran")
+    .select("id, status_pembayaran")
     .eq("id", bookingId)
     .single()
 
@@ -42,12 +42,15 @@ export async function POST(
     metode = (b as { metode?: string }).metode ?? null
   } catch { /* opsional */ }
 
-  // Update dp_dibayar = total_tagihan dan status_pembayaran = lunas
+  const tglLunasJkt = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" })
+
+  // Update status_pembayaran = lunas dan set tgl_pelunasan
+  // dp_dibayar TIDAK diubah agar nominal DP asli tetap tercatat untuk laporan keuangan
   const { error: updateError } = await supabase
     .from("bookings")
     .update({
-      dp_dibayar:        booking.total_tagihan,
       status_pembayaran: "lunas",
+      tgl_pelunasan:     tglLunasJkt,
       ...(metode ? { metode_pelunasan: metode } : {}),
     })
     .eq("id", bookingId)
@@ -61,6 +64,5 @@ export async function POST(
 
   return NextResponse.json({
     success: true,
-    dp_dibayar: booking.total_tagihan,
   })
 }

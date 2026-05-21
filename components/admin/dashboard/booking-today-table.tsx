@@ -21,7 +21,7 @@ export function BookingTodayTable({ bookings, backgrounds }: { bookings: Booking
 
   if (bookings.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+      <div className="bg-white rounded-xl border border-gray-100 p-10 text-center">
         <CalendarDays className="w-12 h-12 text-gray-200 mx-auto mb-3" />
         <p className="text-sm font-medium text-gray-500">Tidak ada booking hari ini.</p>
         <p className="text-sm text-gray-400 mt-0.5">Selamat istirahat! 😊</p>
@@ -32,7 +32,7 @@ export function BookingTodayTable({ bookings, backgrounds }: { bookings: Booking
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="hidden md:block bg-white rounded-xl border border-gray-100 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-50">
@@ -83,7 +83,7 @@ export function BookingTodayTable({ bookings, backgrounds }: { bookings: Booking
             <div
               key={b.id}
               onClick={() => setSelected(b)}
-              className="bg-white rounded-2xl border border-gray-100 px-4 py-3.5 flex items-center gap-3 cursor-pointer active:bg-gray-50"
+              className="bg-white rounded-xl border border-gray-100 px-4 py-3.5 flex items-center gap-3 cursor-pointer active:bg-gray-50"
             >
               <div className="text-center w-14 shrink-0">
                 <p className="text-base font-bold text-[#0d1f3c]">{b.jam_mulai.slice(0, 5)}</p>

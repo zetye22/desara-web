@@ -155,54 +155,58 @@ export function PengeluaranClient() {
 
   return (
     <div className="space-y-5">
-      {/* Tab navigation */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-full sm:w-fit">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => {
-              setActiveTab(id)
-              if (id === "riwayat" && riwayat.length === 0) loadRiwayat()
-            }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === id
-                ? "bg-white text-[#0d1f3c] shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <Icon className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">{label}</span>
-            <span className="sm:hidden">{label.split(" ")[0]}</span>
-          </button>
-        ))}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Tab nav */}
+        <div className="border-b border-gray-100 px-1 flex overflow-x-auto">
+          {TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => {
+                setActiveTab(id)
+                if (id === "riwayat" && riwayat.length === 0) loadRiwayat()
+              }}
+              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors relative ${
+                activeTab === id ? "text-[#0d1f3c]" : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              {label}
+              {activeTab === id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0d1f3c] rounded-t-full" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div className="p-5">
+          {activeTab === "tetap" && (
+            <TabTetap
+              items={posTetap}
+              kategoriList={kategoriList}
+              onRefresh={handleRefreshTetap}
+            />
+          )}
+
+          {activeTab === "bulan" && (
+            <TabBulan
+              items={pengeluaranBulan}
+              kategoriList={kategoriList}
+              bulan={bulanAktif}
+              loading={loadingBulan}
+              onBulanChange={handleBulanChange}
+              onRefresh={handleRefreshBulan}
+            />
+          )}
+
+          {activeTab === "riwayat" && (
+            <TabRiwayat
+              data={riwayat}
+              loading={loadingRiwayat}
+            />
+          )}
+        </div>
       </div>
-
-      {/* Tab content */}
-      {activeTab === "tetap" && (
-        <TabTetap
-          items={posTetap}
-          kategoriList={kategoriList}
-          onRefresh={handleRefreshTetap}
-        />
-      )}
-
-      {activeTab === "bulan" && (
-        <TabBulan
-          items={pengeluaranBulan}
-          kategoriList={kategoriList}
-          bulan={bulanAktif}
-          loading={loadingBulan}
-          onBulanChange={handleBulanChange}
-          onRefresh={handleRefreshBulan}
-        />
-      )}
-
-      {activeTab === "riwayat" && (
-        <TabRiwayat
-          data={riwayat}
-          loading={loadingRiwayat}
-        />
-      )}
     </div>
   )
 }

@@ -5,13 +5,11 @@ import { formatTanggal } from "@/lib/utils"
 import { timeToMinutes } from "@/lib/time-utils"
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react"
 
-const JAM_MULAI   = 10 * 60
-const JAM_SELESAI = 21 * 60
-const TOTAL_MENIT = JAM_SELESAI - JAM_MULAI
-
-function menit2jam(m: number): string {
-  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`
-}
+const JAM_MULAI  = 10 * 60   // 600
+const JAM_SELESAI = 21 * 60  // 1260
+const HOUR_PX    = 80        // px per jam
+const HOURS      = Array.from({ length: 12 }, (_, i) => 10 + i) // 10..21
+const TOTAL_H    = (HOURS.length - 1) * HOUR_PX  // 880px
 
 interface BookingKalender {
   id: string
@@ -28,184 +26,277 @@ interface KalenderClientProps {
   bookings: BookingKalender[]
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  booked:        "bg-blue-100 border-blue-400 text-blue-800",
-  dp_ok:         "bg-amber-100 border-amber-400 text-amber-800",
-  selesai_foto:  "bg-purple-100 border-purple-400 text-purple-800",
-  selesai_edit:  "bg-indigo-100 border-indigo-400 text-indigo-800",
-  diambil:       "bg-green-100 border-green-400 text-green-800",
-  cancel:        "bg-red-50 border-red-200 text-red-300 opacity-50",
+const STATUS_CFG: Record<string, { label: string; bg: string; border: string; text: string; dot: string }> = {
+  booked:       { label: "Booked",       bg: "bg-sky-50",     border: "border-sky-400",     text: "text-sky-900",     dot: "bg-sky-400" },
+  dp_ok:        { label: "DP OK",        bg: "bg-amber-50",   border: "border-amber-400",   text: "text-amber-900",   dot: "bg-amber-400" },
+  selesai_foto: { label: "Selesai Foto", bg: "bg-violet-50",  border: "border-violet-400",  text: "text-violet-900",  dot: "bg-violet-400" },
+  selesai_edit: { label: "Selesai Edit", bg: "bg-indigo-50",  border: "border-indigo-400",  text: "text-indigo-900",  dot: "bg-indigo-400" },
+  diambil:      { label: "Diambil",      bg: "bg-emerald-50", border: "border-emerald-400", text: "text-emerald-900", dot: "bg-emerald-400" },
+  cancel:       { label: "Cancel",       bg: "bg-gray-50",    border: "border-gray-300",    text: "text-gray-400",    dot: "bg-gray-300" },
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  booked:        "Booked",
-  dp_ok:         "DP OK",
-  selesai_foto:  "Selesai Foto",
-  selesai_edit:  "Selesai Edit",
-  diambil:       "Diambil",
-  cancel:        "Cancel",
+interface PlacedBooking {
+  booking: BookingKalender
+  col: number
+  totalCols: number
+  topPx: number
+  heightPx: number
+}
+
+function placeBookings(bookings: BookingKalender[]): PlacedBooking[] {
+  const sorted = [...bookings].sort(
+    (a, b) => timeToMinutes(a.jam_mulai) - timeToMinutes(b.jam_mulai)
+  )
+  const placed: PlacedBooking[] = []
+  const colEnds: number[] = []
+
+  for (const b of sorted) {
+    const start = timeToMinutes(b.jam_mulai)
+    const end   = timeToMinutes(b.jam_selesai)
+    let col = colEnds.findIndex((e) => e <= start)
+    if (col === -1) { col = colEnds.length; colEnds.push(end) }
+    else colEnds[col] = end
+
+    placed.push({
+      booking:   b,
+      col,
+      totalCols: 1,
+      topPx:     ((start - JAM_MULAI) / 60) * HOUR_PX,
+      heightPx:  Math.max(((end - start) / 60) * HOUR_PX, 32),
+    })
+  }
+
+  // Hitung totalCols berdasarkan overlap
+  for (const item of placed) {
+    const s1 = timeToMinutes(item.booking.jam_mulai)
+    const e1 = timeToMinutes(item.booking.jam_selesai)
+    item.totalCols = placed
+      .filter(o => timeToMinutes(o.booking.jam_mulai) < e1 && timeToMinutes(o.booking.jam_selesai) > s1)
+      .reduce((max, o) => Math.max(max, o.col), 0) + 1
+  }
+
+  return placed
+}
+
+function getTodayJkt(): string {
+  const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }))
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 }
 
 export default function KalenderClient({ tanggal, bookings }: KalenderClientProps) {
-  const router = useRouter()
+  const router   = useRouter()
+  const todayJkt = getTodayJkt()
+  const isToday  = tanggal === todayJkt
 
   function navDate(days: number) {
-    const d = new Date(tanggal + "T00:00:00")
+    const d  = new Date(tanggal + "T00:00:00")
     d.setDate(d.getDate() + days)
-    // Gunakan komponen lokal agar tidak terjadi pergeseran UTC
     const y  = d.getFullYear()
     const mo = String(d.getMonth() + 1).padStart(2, "0")
     const dy = String(d.getDate()).padStart(2, "0")
     router.push(`/admin/kalender?tanggal=${y}-${mo}-${dy}`)
   }
 
-  // Marker jam untuk header (setiap 1 jam)
-  const hourMarkers: number[] = []
-  for (let m = JAM_MULAI; m <= JAM_SELESAI; m += 60) {
-    hourMarkers.push(m)
-  }
+  const aktifCount = bookings.filter(b => b.status_sesi !== "cancel").length
+  const placed     = placeBookings(bookings)
 
-  // Marker setiap 30 menit untuk grid lines
-  const halfHourMarkers: number[] = []
-  for (let m = JAM_MULAI; m < JAM_SELESAI; m += 30) {
-    halfHourMarkers.push(m)
-  }
+  const statusCounts = bookings.reduce((acc, b) => {
+    acc[b.status_sesi] = (acc[b.status_sesi] ?? 0) + 1
+    return acc
+  }, {} as Record<string, number>)
 
-  const aktifCount = bookings.filter((b) => b.status_sesi !== "cancel").length
+  // Posisi garis "sekarang"
+  const nowJkt  = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }))
+  const nowMin  = nowJkt.getHours() * 60 + nowJkt.getMinutes()
+  const nowTop  = isToday && nowMin >= JAM_MULAI && nowMin <= JAM_SELESAI
+    ? ((nowMin - JAM_MULAI) / 60) * HOUR_PX
+    : null
 
   return (
     <div className="space-y-4">
-      {/* Navigasi tanggal */}
-      <div className="flex items-center justify-between gap-2">
-        <button
-          onClick={() => navDate(-1)}
-          className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Kemarin</span>
-        </button>
 
-        <div className="flex items-center gap-2 text-center">
-          <CalendarDays className="w-4 h-4 text-[#C9A84C] shrink-0" />
-          <div>
-            <p className="font-semibold text-[#0d1f3c] text-sm leading-tight">
-              {formatTanggal(tanggal)}
-            </p>
-            <p className="text-xs text-gray-400">
+      {/* ── Header navigasi ── */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navDate(-1)}
+            className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition shrink-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <div className="flex-1 text-center">
+            <div className="flex items-center justify-center gap-1.5">
+              <CalendarDays className="w-4 h-4 text-[#C9A84C] shrink-0" />
+              <p className="font-bold text-[#0d1f3c]">{formatTanggal(tanggal)}</p>
+              {isToday && (
+                <span className="text-[10px] font-semibold bg-[#C9A84C]/20 text-[#a07c28] px-2 py-0.5 rounded-full">
+                  Hari Ini
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">
               {aktifCount} booking aktif
+              {bookings.length !== aktifCount ? ` · ${bookings.length - aktifCount} cancel` : ""}
             </p>
           </div>
+
+          <button
+            onClick={() => navDate(1)}
+            className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition shrink-0"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
-        <button
-          onClick={() => navDate(1)}
-          className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition"
-        >
-          <span className="hidden sm:inline">Besok</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        {/* Pills status */}
+        {bookings.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-50">
+            {Object.entries(statusCounts).map(([status, count]) => {
+              const cfg = STATUS_CFG[status]
+              if (!cfg) return null
+              return (
+                <span
+                  key={status}
+                  className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
+                  {count}× {cfg.label}
+                </span>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Tombol kembali ke hari ini */}
+        {!isToday && (
+          <div className="mt-3 pt-3 border-t border-gray-50 text-center">
+            <button
+              onClick={() => router.push("/admin/kalender")}
+              className="text-xs font-medium text-[#0d1f3c] hover:underline"
+            >
+              ← Kembali ke Hari Ini
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Timeline */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div style={{ minWidth: 640 }}>
-          {/* Header jam */}
-          <div className="flex border-b border-gray-100 bg-gray-50">
-            <div className="w-28 shrink-0 px-3 py-2 text-[10px] font-medium text-gray-400 uppercase tracking-wide">
-              Client
+      {/* ── Timeline ── */}
+      {bookings.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm py-16 text-center">
+          <CalendarDays className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+          <p className="text-sm font-medium text-gray-500">Tidak ada booking pada tanggal ini</p>
+          <p className="text-xs text-gray-400 mt-1">Selamat istirahat! 😊</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="relative flex" style={{ height: TOTAL_H }}>
+
+            {/* Kolom jam */}
+            <div className="w-14 shrink-0 border-r border-gray-100 relative">
+              {HOURS.map((hour, i) => (
+                <div
+                  key={hour}
+                  className="absolute w-full text-right pr-2"
+                  style={{ top: i * HOUR_PX - 7 }}
+                >
+                  <span className="text-[10px] font-medium text-gray-400 leading-none">
+                    {String(hour).padStart(2, "0")}:00
+                  </span>
+                </div>
+              ))}
             </div>
-            <div className="relative flex-1 py-2">
-              {hourMarkers.map((m) => {
-                const leftPct = ((m - JAM_MULAI) / TOTAL_MENIT) * 100
+
+            {/* Area grid + events */}
+            <div className="flex-1 relative overflow-hidden">
+
+              {/* Garis jam (solid) */}
+              {HOURS.map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute left-0 right-0 border-t border-gray-100"
+                  style={{ top: i * HOUR_PX }}
+                />
+              ))}
+
+              {/* Garis setengah jam (dashed, lebih samar) */}
+              {HOURS.slice(0, -1).map((_, i) => (
+                <div
+                  key={`h${i}`}
+                  className="absolute left-0 right-0 border-t border-dashed border-gray-50"
+                  style={{ top: i * HOUR_PX + HOUR_PX / 2 }}
+                />
+              ))}
+
+              {/* Garis waktu sekarang */}
+              {nowTop !== null && (
+                <div
+                  className="absolute left-0 right-0 z-20 flex items-center"
+                  style={{ top: nowTop }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-red-500 shrink-0 -ml-1" />
+                  <div className="flex-1 border-t border-red-400" />
+                </div>
+              )}
+
+              {/* Booking events */}
+              {placed.map(({ booking, col, totalCols, topPx, heightPx }) => {
+                const cfg      = STATUS_CFG[booking.status_sesi] ?? STATUS_CFG.booked
+                const isCancel = booking.status_sesi === "cancel"
+                const wPct     = 100 / totalCols
+
                 return (
                   <div
-                    key={m}
-                    className="absolute top-0 flex flex-col items-center"
-                    style={{ left: `${leftPct}%`, transform: "translateX(-50%)" }}
+                    key={booking.id}
+                    className={`absolute rounded-lg border-l-[3px] overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${cfg.bg} ${cfg.border} ${isCancel ? "opacity-40" : ""}`}
+                    style={{
+                      top:     topPx + 2,
+                      height:  heightPx - 4,
+                      left:    `calc(${col * wPct}% + 3px)`,
+                      width:   `calc(${wPct}% - 6px)`,
+                      padding: "5px 6px 5px 9px",
+                    }}
+                    title={`${booking.nama_client} · ${booking.jam_mulai.slice(0, 5)}–${booking.jam_selesai.slice(0, 5)} · ${booking.nama_paket}`}
                   >
-                    <span className="text-[10px] text-gray-400 font-medium">
-                      {menit2jam(m)}
-                    </span>
+                    <p className={`text-[11px] font-bold leading-tight truncate ${cfg.text}`}>
+                      {booking.nama_client}
+                    </p>
+
+                    {heightPx >= 46 && (
+                      <p className={`text-[10px] leading-tight truncate mt-0.5 ${cfg.text} opacity-70`}>
+                        {booking.jam_mulai.slice(0, 5)}–{booking.jam_selesai.slice(0, 5)}
+                      </p>
+                    )}
+
+                    {heightPx >= 64 && (
+                      <p className={`text-[10px] leading-tight truncate ${cfg.text} opacity-55`}>
+                        {booking.nama_paket}
+                      </p>
+                    )}
+
+                    {heightPx < 46 && (
+                      <p className={`text-[9px] leading-tight truncate ${cfg.text} opacity-60`}>
+                        {booking.jam_mulai.slice(0, 5)}–{booking.jam_selesai.slice(0, 5)}
+                      </p>
+                    )}
                   </div>
                 )
               })}
-              <div className="h-5" />
             </div>
           </div>
-
-          {/* Baris booking */}
-          {bookings.length === 0 ? (
-            <div className="py-14 text-center">
-              <CalendarDays className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Tidak ada booking pada tanggal ini</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {bookings.map((booking) => {
-                const mulai    = timeToMinutes(booking.jam_mulai)
-                const selesai  = timeToMinutes(booking.jam_selesai)
-                const leftPct  = ((mulai - JAM_MULAI) / TOTAL_MENIT) * 100
-                const widthPct = ((selesai - mulai) / TOTAL_MENIT) * 100
-                const durasi   = selesai - mulai
-                const color    = STATUS_COLOR[booking.status_sesi] ?? "bg-gray-100 border-gray-300 text-gray-700"
-
-                return (
-                  <div key={booking.id} className="flex items-center min-h-[56px] hover:bg-gray-50/50 transition">
-                    {/* Nama client */}
-                    <div className="w-28 shrink-0 px-3 py-2">
-                      <p className="text-xs font-semibold text-gray-800 leading-tight truncate">
-                        {booking.nama_client}
-                      </p>
-                      <p className="text-[10px] text-gray-400 truncate">{booking.kode_booking}</p>
-                    </div>
-
-                    {/* Bar area */}
-                    <div className="relative flex-1 h-12 py-1.5">
-                      {/* Grid lines setiap 30 menit */}
-                      {halfHourMarkers.map((m) => (
-                        <div
-                          key={m}
-                          className="absolute top-0 bottom-0 w-px bg-gray-100"
-                          style={{ left: `${((m - JAM_MULAI) / TOTAL_MENIT) * 100}%` }}
-                        />
-                      ))}
-
-                      {/* Booking bar */}
-                      <div
-                        className={`absolute inset-y-1.5 rounded-lg border-l-[3px] px-2 flex flex-col justify-center overflow-hidden ${color}`}
-                        style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-                        title={`${booking.nama_client} | ${booking.jam_mulai}–${booking.jam_selesai} | ${booking.nama_paket}`}
-                      >
-                        <p className="text-[10px] font-bold leading-tight truncate">
-                          {booking.jam_mulai}–{booking.jam_selesai}
-                        </p>
-                        {durasi >= 60 && (
-                          <p className="text-[10px] leading-tight truncate opacity-75">
-                            {booking.nama_paket}
-                          </p>
-                        )}
-                        <span className="text-[9px] font-medium opacity-60">
-                          {STATUS_LABEL[booking.status_sesi] ?? booking.status_sesi}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-        {Object.entries(STATUS_LABEL).map(([key, label]) => (
+      {/* ── Legend ── */}
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
+        {Object.entries(STATUS_CFG).map(([key, cfg]) => (
           <div key={key} className="flex items-center gap-1.5">
-            <div className={`w-3 h-3 rounded-sm border-l-2 ${STATUS_COLOR[key]}`} />
-            <span className="text-xs text-gray-500">{label}</span>
+            <span className={`w-2.5 h-2.5 rounded-sm ${cfg.dot}`} />
+            <span className="text-xs text-gray-500">{cfg.label}</span>
           </div>
         ))}
       </div>
+
     </div>
   )
 }

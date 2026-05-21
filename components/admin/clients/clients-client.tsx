@@ -194,7 +194,7 @@ export function ClientsClient() {
 
       {/* Tabel */}
       {loading && clients.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm py-16 text-center text-gray-400 text-sm">
           Memuat data client...
         </div>
       ) : (

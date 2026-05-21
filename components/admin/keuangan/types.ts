@@ -1,5 +1,34 @@
 // Tipe data untuk modul laporan keuangan
 
+export interface TransaksiHarian {
+  tanggal: string
+  keterangan: string
+  tipe: "masuk" | "keluar"
+  nominal: number
+  saldo: number
+  kode_booking?: string
+  nama_client?: string
+  kategori?: string
+}
+
+export interface BagiHasil {
+  laba: number
+  persenInvestor: number
+  bagianInvestor: number
+  bagianStudio: number
+  isRugi: boolean
+}
+
+export interface KasStudio {
+  saldoAwal: number
+  totalMasuk: number
+  totalKeluar: number
+  saldoAkhir: number
+  bagiHasil: BagiHasil
+  saldoSetelahBagiHasil: number
+  persenInvestor: number
+}
+
 export interface PengeluaranRow {
   id: string
   tanggal: string
@@ -42,6 +71,17 @@ export interface AddonInsight {
   totalBooking: number
 }
 
+export interface PembayaranRow {
+  id: string
+  kode_booking: string
+  nama_client: string
+  nama_paket: string
+  tipe: "dp" | "pelunasan"
+  nominal: number
+  tanggal: string
+  tgl_foto: string
+}
+
 export interface LaporanData {
   periode: string         // "YYYY-MM"
   pemasukan: {
@@ -75,6 +115,9 @@ export interface LaporanData {
   }
   laba: number
   margin: number
+  kas: KasStudio
+  saldoBerjalan: TransaksiHarian[]
+  pembayaran: PembayaranRow[]
   tren6Bulan: {
     periode: string
     label: string
