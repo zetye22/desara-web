@@ -1,16 +1,14 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Receipt, Repeat, History } from "lucide-react"
-import { TabTetap } from "./tab-tetap"
+import { Receipt, History } from "lucide-react"
 import { TabBulan } from "./tab-bulan"
 import { TabRiwayat } from "./tab-riwayat"
-import type { KategoriPengeluaran, Pengeluaran, PengeluaranTetap } from "./types"
+import type { KategoriPengeluaran, Pengeluaran } from "./types"
 
 const TABS = [
-  { id: "tetap",   label: "Pengeluaran Tetap", icon: Repeat },
-  { id: "bulan",   label: "Bulan Ini",         icon: Receipt },
-  { id: "riwayat", label: "Riwayat",           icon: History },
+  { id: "bulan",   label: "Bulan Ini", icon: Receipt },
+  { id: "riwayat", label: "Riwayat",  icon: History },
 ] as const
 
 type TabId = typeof TABS[number]["id"]
@@ -23,13 +21,10 @@ interface RiwayatBulan {
 }
 
 export function PengeluaranClient() {
-  const [activeTab, setActiveTab] = useState<TabId>("tetap")
+  const [activeTab, setActiveTab] = useState<TabId>("bulan")
 
   // Data kategori (dimuat sekali)
   const [kategoriList, setKategoriList] = useState<KategoriPengeluaran[]>([])
-
-  // Data tab tetap
-  const [posTetap, setPosTetap] = useState<PengeluaranTetap[]>([])
 
   // Data tab bulan
   const bulanSekarang = new Date().toISOString().slice(0, 7)
@@ -48,15 +43,6 @@ export function PengeluaranClient() {
       const res = await fetch("/api/pengeluaran/kategori")
       const data = await res.json()
       if (res.ok) setKategoriList(data.items ?? [])
-    } catch { /* silent */ }
-  }, [])
-
-  // ── Load pos tetap ─────────────────────────────────────────
-  const loadPosTetap = useCallback(async () => {
-    try {
-      const res = await fetch("/api/pengeluaran/tetap")
-      const data = await res.json()
-      if (res.ok) setPosTetap(data.items ?? [])
     } catch { /* silent */ }
   }, [])
 
@@ -128,9 +114,8 @@ export function PengeluaranClient() {
   // ── Initial load ───────────────────────────────────────────
   useEffect(() => {
     loadKategori()
-    loadPosTetap()
     loadBulan(bulanAktif)
-  }, [loadKategori, loadPosTetap, loadBulan, bulanAktif])
+  }, [loadKategori, loadBulan, bulanAktif])
 
   // Load riwayat hanya saat tab aktif
   useEffect(() => {
@@ -143,10 +128,6 @@ export function PengeluaranClient() {
   function handleBulanChange(bulan: string) {
     setBulanAktif(bulan)
     loadBulan(bulan)
-  }
-
-  function handleRefreshTetap() {
-    loadPosTetap()
   }
 
   function handleRefreshBulan() {
@@ -180,14 +161,6 @@ export function PengeluaranClient() {
 
         {/* Tab content */}
         <div className="p-5">
-          {activeTab === "tetap" && (
-            <TabTetap
-              items={posTetap}
-              kategoriList={kategoriList}
-              onRefresh={handleRefreshTetap}
-            />
-          )}
-
           {activeTab === "bulan" && (
             <TabBulan
               items={pengeluaranBulan}

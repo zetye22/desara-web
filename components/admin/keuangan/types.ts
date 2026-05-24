@@ -34,7 +34,7 @@ export interface PengeluaranRow {
   tanggal: string
   kategori: string
   kategori_id?: string | null
-  kategori_pengeluaran?: { id: string; nama: string } | null
+  kategori_pengeluaran?: { id: string; nama: string; tipe?: string } | null
   deskripsi: string | null
   nominal: number
   bulan_periode: string
