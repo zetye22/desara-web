@@ -41,7 +41,6 @@ export function Charts({ data }: ChartsProps) {
   const pieData = [
     { nama: "HPP", value: data.pengeluaran.totalHpp, fill: "#0d1f3c" },
     { nama: "Operasional", value: data.pengeluaran.totalOperasional, fill: "#C9A84C" },
-    { nama: "Lainnya", value: data.pengeluaran.totalLainnya, fill: "#94A3B8" },
   ].filter((d) => d.value > 0)
 
   const totalPengeluaran = data.pengeluaran.total

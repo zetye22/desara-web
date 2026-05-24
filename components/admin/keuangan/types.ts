@@ -107,10 +107,8 @@ export interface LaporanData {
     operasional: {
       biayaTetap: { nama: string; nominal: number }[]
     }
-    lainnya: PengeluaranRow[]
     totalHpp: number
     totalOperasional: number
-    totalLainnya: number
     total: number
   }
   laba: number

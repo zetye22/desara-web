@@ -180,24 +180,6 @@ export function ExportButtons({ data, periode }: ExportButtonsProps) {
       })
       y = lastY() + 8
 
-      // ── 5. Pengeluaran Lainnya ──
-      pdfSection(doc, "5. PENGELUARAN LAINNYA (MANUAL)", y)
-      autoTable(doc, {
-        startY: y + 5,
-        head: [["Tanggal", "Kategori", "Deskripsi", "Nominal"]],
-        body: data.pengeluaran.lainnya.length > 0
-          ? data.pengeluaran.lainnya.map((p) => [p.tanggal, p.kategori, p.deskripsi ?? "—", fmtRupiah(p.nominal)])
-          : [["—", "—", "Tidak ada pengeluaran lainnya", "—"]],
-        ...(data.pengeluaran.lainnya.length > 0 ? {
-          foot: [["Subtotal", "", "", fmtRupiah(data.pengeluaran.totalLainnya)]],
-          footStyles: { fillColor: [240, 240, 240], fontStyle: "bold" },
-        } : {}),
-        theme: "grid",
-        headStyles: { fillColor: [13, 31, 60], textColor: 255, fontStyle: "bold" },
-        columnStyles: { 3: { halign: "right" } },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 9 },
-      })
       y = lastY() + 10
 
       // ── 6. DP & Pelunasan ──
@@ -337,7 +319,6 @@ export function ExportButtons({ data, periode }: ExportButtonsProps) {
         ["Total Pengeluaran",              data.pengeluaran.total],
         ["  - HPP",                        data.pengeluaran.totalHpp],
         ["  - Biaya Tetap",                data.pengeluaran.totalOperasional],
-        ["  - Lain-lain",                  data.pengeluaran.totalLainnya],
         [],
         ["Laba Bersih (Accrual)",          data.laba],
         ["Margin Profit (%)",              parseFloat((data.margin * 100).toFixed(2))],
@@ -410,11 +391,6 @@ export function ExportButtons({ data, periode }: ExportButtonsProps) {
         ["Item", "Nominal (Rp)"],
         ...data.pengeluaran.operasional.biayaTetap.map((b) => [b.nama, b.nominal]),
         ["Subtotal Biaya Tetap", data.pengeluaran.totalOperasional],
-        [],
-        ["=== PENGELUARAN LAINNYA (MANUAL) ==="],
-        ["Tanggal", "Kategori", "Deskripsi", "Nominal (Rp)"],
-        ...data.pengeluaran.lainnya.map((p) => [p.tanggal, p.kategori, p.deskripsi ?? "", p.nominal]),
-        ["Subtotal Lainnya", "", "", data.pengeluaran.totalLainnya],
         [],
         ["TOTAL PENGELUARAN", "", "", data.pengeluaran.total],
       ]), "Pengeluaran")

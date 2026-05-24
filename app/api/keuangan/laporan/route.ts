@@ -40,10 +40,9 @@ function hitungLaporan(
   periode: string,
   addons: AddonRow[] = []
 ): Omit<LaporanData, "tren6Bulan" | "comparison" | "kas" | "saldoBerjalan" | "pembayaran"> {
-  // Split pengeluaran: operasional (Section B) vs lainnya (Section C)
-  const operasionalRows = pengeluaranRows.filter((p) => p.kategori_pengeluaran?.tipe === "operasional")
-  const biayaTetap = operasionalRows.map((p) => ({
-    nama: p.deskripsi ?? p.kategori_pengeluaran?.nama ?? "Operasional",
+  // Semua pengeluaran manual masuk Section B
+  const biayaTetap = pengeluaranRows.map((p) => ({
+    nama: p.deskripsi ?? p.kategori_pengeluaran?.nama ?? "Pengeluaran",
     nominal: p.nominal,
   }))
   // ── Pemasukan ──────────────────────────────────────────────────────────────
@@ -111,9 +110,6 @@ function hitungLaporan(
     jumlahBookingAdaAddon,
     totalBooking: bookings.length,
   }
-
-  // ── Pengeluaran Lainnya: semua entry selain operasional ───────────────────
-  const lainnyaRows = pengeluaranRows.filter((p) => p.kategori_pengeluaran?.tipe !== "operasional")
 
   // ── HPP Fotografer (dari snapshot upah di bookings) ─────────────────────────
   const pgMap = new Map<string, { jumlah: number; total: number }>()
@@ -195,10 +191,7 @@ function hitungLaporan(
   // ── Operasional (dari pengeluaran_tetap aktif di database) ────────────────
   const totalOperasional = biayaTetap.reduce((s, b) => s + b.nominal, 0)
 
-  // ── Pengeluaran Lainnya (non-gaji) ─────────────────────────────────────────
-  const totalLainnya = lainnyaRows.reduce((s, p) => s + p.nominal, 0)
-
-  const totalPengeluaran = totalHpp + totalOperasional + totalLainnya
+  const totalPengeluaran = totalHpp + totalOperasional
 
   // ── Laba & Margin ───────────────────────────────────────────────────────────
   const laba = totalPemasukan - totalPengeluaran
@@ -224,10 +217,8 @@ function hitungLaporan(
       operasional: {
         biayaTetap,
       },
-      lainnya: lainnyaRows,
       totalHpp,
       totalOperasional,
-      totalLainnya,
       total: totalPengeluaran,
     },
     laba,
