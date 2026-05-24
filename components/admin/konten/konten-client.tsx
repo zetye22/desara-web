@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { Star, Plus, Pencil, Trash2, Eye, EyeOff, Loader2, Save, X, ArrowUp, ArrowDown } from "lucide-react"
+import { useRole } from "@/lib/role-context"
 
 interface TestimoniRow {
   id: string
@@ -20,6 +21,7 @@ const EMPTY_FORM = {
 }
 
 export function KontenClient() {
+  const { isAdmin } = useRole()
   const [items, setItems]       = useState<TestimoniRow[]>([])
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -181,13 +183,15 @@ export function KontenClient() {
           <h2 className="text-base font-semibold text-[#0d1f3c]">Testimoni Client</h2>
           <p className="text-xs text-gray-400 mt-0.5">{items.filter((i) => i.aktif).length} aktif ditampilkan</p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 bg-[#0d1f3c] hover:bg-[#1a3a6e] text-white text-sm font-medium px-4 py-2 rounded-xl transition"
-        >
-          <Plus className="w-4 h-4" />
-          Tambah Testimoni
-        </button>
+        {!isAdmin && (
+          <button
+            onClick={openNew}
+            className="flex items-center gap-2 bg-[#0d1f3c] hover:bg-[#1a3a6e] text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+          >
+            <Plus className="w-4 h-4" />
+            Tambah Testimoni
+          </button>
+        )}
       </div>
 
       {/* Form tambah/edit */}
@@ -357,60 +361,62 @@ export function KontenClient() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 shrink-0">
-                  {/* Urutan */}
-                  <button
-                    onClick={() => moveUrutan(item, "up")}
-                    disabled={idx === 0}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition"
-                    title="Naikan urutan"
-                  >
-                    <ArrowUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => moveUrutan(item, "down")}
-                    disabled={idx === sorted.length - 1}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition"
-                    title="Turunkan urutan"
-                  >
-                    <ArrowDown className="w-3.5 h-3.5" />
-                  </button>
+                {!isAdmin && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Urutan */}
+                    <button
+                      onClick={() => moveUrutan(item, "up")}
+                      disabled={idx === 0}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition"
+                      title="Naikan urutan"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => moveUrutan(item, "down")}
+                      disabled={idx === sorted.length - 1}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition"
+                      title="Turunkan urutan"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
 
-                  {/* Toggle aktif */}
-                  <button
-                    onClick={() => toggleAktif(item)}
-                    className={`p-1.5 rounded-lg transition ${
-                      item.aktif
-                        ? "text-green-500 hover:text-green-700 hover:bg-green-50"
-                        : "text-gray-300 hover:text-gray-500 hover:bg-gray-100"
-                    }`}
-                    title={item.aktif ? "Sembunyikan" : "Tampilkan"}
-                  >
-                    {item.aktif ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                  </button>
+                    {/* Toggle aktif */}
+                    <button
+                      onClick={() => toggleAktif(item)}
+                      className={`p-1.5 rounded-lg transition ${
+                        item.aktif
+                          ? "text-green-500 hover:text-green-700 hover:bg-green-50"
+                          : "text-gray-300 hover:text-gray-500 hover:bg-gray-100"
+                      }`}
+                      title={item.aktif ? "Sembunyikan" : "Tampilkan"}
+                    >
+                      {item.aktif ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    </button>
 
-                  {/* Edit */}
-                  <button
-                    onClick={() => openEdit(item)}
-                    className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition"
-                    title="Edit"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
+                    {/* Edit */}
+                    <button
+                      onClick={() => openEdit(item)}
+                      className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
 
-                  {/* Hapus */}
-                  <button
-                    onClick={() => handleDelete(item.id, item.nama)}
-                    disabled={deleting === item.id}
-                    className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-50"
-                    title="Hapus"
-                  >
-                    {deleting === item.id
-                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      : <Trash2 className="w-3.5 h-3.5" />
-                    }
-                  </button>
-                </div>
+                    {/* Hapus */}
+                    <button
+                      onClick={() => handleDelete(item.id, item.nama)}
+                      disabled={deleting === item.id}
+                      className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+                      title="Hapus"
+                    >
+                      {deleting === item.id
+                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        : <Trash2 className="w-3.5 h-3.5" />
+                      }
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

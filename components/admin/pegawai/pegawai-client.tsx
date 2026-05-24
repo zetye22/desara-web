@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, UserX, UserCheck, Printer, MessageCircle, RefreshCw } from "lucide-react"
+import { useRole } from "@/lib/role-context"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
@@ -14,6 +15,7 @@ interface ModalState {
 }
 
 export function PegawaiClient() {
+  const { isAdmin } = useRole()
   const [items, setItems] = useState<PegawaiTetap[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<ModalState | null>(null)
@@ -251,14 +253,16 @@ export function PegawaiClient() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          className="bg-[#0d1f3c] hover:bg-[#1a3561] gap-1.5"
-          onClick={openTambah}
-        >
-          <Plus className="w-4 h-4" />
-          Tambah Pegawai
-        </Button>
+        {!isAdmin && (
+          <Button
+            size="sm"
+            className="bg-[#0d1f3c] hover:bg-[#1a3561] gap-1.5"
+            onClick={openTambah}
+          >
+            <Plus className="w-4 h-4" />
+            Tambah Pegawai
+          </Button>
+        )}
         <Button
           size="sm"
           variant="ghost"
@@ -326,27 +330,31 @@ export function PegawaiClient() {
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => setSlipModal(p)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-                            title="Generate Slip Gaji"
-                          >
-                            <Printer className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => openEdit(p)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#0d1f3c] hover:bg-blue-50 transition-colors"
-                            title="Edit"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleToggleAktif(p)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                            title="Nonaktifkan"
-                          >
-                            <UserX className="w-3.5 h-3.5" />
-                          </button>
+                          {!isAdmin && (
+                            <>
+                              <button
+                                onClick={() => setSlipModal(p)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+                                title="Generate Slip Gaji"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => openEdit(p)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-[#0d1f3c] hover:bg-blue-50 transition-colors"
+                                title="Edit"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleToggleAktif(p)}
+                                className="p-1.5 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                                title="Nonaktifkan"
+                              >
+                                <UserX className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -385,13 +393,15 @@ export function PegawaiClient() {
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => handleToggleAktif(p)}
-                  className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                >
-                  <UserCheck className="w-3.5 h-3.5" />
-                  Aktifkan
-                </button>
+                {!isAdmin && (
+                  <button
+                    onClick={() => handleToggleAktif(p)}
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                    Aktifkan
+                  </button>
+                )}
               </div>
             ))}
           </div>

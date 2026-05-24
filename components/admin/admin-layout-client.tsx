@@ -3,16 +3,19 @@
 import { useState } from "react"
 import { Sidebar } from "./sidebar"
 import { Topbar } from "./topbar"
+import { RoleProvider, type UserRole } from "@/lib/role-context"
 
 interface AdminLayoutClientProps {
   namaAdmin: string
+  role: UserRole
   children: React.ReactNode
 }
 
-export function AdminLayoutClient({ namaAdmin, children }: AdminLayoutClientProps) {
+export function AdminLayoutClient({ namaAdmin, role, children }: AdminLayoutClientProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
+    <RoleProvider role={role}>
     <div className="flex h-screen overflow-hidden bg-[#F8F5F0]">
       {/* Sidebar Desktop — selalu tampil */}
       <div className="hidden lg:flex shrink-0">
@@ -43,5 +46,6 @@ export function AdminLayoutClient({ namaAdmin, children }: AdminLayoutClientProp
         </main>
       </div>
     </div>
+    </RoleProvider>
   )
 }

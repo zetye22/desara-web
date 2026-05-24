@@ -22,9 +22,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .single()
 
   const namaAdmin = profile?.nama ?? user.email ?? "Admin"
+  const role: "owner" | "admin" = profile?.role === "owner" ? "owner" : "admin"
 
   return (
-    <AdminLayoutClient namaAdmin={namaAdmin}>
+    <AdminLayoutClient namaAdmin={namaAdmin} role={role}>
       {children}
     </AdminLayoutClient>
   )

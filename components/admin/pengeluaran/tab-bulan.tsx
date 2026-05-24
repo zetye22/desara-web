@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { ModalPengeluaran } from "./modal-pengeluaran"
 import type { Pengeluaran, KategoriPengeluaran } from "./types"
+import { useRole } from "@/lib/role-context"
 
 interface TabBulanProps {
   items: Pengeluaran[]
@@ -18,6 +19,7 @@ interface TabBulanProps {
 }
 
 export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, onRefresh }: TabBulanProps) {
+  const { isAdmin } = useRole()
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState<Pengeluaran | undefined>(undefined)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -118,14 +120,16 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
-          <Button
-            size="sm"
-            className="bg-[#0d1f3c] hover:bg-[#1a3561] gap-2"
-            onClick={handleTambah}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Tambah</span>
-          </Button>
+          {!isAdmin && (
+            <Button
+              size="sm"
+              className="bg-[#0d1f3c] hover:bg-[#1a3561] gap-2"
+              onClick={handleTambah}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Tambah</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -237,23 +241,25 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
                         {formatRupiah(item.nominal)}
                       </td>
                       <td className="px-5 py-2.5 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => handleEdit(item)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#0d1f3c] hover:bg-blue-50 transition-colors"
-                            title="Edit"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            disabled={deletingId === item.id}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-                            title="Hapus"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        {!isAdmin && (
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-[#0d1f3c] hover:bg-blue-50 transition-colors"
+                              title="Edit"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              disabled={deletingId === item.id}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -298,16 +304,20 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <span className="text-sm font-semibold text-gray-700">{formatRupiah(item.nominal)}</span>
-                      <button onClick={() => handleEdit(item)} className="p-1 text-gray-400 hover:text-[#0d1f3c]">
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        disabled={deletingId === item.id}
-                        className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-50"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {!isAdmin && (
+                        <>
+                          <button onClick={() => handleEdit(item)} className="p-1 text-gray-400 hover:text-[#0d1f3c]">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            disabled={deletingId === item.id}
+                            className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

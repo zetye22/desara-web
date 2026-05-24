@@ -42,8 +42,8 @@ export interface PortfolioCardProps {
   selected: boolean
   onToggleSelect: () => void
   onToggleAktif: () => void
-  onEdit: () => void
-  onDelete: () => void
+  onEdit?: () => void
+  onDelete?: () => void
   // Drag handle props dari dnd-kit (disediakan oleh SortablePortfolioCard di parent)
   dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>
   isDragging?: boolean
@@ -64,12 +64,12 @@ export function PortfolioCard({
 
   const handleDelete = () => {
     setMenuOpen(false)
-    onDelete()
+    onDelete?.()
   }
 
   const handleEdit = () => {
     setMenuOpen(false)
-    onEdit()
+    onEdit?.()
   }
 
   return (
@@ -142,8 +142,8 @@ export function PortfolioCard({
           {item.aktif ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </button>
 
-        {/* Menu titik tiga */}
-        <div className="relative">
+        {/* Menu titik tiga — hanya jika ada aksi */}
+        {(onEdit || onDelete) && <div className="relative">
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v) }}
             className="w-7 h-7 rounded-full flex items-center justify-center bg-black/40 hover:bg-black/60 text-white transition-colors focus:outline-none"
@@ -171,7 +171,7 @@ export function PortfolioCard({
               </button>
             </div>
           )}
-        </div>
+        </div>}
       </div>
 
       {/* Pojok kiri bawah: checkbox bulk select */}

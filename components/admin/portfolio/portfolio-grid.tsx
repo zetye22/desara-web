@@ -19,6 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { toast } from "sonner"
 import { Plus, ImageIcon } from "lucide-react"
+import { useRole } from "@/lib/role-context"
 import { Button } from "@/components/ui/button"
 import { PortfolioCard } from "@/components/admin/portfolio/portfolio-card"
 import { UploadModal } from "@/components/admin/portfolio/upload-modal"
@@ -55,8 +56,8 @@ interface SortablePortfolioCardProps {
   selected: boolean
   onToggleSelect: () => void
   onToggleAktif: () => void
-  onEdit: () => void
-  onDelete: () => void
+  onEdit?: () => void
+  onDelete?: () => void
 }
 
 function SortablePortfolioCard({
@@ -110,6 +111,7 @@ interface PortfolioGridProps {
 }
 
 export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
+  const { isAdmin } = useRole()
   const [items, setItems] = useState<PortfolioRow[]>(initialItems)
   const [filter, setFilter] = useState<FilterKategori>("semua")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -307,13 +309,15 @@ export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
             {items.length} foto · {items.filter((i) => i.aktif).length} aktif
           </p>
         </div>
-        <Button
-          onClick={() => setShowUploadModal(true)}
-          className="rounded-xl bg-[#0d1f3c] hover:bg-[#0d1f3c]/90 text-white gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Upload Foto Baru
-        </Button>
+        {!isAdmin && (
+          <Button
+            onClick={() => setShowUploadModal(true)}
+            className="rounded-xl bg-[#0d1f3c] hover:bg-[#0d1f3c]/90 text-white gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Upload Foto Baru
+          </Button>
+        )}
       </div>
 
       {/* Filter tabs */}
@@ -374,8 +378,8 @@ export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
                   selected={selectedIds.has(item.id)}
                   onToggleSelect={() => toggleSelect(item.id)}
                   onToggleAktif={() => toggleAktif(item.id)}
-                  onEdit={() => setEditItem(item)}
-                  onDelete={() => handleDelete(item.id)}
+                  onEdit={isAdmin ? undefined : () => setEditItem(item)}
+                  onDelete={isAdmin ? undefined : () => handleDelete(item.id)}
                 />
               ))}
             </div>

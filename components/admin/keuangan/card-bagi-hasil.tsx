@@ -5,6 +5,7 @@ import { formatRupiah } from "@/lib/utils"
 import type { KasStudio } from "./types"
 import { Settings2, Loader2, TrendingUp, TrendingDown } from "lucide-react"
 import { toast } from "sonner"
+import { useRole } from "@/lib/role-context"
 
 interface CardBagiHasilProps {
   kas: KasStudio
@@ -13,6 +14,7 @@ interface CardBagiHasilProps {
 }
 
 export function CardBagiHasil({ kas, periode, onRefresh }: CardBagiHasilProps) {
+  const { isAdmin } = useRole()
   const [edit, setEdit]         = useState(false)
   const [saldoInput, setSaldo]  = useState(String(kas.saldoAwal))
   const [pctInput, setPct]      = useState(String(kas.persenInvestor))
@@ -50,12 +52,14 @@ export function CardBagiHasil({ kas, periode, onRefresh }: CardBagiHasilProps) {
         <div>
           <p className="text-xs text-gray-400">Skema bagi hasil: Investor {kas.persenInvestor}% · Studio {100 - kas.persenInvestor}%</p>
         </div>
-        <button
-          onClick={() => { setEdit(!edit); setSaldo(String(kas.saldoAwal)); setPct(String(kas.persenInvestor)) }}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0d1f3c] border border-gray-200 rounded-lg px-3 py-1.5 transition-colors bg-white"
-        >
-          <Settings2 className="w-3.5 h-3.5" /> Atur Kas & Investor
-        </button>
+        {!isAdmin && (
+          <button
+            onClick={() => { setEdit(!edit); setSaldo(String(kas.saldoAwal)); setPct(String(kas.persenInvestor)) }}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0d1f3c] border border-gray-200 rounded-lg px-3 py-1.5 transition-colors bg-white"
+          >
+            <Settings2 className="w-3.5 h-3.5" /> Atur Kas & Investor
+          </button>
+        )}
       </div>
 
       {/* Form Edit */}
