@@ -757,7 +757,7 @@ export default function DetailModal({
       {/* Modal Kirim WA */}
       {showWaModal && (
         <KirimWaModal
-          booking={booking}
+          booking={{ ...booking, dp_dibayar: localDpDibayar }}
           onClose={() => setShowWaModal(false)}
         />
       )}
