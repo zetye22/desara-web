@@ -32,6 +32,20 @@ export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient() as any
 
+  // Cek apakah tanggal ini diblokir sebagai hari libur
+  const { data: liburData } = await supabase
+    .from("tanggal_libur")
+    .select("tanggal, keterangan")
+    .eq("tanggal", tanggal)
+    .maybeSingle()
+
+  if (liburData) {
+    const keterangan: string | null = liburData.keterangan ?? null
+    const alasan = `Studio tutup${keterangan ? ` — ${keterangan}` : ""}`
+    const slots = SLOT_JAM.map((jam) => ({ jam, available: false, alasan, bentrok_dengan: null }))
+    return NextResponse.json({ slots, libur: true, keterangan })
+  }
+
   const { data: bookings, error } = await supabase
     .from("bookings")
     .select("id, kode_booking, jam_mulai, jam_selesai, nama_client")

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import {
-  Package, Plus, Image, Settings, CreditCard, History
+  Package, Plus, Image, Settings, CreditCard, History, CalendarX
 } from "lucide-react"
 import { TabPaket }      from "./tab-paket"
 import { TabAddon }      from "./tab-addon"
@@ -10,15 +10,17 @@ import { TabBackground } from "./tab-background"
 import { TabOperasional } from "./tab-operasional"
 import { TabRekening }   from "./tab-rekening"
 import { TabRiwayat }    from "./tab-riwayat"
+import { TabLibur }      from "./tab-libur"
 import type { SettingsRow, Background } from "./types"
 
 const TABS = [
-  { id: "paket",       label: "Paket Foto",       icon: Package   },
-  { id: "addon",       label: "Add-on",           icon: Plus      },
-  { id: "background",  label: "Background",       icon: Image     },
-  { id: "operasional", label: "Operasional",      icon: Settings  },
+  { id: "paket",       label: "Paket Foto",        icon: Package    },
+  { id: "addon",       label: "Add-on",            icon: Plus       },
+  { id: "background",  label: "Background",        icon: Image      },
+  { id: "operasional", label: "Operasional",       icon: Settings   },
   { id: "rekening",    label: "Rekening & Kontak", icon: CreditCard },
-  { id: "riwayat",     label: "Riwayat",          icon: History   },
+  { id: "libur",       label: "Tgl Libur",         icon: CalendarX  },
+  { id: "riwayat",     label: "Riwayat",           icon: History    },
 ] as const
 
 type TabId = typeof TABS[number]["id"]
@@ -159,6 +161,10 @@ export function SettingsClient({ isOwner }: SettingsClientProps) {
             isOwner={isOwner}
             onRefresh={loadSettings}
           />
+        )}
+
+        {activeTab === "libur" && (
+          <TabLibur isOwner={isOwner} />
         )}
 
         {activeTab === "riwayat" && <TabRiwayat />}

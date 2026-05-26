@@ -94,6 +94,21 @@ export async function POST(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient() as any
 
+  // Validasi tanggal libur sebelum insert
+  const { data: liburCheck } = await supabase
+    .from("tanggal_libur")
+    .select("keterangan")
+    .eq("tanggal", data.tgl_foto)
+    .maybeSingle()
+
+  if (liburCheck) {
+    const detail = liburCheck.keterangan ? ` (${liburCheck.keterangan})` : ""
+    return NextResponse.json(
+      { error: `Studio tutup pada tanggal ini${detail}. Silakan pilih tanggal lain.` },
+      { status: 400 }
+    )
+  }
+
   // Re-cek slot availability sebelum insert (mencegah race condition)
   const { data: existingBookings, error: fetchError } = await supabase
     .from("bookings")

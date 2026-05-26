@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, memo } from "react"
-import { ChevronRight, ChevronLeft, Clock, Loader2 } from "lucide-react"
+import { ChevronRight, ChevronLeft, Clock, Loader2, CalendarX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useBookingStore } from "@/lib/booking-store"
 import { hitungHarga } from "@/lib/harga-booking"
@@ -37,10 +37,12 @@ function MiniKalender({
   selected,
   onSelect,
   minDate,
+  blockedDates,
 }: {
   selected: string | null
   onSelect: (d: string) => void
   minDate: string
+  blockedDates: Set<string>
 }) {
   const now    = new Date()
   const [year, setYear]   = useState(selected ? parseInt(selected.slice(0, 4)) : now.getFullYear())
@@ -104,18 +106,22 @@ function MiniKalender({
           const dateStr  = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
           const isSel    = dateStr === selected
           const isToday  = dateStr === today
-          const isDis    = dateStr < minDate
+          const isLibur  = blockedDates.has(dateStr)
+          const isDis    = dateStr < minDate || isLibur
 
           return (
             <button
               key={dateStr}
               onClick={() => !isDis && onSelect(dateStr)}
               disabled={isDis}
+              title={isLibur ? "Studio tutup" : undefined}
               className={`
                 relative mx-auto flex h-9 w-9 items-center justify-center rounded-full
                 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/50
                 ${isSel
                   ? "bg-[#0d1f3c] text-white shadow-md scale-105"
+                  : isLibur
+                  ? "bg-red-50 text-red-300 cursor-not-allowed line-through"
                   : isDis
                   ? "text-gray-200 cursor-not-allowed"
                   : isToday
@@ -125,7 +131,7 @@ function MiniKalender({
               `}
             >
               {day}
-              {isToday && !isSel && (
+              {isToday && !isSel && !isLibur && (
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C9A84C]" />
               )}
             </button>
@@ -176,25 +182,45 @@ export function Step2PilihJadwal() {
     setTanggal, setJamMulai, nextStep, prevStep,
   } = useBookingStore()
 
-  const [slotStatus, setSlotStatus]   = useState<Record<string, SlotInfo>>({})
-  const [loadingSlot, setLoadingSlot] = useState(false)
+  const [slotStatus, setSlotStatus]     = useState<Record<string, SlotInfo>>({})
+  const [loadingSlot, setLoadingSlot]   = useState(false)
+  const [isLibur, setIsLibur]           = useState(false)
+  const [liburKet, setLiburKet]         = useState<string | null>(null)
+  const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set())
 
   const rincian    = useMemo(() => hitungHarga(paketId, addons, katalog), [paketId, addons, katalog])
-  const bisaLanjut = !!tanggalFoto && !!jamMulai
+  const bisaLanjut = !!tanggalFoto && !!jamMulai && !isLibur
   const minDate    = tomorrowJkt()
+
+  // Fetch daftar tanggal libur sekali saat mount
+  useEffect(() => {
+    fetch("/api/tanggal-libur")
+      .then((r) => r.json())
+      .then((d) => {
+        const set = new Set<string>((d.items ?? []).map((i: { tanggal: string }) => i.tanggal))
+        setBlockedDates(set)
+      })
+      .catch(() => { /* silent */ })
+  }, [])
 
   // Fetch ketersediaan slot
   const fetchSlot = useCallback(async (tanggal: string) => {
     if (!rincian.durasiTotal) return
     setLoadingSlot(true)
     setSlotStatus({})
+    setIsLibur(false)
+    setLiburKet(null)
     try {
       const params = new URLSearchParams({
         tanggal,
         durasi_menit: String(rincian.durasiTotal),
       })
       const res  = await fetch(`/api/bookings/cek-slot?${params}`)
-      const json = await res.json() as { slots?: SlotInfo[] }
+      const json = await res.json() as { slots?: SlotInfo[]; libur?: boolean; keterangan?: string | null }
+      if (json.libur) {
+        setIsLibur(true)
+        setLiburKet(json.keterangan ?? null)
+      }
       if (json.slots) {
         const map: Record<string, SlotInfo> = {}
         json.slots.forEach((s) => { map[s.jam] = s })
@@ -272,7 +298,15 @@ export function Step2PilihJadwal() {
               selected={tanggalFoto}
               onSelect={(d) => { setTanggal(d); setJamMulai("") }}
               minDate={minDate}
+              blockedDates={blockedDates}
             />
+            {/* Legend libur */}
+            {blockedDates.size > 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-red-400 mt-1">
+                <span className="w-3 h-3 rounded-full bg-red-100 border border-red-200 inline-block shrink-0" />
+                Tanggal dicoret = studio tutup
+              </div>
+            )}
           </div>
 
           {/* Tanggal terpilih */}
@@ -303,6 +337,13 @@ export function Step2PilihJadwal() {
             <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-12 flex flex-col items-center gap-2 text-center">
               <Clock className="w-8 h-8 text-gray-300" />
               <p className="text-sm text-gray-400">Pilih tanggal terlebih dahulu</p>
+            </div>
+          ) : isLibur ? (
+            <div className="rounded-2xl border border-red-100 bg-red-50 py-12 flex flex-col items-center gap-2 text-center">
+              <CalendarX className="w-8 h-8 text-red-300" />
+              <p className="text-sm font-semibold text-red-600">Studio Tutup</p>
+              {liburKet && <p className="text-xs text-red-400">{liburKet}</p>}
+              <p className="text-xs text-red-300 mt-1">Silakan pilih tanggal lain</p>
             </div>
           ) : loadingSlot ? (
             <div className="rounded-2xl border border-gray-100 bg-white py-12 flex flex-col items-center gap-2">
