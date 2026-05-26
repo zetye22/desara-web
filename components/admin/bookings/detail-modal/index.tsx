@@ -119,21 +119,32 @@ function labelSesi(status: string) {
   )
 }
 
+// Konversi tanggal + jam WIB ke string UTC untuk Google Calendar
+function toGcalUtc(tglStr: string, jamStr: string): string {
+  // jamStr bisa "10:00" atau "10:00:00" — ambil jam & menit saja
+  const [h, m] = jamStr.split(":").map(Number)
+  const date = new Date(`${tglStr}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00+07:00`)
+  const Y  = date.getUTCFullYear()
+  const Mo = String(date.getUTCMonth() + 1).padStart(2, "0")
+  const D  = String(date.getUTCDate()).padStart(2, "0")
+  const H  = String(date.getUTCHours()).padStart(2, "0")
+  const Mi = String(date.getUTCMinutes()).padStart(2, "0")
+  return `${Y}${Mo}${D}T${H}${Mi}00Z`
+}
+
 // Buat URL Google Calendar dari data booking
 function buildGcalUrl(b: BookingRow): string {
-  const tgl     = b.tgl_foto.replace(/-/g, "")
-  const mulai   = b.jam_mulai.replace(":", "") + "00"
-  const selesai = b.jam_selesai.replace(":", "") + "00"
+  const mulaiUtc   = toGcalUtc(b.tgl_foto, b.jam_mulai)
+  const selesaiUtc = toGcalUtc(b.tgl_foto, b.jam_selesai)
+  const dates      = `${mulaiUtc}/${selesaiUtc}`
 
-  // dates harus pakai "/" literal (bukan %2F) agar Google Calendar bisa parse jam
-  const dates   = `${tgl}T${mulai}/${tgl}T${selesai}`
   const title   = encodeURIComponent(`📸 ${b.nama_client} — ${b.nama_paket}`)
   const details = encodeURIComponent(
     `Kode Booking: ${b.kode_booking}\nClient: ${b.nama_client}\nNo WA: ${b.no_wa}\nPaket: ${b.nama_paket}\nJam: ${b.jam_mulai}–${b.jam_selesai} WIB`
   )
   const location = encodeURIComponent("Desara Home Studio")
 
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}&ctz=Asia%2FJakarta`
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`
 }
 
 export default function DetailModal({
