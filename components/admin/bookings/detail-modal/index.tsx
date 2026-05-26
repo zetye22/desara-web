@@ -121,27 +121,19 @@ function labelSesi(status: string) {
 
 // Buat URL Google Calendar dari data booking
 function buildGcalUrl(b: BookingRow): string {
-  const tgl      = b.tgl_foto.replace(/-/g, "")
-  const mulai    = b.jam_mulai.replace(":", "") + "00"
-  const selesai  = b.jam_selesai.replace(":", "") + "00"
-  const title    = `📸 ${b.nama_client} — ${b.nama_paket}`
-  const details  = [
-    `Kode Booking: ${b.kode_booking}`,
-    `Client: ${b.nama_client}`,
-    `No WA: ${b.no_wa}`,
-    `Paket: ${b.nama_paket}`,
-    `Jam: ${b.jam_mulai}–${b.jam_selesai} WIB`,
-  ].join("\n")
+  const tgl     = b.tgl_foto.replace(/-/g, "")
+  const mulai   = b.jam_mulai.replace(":", "") + "00"
+  const selesai = b.jam_selesai.replace(":", "") + "00"
 
-  const params = new URLSearchParams({
-    action:   "TEMPLATE",
-    text:     title,
-    dates:    `${tgl}T${mulai}/${tgl}T${selesai}`,
-    details,
-    location: "Desara Home Studio",
-    ctz:      "Asia/Jakarta",
-  })
-  return `https://calendar.google.com/calendar/render?${params.toString()}`
+  // dates harus pakai "/" literal (bukan %2F) agar Google Calendar bisa parse jam
+  const dates   = `${tgl}T${mulai}/${tgl}T${selesai}`
+  const title   = encodeURIComponent(`📸 ${b.nama_client} — ${b.nama_paket}`)
+  const details = encodeURIComponent(
+    `Kode Booking: ${b.kode_booking}\nClient: ${b.nama_client}\nNo WA: ${b.no_wa}\nPaket: ${b.nama_paket}\nJam: ${b.jam_mulai}–${b.jam_selesai} WIB`
+  )
+  const location = encodeURIComponent("Desara Home Studio")
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}&ctz=Asia%2FJakarta`
 }
 
 export default function DetailModal({
