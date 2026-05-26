@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { CalendarClock, MessageCircle } from "lucide-react"
+import { CalendarClock, MessageCircle, CalendarPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import TabAddon from "./tab-addon"
@@ -117,6 +117,31 @@ function labelSesi(status: string) {
   return (
     STATUS_SESI_OPTIONS.find((o) => o.value === status)?.label ?? status
   )
+}
+
+// Buat URL Google Calendar dari data booking
+function buildGcalUrl(b: BookingRow): string {
+  const tgl      = b.tgl_foto.replace(/-/g, "")
+  const mulai    = b.jam_mulai.replace(":", "") + "00"
+  const selesai  = b.jam_selesai.replace(":", "") + "00"
+  const title    = `📸 ${b.nama_client} — ${b.nama_paket}`
+  const details  = [
+    `Kode Booking: ${b.kode_booking}`,
+    `Client: ${b.nama_client}`,
+    `No WA: ${b.no_wa}`,
+    `Paket: ${b.nama_paket}`,
+    `Jam: ${b.jam_mulai}–${b.jam_selesai} WIB`,
+  ].join("\n")
+
+  const params = new URLSearchParams({
+    action:   "TEMPLATE",
+    text:     title,
+    dates:    `${tgl}T${mulai}/${tgl}T${selesai}`,
+    details,
+    location: "Desara Home Studio",
+    ctz:      "Asia/Jakarta",
+  })
+  return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
 
 export default function DetailModal({
@@ -290,6 +315,16 @@ export default function DetailModal({
             </h2>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href={buildGcalUrl(booking)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition"
+              title="Tambah ke Google Calendar"
+            >
+              <CalendarPlus className="w-3.5 h-3.5" />
+              G-Cal
+            </a>
             <button
               onClick={() => setShowReschedule(true)}
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 transition"
