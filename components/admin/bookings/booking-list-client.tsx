@@ -3,12 +3,47 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { Download } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { formatRupiah, formatTanggal } from "@/lib/utils"
 import DetailModal from "./detail-modal"
 import { createClient } from "@/lib/supabase/client"
 
 import type { BookingRow } from "./types"
+
+function getDefaultDateFrom() {
+  const d = new Date()
+  d.setDate(d.getDate() - 30)
+  return d.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" })
+}
+
+function exportToCsv(rows: BookingRow[]) {
+  const headers = [
+    "Kode", "Nama Client", "No WA", "Tanggal Foto", "Jam Mulai", "Jam Selesai",
+    "Paket", "Kategori", "Jumlah Orang", "Status Sesi", "Status Bayar",
+    "Total Tagihan", "DP Dibayar",
+  ]
+  const escape = (v: string | number | null | undefined) => {
+    const s = String(v ?? "")
+    return s.includes(",") || s.includes('"') || s.includes("\n")
+      ? `"${s.replace(/"/g, '""')}"`
+      : s
+  }
+  const csvRows = rows.map((b) => [
+    b.kode_booking, b.nama_client, b.no_wa, b.tgl_foto, b.jam_mulai, b.jam_selesai,
+    b.nama_paket, b.kategori_sesi, b.jumlah_orang, b.status_sesi, b.status_pembayaran,
+    b.total_tagihan, b.dp_dibayar,
+  ].map(escape).join(","))
+
+  const csv = [headers.join(","), ...csvRows].join("\r\n")
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement("a")
+  a.href     = url
+  a.download = `booking-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 interface BookingListClientProps {
   initialBookings: BookingRow[]
@@ -107,6 +142,13 @@ export default function BookingListClient({
               `📸 Booking baru masuk: ${data.booking.nama_client} — ${data.booking.kode_booking}`,
               { duration: 7000 }
             )
+            // Browser notification saat tab tidak aktif
+            if (document.hidden && Notification.permission === "granted") {
+              new Notification("📸 Booking Baru Masuk!", {
+                body: `${data.booking.nama_client} — ${data.booking.kode_booking}`,
+                icon: "/favicon.ico",
+              })
+            }
           } else {
             router.refresh()
           }
@@ -148,13 +190,21 @@ export default function BookingListClient({
     return () => { supabase.removeChannel(channel) }
   }, [router])
 
-  // State filter
-  const [search, setSearch]         = useState("")
-  const [dateFrom, setDateFrom]     = useState("")
-  const [dateTo, setDateTo]         = useState("")
-  const [filterSesi, setFilterSesi] = useState("")
+  // State filter — default 30 hari terakhir
+  const [search, setSearch]           = useState("")
+  const [dateFrom, setDateFrom]       = useState(getDefaultDateFrom)
+  const [dateTo, setDateTo]           = useState("")
+  const [filterSesi, setFilterSesi]   = useState("")
   const [filterBayar, setFilterBayar] = useState("")
   const [filterAddon, setFilterAddon] = useState("")
+
+  const isFiltered = dateFrom !== "" || dateTo !== "" || search !== "" || filterSesi !== "" || filterBayar !== "" || filterAddon !== ""
+  const isDefaultRange = dateFrom === getDefaultDateFrom() && dateTo === ""
+
+  // State notifikasi browser
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission | "unsupported">(
+    typeof Notification !== "undefined" ? Notification.permission : "unsupported"
+  )
 
   // State modal
   const [selectedBooking, setSelectedBooking] = useState<BookingRow | null>(null)
@@ -250,6 +300,17 @@ export default function BookingListClient({
         })}
         </div>
 
+        {/* Tombol aktifkan notifikasi */}
+        {notifPerm === "default" && (
+          <button
+            onClick={() => {
+              Notification.requestPermission().then((p) => setNotifPerm(p))
+            }}
+            className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 transition shrink-0"
+          >
+            🔔 Aktifkan notifikasi
+          </button>
+        )}
       </div>
 
       {/* ===== Filter Bar ===== */}
@@ -335,10 +396,33 @@ export default function BookingListClient({
           </div>
         </div>
 
-        {/* Jumlah hasil */}
-        <p className="mt-2 text-xs text-gray-400">
-          Menampilkan {filtered.length} dari {bookings.length} booking
-        </p>
+        {/* Baris bawah: jumlah hasil + aksi */}
+        <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+          <p className="text-xs text-gray-400">
+            Menampilkan {filtered.length} dari {bookings.length} booking
+            {isDefaultRange && (
+              <span className="ml-1">
+                (30 hari terakhir —{" "}
+                <button
+                  onClick={() => setDateFrom("")}
+                  className="text-blue-500 hover:underline"
+                >
+                  tampilkan semua
+                </button>
+                )
+              </span>
+            )}
+          </p>
+          {filtered.length > 0 && (
+            <button
+              onClick={() => exportToCsv(filtered)}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export CSV
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ===== Tabel Desktop ===== */}

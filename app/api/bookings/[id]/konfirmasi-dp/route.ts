@@ -92,6 +92,18 @@ export async function POST(
 
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
+  // Log perubahan pembayaran
+  const { data: profile } = await supabase.from("admin_profiles").select("nama").eq("user_id", user.id).single()
+  await supabase.from("booking_payment_log").insert({
+    booking_id:  params.id,
+    status_lama: "belum_dp",
+    status_baru: statusPembayaran,
+    nominal,
+    catatan:     body.catatan ?? null,
+    admin_id:    user.id,
+    admin_nama:  profile?.nama ?? user.email ?? null,
+  }).then(() => {})
+
   return NextResponse.json({
     success:           true,
     status_pembayaran: statusPembayaran,

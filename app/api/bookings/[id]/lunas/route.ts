@@ -8,16 +8,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Cek autentikasi
-  const {
-    data: { user },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient()).auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const { data: { user } } = await createClient().auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const bookingId = params.id
 
@@ -61,6 +54,17 @@ export async function POST(
       { status: 500 }
     )
   }
+
+  // Log perubahan pembayaran
+  const { data: profile } = await supabase.from("admin_profiles").select("nama").eq("user_id", user.id).single()
+  await supabase.from("booking_payment_log").insert({
+    booking_id:  bookingId,
+    status_lama: booking.status_pembayaran,
+    status_baru: "lunas",
+    metode:      metode ?? null,
+    admin_id:    user.id,
+    admin_nama:  profile?.nama ?? null,
+  }).then(() => {})
 
   return NextResponse.json({
     success: true,

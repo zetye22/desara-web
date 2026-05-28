@@ -7,8 +7,7 @@ import type { BookingRow } from "@/components/admin/bookings/types"
 export const dynamic = "force-dynamic"
 
 export default async function BookingsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // 1. Ambil semua booking (bukan cancel), urut tgl foto terbaru
   const { data: bookings, error: bookingsError } = await supabase
@@ -68,8 +67,7 @@ export default async function BookingsPage() {
   try {
     const {
       data: { user },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } = await (createClient() as any).auth.getUser()
+    } = await createClient().auth.getUser()
 
     if (user) {
       // Coba ambil dari admin_profiles
