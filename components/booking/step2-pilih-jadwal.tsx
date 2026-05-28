@@ -13,11 +13,6 @@ function toJktDateStr(d: Date): string {
   return d.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" })
 }
 function todayJkt() { return toJktDateStr(new Date()) }
-function tomorrowJkt() {
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
-  return toJktDateStr(d)
-}
 
 // ── Slot types ───────────────────────────────────────────────────────────────
 interface SlotInfo {
