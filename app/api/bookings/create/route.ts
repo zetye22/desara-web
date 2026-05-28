@@ -60,6 +60,14 @@ export async function POST(request: NextRequest) {
 
   const data = parsed.data
 
+  // Cetak 12R dan 20R tidak boleh dipilih bersamaan
+  if (data.addons.cetak12R && data.addons.cetak20R) {
+    return NextResponse.json(
+      { error: "Hanya boleh pilih satu opsi cetak (12R atau 20R, tidak bisa keduanya)" },
+      { status: 400 }
+    )
+  }
+
   // Cari paket di server (jangan trust paket_id sembarangan)
   const paket = SEMUA_PAKET.find((p) => p.id === data.paket_id)
   if (!paket) {

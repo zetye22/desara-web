@@ -10,7 +10,7 @@ export async function POST(
   const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  let body: { nominal?: number; catatan?: string }
+  let body: { nominal?: number; catatan?: string; metode?: string }
   try { body = await request.json() } catch {
     return NextResponse.json({ error: "Format tidak valid" }, { status: 400 })
   }
@@ -40,12 +40,13 @@ export async function POST(
     return NextResponse.json({ error: "DP sudah pernah dikonfirmasi" }, { status: 409 })
   }
 
-  // 2. Anti-bentrok: cek slot terhadap booking yang sudah BOOKED (bukan pending)
+  // 2. Anti-bentrok: cek slot terhadap booking BOOKED atau PENDING lain
+  // Include "pending" untuk cegah race condition saat 2 admin confirm DP bersamaan
   const { data: existingBookings } = await supabase
     .from("bookings")
     .select("id, kode_booking, jam_mulai, jam_selesai, nama_client")
     .eq("tgl_foto", booking.tgl_foto)
-    .eq("status_sesi", "booked")          // hanya yang sudah booked
+    .in("status_sesi", ["booked", "pending"])
     .neq("id", params.id)
 
   const mulai   = timeToMinutes(booking.jam_mulai)
@@ -82,6 +83,7 @@ export async function POST(
     updatePayload.tgl_pelunasan = tglDpJkt
   }
   if (body.catatan) updatePayload.catatan = body.catatan
+  if (body.metode) updatePayload.metode_dp = body.metode
 
   const { error: updateErr } = await supabase
     .from("bookings")
@@ -97,6 +99,7 @@ export async function POST(
     status_lama: "belum_dp",
     status_baru: statusPembayaran,
     nominal,
+    metode:      body.metode ?? null,
     catatan:     body.catatan ?? null,
     admin_id:    user.id,
     admin_nama:  profile?.nama ?? user.email ?? null,

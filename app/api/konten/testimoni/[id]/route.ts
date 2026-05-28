@@ -1,18 +1,14 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
-async function requireAdmin() {
-  const { data: { user } } = await createClient().auth.getUser()
-  return user
-}
-
-// PATCH — update testimoni
+// PATCH — update testimoni (owner only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const user = await requireAdmin()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 
@@ -50,13 +46,13 @@ export async function PATCH(
   return NextResponse.json({ success: true, item })
 }
 
-// DELETE — hapus testimoni
+// DELETE — hapus testimoni (owner only)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const user = await requireAdmin()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 

@@ -8,9 +8,11 @@ import { createAdminClient } from "@/lib/supabase/server"
 const CRON_SECRET = process.env.CRON_SECRET
 
 export async function GET(request: NextRequest) {
-  // Verifikasi secret agar tidak bisa dipanggil sembarangan
+  if (!CRON_SECRET) {
+    return NextResponse.json({ error: "CRON_SECRET tidak dikonfigurasi" }, { status: 500 })
+  }
   const authHeader = request.headers.get("authorization")
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

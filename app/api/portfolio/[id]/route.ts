@@ -1,15 +1,14 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
-// PATCH — Edit metadata foto (auth required)
+// PATCH — Edit metadata foto (owner only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
   const { id } = params
 
@@ -41,14 +40,13 @@ export async function PATCH(
   return NextResponse.json({ success: true })
 }
 
-// DELETE — Hapus foto (auth required)
+// DELETE — Hapus foto (owner only)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
   const { id } = params
 

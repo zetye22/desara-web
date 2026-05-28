@@ -11,7 +11,7 @@ export async function PATCH(
   const guard = await requireAdmin()
   if (guard) return guard
 
-  let body: { status_sesi?: string; status_pembayaran?: string; dp_dibayar?: number }
+  let body: { status_sesi?: string; status_pembayaran?: string }
   try {
     body = await request.json()
   } catch {
@@ -22,10 +22,16 @@ export async function PATCH(
     return NextResponse.json({ error: "Status tidak valid" }, { status: 400 })
   }
 
+  // Blokir update status_pembayaran via endpoint ini — gunakan /konfirmasi-dp atau /lunas
+  if (body.status_pembayaran) {
+    return NextResponse.json(
+      { error: "Gunakan endpoint /konfirmasi-dp atau /lunas untuk update status pembayaran" },
+      { status: 400 }
+    )
+  }
+
   const updateData: Record<string, unknown> = {}
-  if (body.status_sesi)                     updateData.status_sesi       = body.status_sesi
-  if (body.status_pembayaran)               updateData.status_pembayaran = body.status_pembayaran
-  if (typeof body.dp_dibayar === "number")  updateData.dp_dibayar        = body.dp_dibayar
+  if (body.status_sesi) updateData.status_sesi = body.status_sesi
 
   if (Object.keys(updateData).length === 0) {
     return NextResponse.json({ error: "Tidak ada field yang diupdate" }, { status: 400 })

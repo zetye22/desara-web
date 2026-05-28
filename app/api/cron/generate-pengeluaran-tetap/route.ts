@@ -5,9 +5,12 @@ import { createAdminClient } from "@/lib/supabase/server"
 // Dipanggil Vercel Cron tanggal 1 setiap bulan jam 00:05 WIB (17:05 UTC hari sebelumnya)
 // Auto-generate pengeluaran tetap ke bulan baru
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization")
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    return NextResponse.json({ error: "CRON_SECRET tidak dikonfigurasi" }, { status: 500 })
+  }
+  const authHeader = request.headers.get("authorization")
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

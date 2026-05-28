@@ -63,6 +63,10 @@ export function Step4Konfirmasi() {
       toast.error("Data booking tidak lengkap. Mohon ulangi dari awal.")
       return
     }
+    if (store.backgroundDipilih.length === 0) {
+      toast.error("Pilih minimal 1 background. Kembali ke langkah sebelumnya.")
+      return
+    }
 
     setLoading(true)
     try {
@@ -119,9 +123,12 @@ export function Step4Konfirmasi() {
           const fd = new FormData()
           fd.append("file", fileBukti)
           fd.append("kode_booking", json.kode_booking)
-          await fetch("/api/bookings/upload-bukti", { method: "POST", body: fd })
+          const uploadRes = await fetch("/api/bookings/upload-bukti", { method: "POST", body: fd })
+          if (!uploadRes.ok) {
+            toast.warning("Booking berhasil tapi bukti transfer gagal terupload. Kirim ulang via WhatsApp ke admin ya.")
+          }
         } catch {
-          // Upload gagal tidak batalkan booking
+          toast.warning("Booking berhasil tapi bukti transfer gagal terupload. Kirim ulang via WhatsApp ke admin ya.")
         }
       }
 
