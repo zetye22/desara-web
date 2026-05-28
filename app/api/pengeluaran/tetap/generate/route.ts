@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 
 function labelBulanStr(bulan: string): string {
@@ -10,11 +10,9 @@ function labelBulanStr(bulan: string): string {
 // POST — generate pengeluaran tetap + gaji pegawai untuk satu bulan
 // Body: { bulan: "YYYY-MM" }
 export async function POST(request: NextRequest) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   let body: unknown

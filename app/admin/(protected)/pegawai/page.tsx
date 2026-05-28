@@ -8,8 +8,7 @@ export const metadata: Metadata = {
 }
 
 export default async function PegawaiPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) redirect("/admin/login")
 
   return (

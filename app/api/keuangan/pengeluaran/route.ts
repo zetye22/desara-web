@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 
 // Kategori pengeluaran yang valid
@@ -8,11 +8,9 @@ type KategoriPengeluaran = typeof KATEGORI_VALID[number]
 // GET — List pengeluaran untuk satu periode: ?periode=YYYY-MM
 export async function GET(request: NextRequest) {
   // Cek autentikasi
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   const { searchParams } = new URL(request.url)
@@ -38,11 +36,9 @@ export async function GET(request: NextRequest) {
 // POST — Tambah pengeluaran baru
 export async function POST(request: NextRequest) {
   // Cek autentikasi
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   let body: unknown

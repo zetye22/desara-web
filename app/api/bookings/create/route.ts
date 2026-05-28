@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createBookingSchema } from "@/lib/booking-server-schema"
 import { SEMUA_PAKET } from "@/lib/constants"
@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Tanggal foto tidak boleh di masa lalu" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   // Validasi tanggal libur sebelum insert

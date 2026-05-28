@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 
 // GET — list clients dengan filter + pagination
@@ -7,11 +7,9 @@ import { createAdminClient, createClient } from "@/lib/supabase/server"
 // &inactive_bulan=3  &blacklist=false|true
 // &page=1  &limit=30  &sort=total_spending&order=desc
 export async function GET(request: NextRequest) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const p = new URL(request.url).searchParams
 

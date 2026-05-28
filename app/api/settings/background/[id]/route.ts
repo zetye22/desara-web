@@ -1,26 +1,16 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
-
-async function checkOwner(userId: string, supabase: unknown) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("admin_profiles").select("role").eq("user_id", userId).single()
-  return data?.role === "owner"
-}
+import { createAdminClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
-  if (!await checkOwner(user.id, supabase)) {
-    return NextResponse.json({ error: "Hanya Owner yang bisa mengubah pengaturan" }, { status: 403 })
-  }
 
   let body: unknown
   try { body = await request.json() } catch {
@@ -59,18 +49,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
-  if (!await checkOwner(user.id, supabase)) {
-    return NextResponse.json({ error: "Hanya Owner yang bisa mengubah pengaturan" }, { status: 403 })
-  }
 
   const { error } = await supabase.from("studio_backgrounds").delete().eq("id", params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ found: false })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const variants = normalisasiWa(no_wa)
 

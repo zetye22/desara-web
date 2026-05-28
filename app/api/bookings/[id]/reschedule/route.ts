@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 import { timeToMinutes, minutesToTime } from "@/lib/time-utils"
 
@@ -6,8 +6,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   let body: {
@@ -26,7 +25,6 @@ export async function PATCH(
     return NextResponse.json({ error: "tgl_foto_baru dan jam_mulai_baru wajib diisi" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   // 1. Ambil booking saat ini

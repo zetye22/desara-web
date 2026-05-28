@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 
 // PATCH — Update urutan portfolio secara bulk (auth required)
 export async function PATCH(request: NextRequest) {
   // Cek autentikasi
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   let body: { items: { id: string; urutan: number }[] }
@@ -20,7 +19,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Items wajib diisi" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   // Update setiap row secara sequential

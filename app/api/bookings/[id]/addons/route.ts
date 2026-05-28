@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 
@@ -19,15 +19,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   // Cek autentikasi
-  const {
-    data: { user },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const bookingId = params.id
 
@@ -54,15 +50,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   // Cek autentikasi
-  const {
-    data: { user },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const bookingId = params.id
 

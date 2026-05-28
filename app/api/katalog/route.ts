@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic"
+﻿export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
@@ -28,7 +28,6 @@ const DEFAULT_ADDON: AddonKatalog = {
 }
 
 export async function GET() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   const [settingsRes, bgRes] = await Promise.all([

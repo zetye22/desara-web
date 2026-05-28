@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 
@@ -7,11 +7,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { key: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   const { data: profile } = await supabase
@@ -34,12 +32,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { key: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // Cek role — hanya owner yang bisa update settings
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   const { data: profile } = await supabase

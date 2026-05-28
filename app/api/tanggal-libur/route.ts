@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { requireOwner } from "@/lib/auth-server"
 
 export async function GET() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("tanggal_libur")

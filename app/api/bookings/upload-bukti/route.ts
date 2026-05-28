@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024  // 5 MB
@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Format kode booking tidak valid" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   // Pastikan booking ada
