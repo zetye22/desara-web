@@ -232,30 +232,26 @@ function AddOnPicker() {
         </div>
 
         {/* Cetak */}
-        {!paket.cetakInclude && (
-          <>
-            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white">
-              <div>
-                <p className="text-sm font-medium text-gray-700">{addonData.cetak12R.nama}</p>
-                <p className="text-xs text-gray-400">{formatRupiah(addonData.cetak12R.harga)} / lembar</p>
-              </div>
-              <Counter value={addons.cetak12R} min={0} max={10} onChange={(v) => setAddon("cetak12R", v)} />
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white">
-              <div>
-                <p className="text-sm font-medium text-gray-700">{addonData.cetak20R.nama}</p>
-                <p className="text-xs text-gray-400">{formatRupiah(addonData.cetak20R.harga)} / lembar</p>
-              </div>
-              <Counter value={addons.cetak20R} min={0} max={10} onChange={(v) => setAddon("cetak20R", v)} />
-            </div>
-          </>
-        )}
         {paket.cetakInclude && (
           <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
             <Check className="w-4 h-4 shrink-0" />
             Paket ini sudah include Cetak {paket.cetakInclude} + Frame
           </div>
         )}
+        <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white">
+          <div>
+            <p className="text-sm font-medium text-gray-700">{addonData.cetak12R.nama}</p>
+            <p className="text-xs text-gray-400">{formatRupiah(addonData.cetak12R.harga)} / lembar</p>
+          </div>
+          <Counter value={addons.cetak12R} min={0} max={10} onChange={(v) => setAddon("cetak12R", v)} />
+        </div>
+        <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white">
+          <div>
+            <p className="text-sm font-medium text-gray-700">{addonData.cetak20R.nama}</p>
+            <p className="text-xs text-gray-400">{formatRupiah(addonData.cetak20R.harga)} / lembar</p>
+          </div>
+          <Counter value={addons.cetak20R} min={0} max={10} onChange={(v) => setAddon("cetak20R", v)} />
+        </div>
       </div>
     </div>
   )

@@ -190,7 +190,7 @@ export function Step2PilihJadwal() {
 
   const rincian    = useMemo(() => hitungHarga(paketId, addons, katalog), [paketId, addons, katalog])
   const bisaLanjut = !!tanggalFoto && !!jamMulai && !isLibur
-  const minDate    = tomorrowJkt()
+  const minDate    = todayJkt()
 
   // Fetch daftar tanggal libur sekali saat mount
   useEffect(() => {
