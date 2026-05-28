@@ -298,55 +298,55 @@ export default function DetailModal({
   return (
     // Overlay
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4"
       onClick={onClose}
     >
       {/* Modal */}
       <div
-        className="relative flex h-full max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="relative flex h-full max-h-[96vh] sm:max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4"
           style={{ backgroundColor: "#0d1f3c" }}
         >
-          <div>
+          <div className="min-w-0 flex-1 mr-2">
             <p className="text-xs text-white/60">Detail Booking</p>
-            <h2 className="text-lg font-bold text-white">
+            <h2 className="text-base sm:text-lg font-bold text-white truncate">
               {booking.kode_booking}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <a
               href={buildGcalUrl(booking)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-xs font-medium bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition"
               title="Tambah ke Google Calendar"
             >
-              <CalendarPlus className="w-3.5 h-3.5" />
-              G-Cal
+              <CalendarPlus className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">G-Cal</span>
             </a>
             <button
               onClick={() => setShowReschedule(true)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 transition"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-xs font-medium bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 transition"
               title="Reschedule booking"
             >
-              <CalendarClock className="w-3.5 h-3.5" />
-              Reschedule
+              <CalendarClock className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Reschedule</span>
             </button>
             <button
               onClick={() => setShowWaModal(true)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-green-500/20 text-green-300 hover:bg-green-500/30 transition"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-xs font-medium bg-green-500/20 text-green-300 hover:bg-green-500/30 transition"
               title="Kirim WhatsApp"
             >
-              <MessageCircle className="w-3.5 h-3.5" />
-              Kirim WA
+              <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Kirim WA</span>
             </button>
             <button
               onClick={onClose}
-              className="rounded-full p-1 text-white/70 transition hover:text-white"
+              className="rounded-full p-1.5 text-white/70 transition hover:text-white ml-0.5"
               aria-label="Tutup"
             >
               ✕
@@ -355,13 +355,13 @@ export default function DetailModal({
         </div>
 
         {/* Tab bar — horizontal scroll */}
-        <div className="overflow-x-auto border-b bg-gray-50">
-          <div className="flex min-w-max gap-1 px-4 py-2">
+        <div className="overflow-x-auto border-b bg-gray-50 scrollbar-none">
+          <div className="flex min-w-max gap-0.5 sm:gap-1 px-3 sm:px-4 py-2">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition whitespace-nowrap ${
+                className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition whitespace-nowrap min-h-[36px] ${
                   activeTab === tab.id
                     ? "text-white shadow-sm"
                     : "text-gray-500 hover:bg-gray-200"

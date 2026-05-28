@@ -288,10 +288,10 @@ export default function BookingListClient({
       </div>
 
       {/* ===== Filter Bar ===== */}
-      <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="rounded-xl border border-gray-100 bg-white p-3 sm:p-4 shadow-sm">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-6">
           {/* Pencarian */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <Input
               placeholder="Cari nama / kode..."
               value={search}
@@ -302,22 +302,24 @@ export default function BookingListClient({
 
           {/* Tanggal dari */}
           <div>
+            <label className="block text-[10px] font-medium text-gray-400 mb-0.5 lg:hidden">Dari tanggal</label>
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full rounded-lg border border-gray-200 bg-white px-2 sm:px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
               title="Tanggal dari"
             />
           </div>
 
           {/* Tanggal sampai */}
           <div>
+            <label className="block text-[10px] font-medium text-gray-400 mb-0.5 lg:hidden">Sampai tanggal</label>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full rounded-lg border border-gray-200 bg-white px-2 sm:px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
               title="Tanggal sampai"
             />
           </div>
@@ -327,7 +329,7 @@ export default function BookingListClient({
             <select
               value={filterSesi}
               onChange={(e) => setFilterSesi(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full rounded-lg border border-gray-200 bg-white px-2 sm:px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
             >
               <option value="">Semua Status Sesi</option>
               <option value="pending">Pending</option>
@@ -344,7 +346,7 @@ export default function BookingListClient({
             <select
               value={filterBayar}
               onChange={(e) => setFilterBayar(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full rounded-lg border border-gray-200 bg-white px-2 sm:px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
             >
               <option value="">Semua Status Bayar</option>
               <option value="belum_dp">Belum DP</option>
@@ -354,11 +356,11 @@ export default function BookingListClient({
           </div>
 
           {/* Filter add-on */}
-          <div>
+          <div className="col-span-2 lg:col-span-1">
             <select
               value={filterAddon}
               onChange={(e) => setFilterAddon(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+              className="w-full rounded-lg border border-gray-200 bg-white px-2 sm:px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
             >
               <option value="">Semua Add-on</option>
               <option value="ada_lapangan">Ada Add-on Lapangan</option>

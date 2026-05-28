@@ -10,7 +10,7 @@ export function KpiCards({ data }: { data: KpiData }) {
     : Math.round(((data.bookingMingguIni - data.bookingMingguLalu) / data.bookingMingguLalu) * 100)
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {/* Card 1: Booking Hari Ini */}
       <KpiCard
         icon={<CalendarDays className="w-5 h-5" />}
@@ -111,14 +111,14 @@ function KpiCard({
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className={`h-1 w-full ${accentBar[color]}`} />
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{label}</p>
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg[color]}`}>
+      <div className="p-3.5 sm:p-5">
+        <div className="flex items-start justify-between mb-2">
+          <p className="text-[10px] sm:text-xs text-gray-400 font-medium uppercase tracking-wide leading-tight">{label}</p>
+          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 ml-1 ${iconBg[color]}`}>
             {icon}
           </div>
         </div>
-        <p className="text-2xl font-bold text-[#0d1f3c] leading-tight mb-1 truncate">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold text-[#0d1f3c] leading-tight mb-1 truncate">{value}</p>
         <div className={`flex items-center gap-1 text-xs ${subCls[subtitleColor]}`}>
           {subtitleIcon}
           <span>{subtitle}</span>

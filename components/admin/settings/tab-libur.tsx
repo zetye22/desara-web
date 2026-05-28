@@ -105,34 +105,36 @@ export function TabLibur({ isOwner }: TabLiburProps) {
         {isOwner && (
           <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 mb-5">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Tambah Tanggal Libur</p>
-            <div className="flex flex-wrap gap-3 items-end">
-              <div>
-                <label className="text-xs text-gray-500 font-medium block mb-1">Tanggal *</label>
-                <input
-                  type="date"
-                  value={tanggalInput}
-                  min={today}
-                  onChange={(e) => setTanggal(e.target.value)}
-                  className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500 font-medium block mb-1">Keterangan (opsional)</label>
-                <input
-                  type="text"
-                  value={keteranganInput}
-                  onChange={(e) => setKet(e.target.value)}
-                  placeholder="cth: Libur Lebaran, Maintenance..."
-                  className="h-9 w-56 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
-                />
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500 font-medium block mb-1">Tanggal *</label>
+                  <input
+                    type="date"
+                    value={tanggalInput}
+                    min={today}
+                    onChange={(e) => setTanggal(e.target.value)}
+                    className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 font-medium block mb-1">Keterangan (opsional)</label>
+                  <input
+                    type="text"
+                    value={keteranganInput}
+                    onChange={(e) => setKet(e.target.value)}
+                    placeholder="cth: Libur Lebaran, Maintenance..."
+                    className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d1f3c]/20"
+                  />
+                </div>
               </div>
               <button
                 onClick={handleAdd}
                 disabled={saving || !tanggalInput}
-                className="h-9 px-4 bg-[#0d1f3c] text-white text-sm rounded-lg font-medium hover:bg-[#162d56] disabled:opacity-50 flex items-center gap-1.5"
+                className="h-10 w-full sm:w-auto px-5 bg-[#0d1f3c] text-white text-sm rounded-lg font-medium hover:bg-[#162d56] disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                Tambah
+                Tambah Tanggal Libur
               </button>
             </div>
           </div>
