@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server"
 export async function PATCH(request: NextRequest) {
   // Cek autentikasi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   let body: { items: { id: string; urutan: number }[] }
@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Update setiap row secara sequential
   for (const { id, urutan } of body.items) {

@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic"
 // POST — perbaiki bukti_transfer_url lama yang masih berupa path relatif
 export async function POST() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Ambil semua booking yang punya bukti_transfer_url tapi bukan URL lengkap
   const { data: bookings, error } = await supabase

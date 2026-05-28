@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { RefreshCw, DatabaseZap } from "lucide-react"
 import { toast } from "sonner"
+import { useConfirm } from "@/hooks/use-confirm"
 import { Button } from "@/components/ui/button"
 import { InsightsCards } from "./insights-cards"
 import { ClientFilters } from "./filters"
@@ -14,6 +15,7 @@ import type { Client, Insights, FilterState } from "./types"
 import { DEFAULT_FILTERS } from "./types"
 
 export function ClientsClient() {
+  const { confirm, ConfirmDialog } = useConfirm()
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
   const [clients, setClients] = useState<Client[]>([])
   const [total, setTotal] = useState(0)
@@ -123,7 +125,8 @@ export function ClientsClient() {
   }
 
   async function handleDelete(id: string, nama: string) {
-    if (!window.confirm(`Hapus client "${nama}" secara permanen? Data booking tetap tersimpan.`)) return
+    const ok = await confirm({ title: "Hapus Client?", message: `Hapus client "${nama}" secara permanen? Data booking tetap tersimpan.` })
+    if (!ok) return
     const res = await fetch(`/api/clients/${id}?mode=hard`, { method: "DELETE" })
     if (res.ok) {
       setClients((prev) => prev.filter((c) => c.id !== id))
@@ -140,7 +143,7 @@ export function ClientsClient() {
       if (res.ok) {
         await fetchClients()
         await fetchInsights()
-        alert(`Sinkronisasi selesai — ${data.updated} client diperbarui.`)
+        toast.success(`Sinkronisasi selesai — ${data.updated} client diperbarui.`)
       }
     } finally {
       setSyncing(false)
@@ -221,7 +224,7 @@ export function ClientsClient() {
           onDeleted={handleClientDeleted}
         />
       )}
-
+      <ConfirmDialog />
     </div>
   )
 }

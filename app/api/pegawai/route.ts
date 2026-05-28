@@ -6,11 +6,11 @@ import { createAdminClient, createClient } from "@/lib/supabase/server"
 // GET — list semua pegawai tetap
 export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from("pegawai_tetap")
@@ -26,11 +26,11 @@ export async function GET() {
 // POST — tambah pegawai baru
 export async function POST(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   let body: unknown
   try { body = await request.json() } catch {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Trash2, CalendarX, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { ConfirmModal } from "@/components/ui/confirm-modal"
 
 interface TanggalLibur {
   id: string
@@ -30,6 +31,7 @@ export function TabLibur({ isOwner }: TabLiburProps) {
   const [keteranganInput, setKet]   = useState("")
   const [saving, setSaving]         = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmItem, setConfirmItem] = useState<TanggalLibur | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -67,7 +69,6 @@ export function TabLibur({ isOwner }: TabLiburProps) {
   }
 
   async function handleDelete(item: TanggalLibur) {
-    if (!confirm(`Hapus libur tanggal ${formatTanggal(item.tanggal)}?`)) return
     setDeletingId(item.id)
     try {
       const res = await fetch(`/api/tanggal-libur/${item.tanggal}`, { method: "DELETE" })
@@ -169,7 +170,7 @@ export function TabLibur({ isOwner }: TabLiburProps) {
                 </div>
                 {isOwner && (
                   <button
-                    onClick={() => handleDelete(item)}
+                    onClick={() => setConfirmItem(item)}
                     disabled={deletingId === item.id}
                     className="p-1.5 rounded-lg text-red-300 hover:text-red-600 hover:bg-red-100 transition"
                     title="Hapus"
@@ -216,6 +217,18 @@ export function TabLibur({ isOwner }: TabLiburProps) {
           </details>
         )}
       </div>
+      {/* Konfirmasi hapus */}
+      <ConfirmModal
+        open={!!confirmItem}
+        title="Hapus Tanggal Libur?"
+        message={confirmItem ? `${formatTanggal(confirmItem.tanggal)} akan dihapus dari daftar libur. Client akan bisa booking di tanggal ini kembali.` : ""}
+        confirmLabel="Ya, Hapus"
+        onConfirm={() => {
+          if (confirmItem) handleDelete(confirmItem)
+          setConfirmItem(null)
+        }}
+        onCancel={() => setConfirmItem(null)}
+      />
     </div>
   )
 }

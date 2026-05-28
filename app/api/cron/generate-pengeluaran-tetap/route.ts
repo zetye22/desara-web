@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   const bulan = jakartaDate.toISOString().slice(0, 7) // "YYYY-MM"
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const { data: posTetap, error: errTetap } = await supabase
     .from("pengeluaran_tetap")

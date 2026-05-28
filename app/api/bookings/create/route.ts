@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Validasi tanggal libur sebelum insert
   const { data: liburCheck } = await supabase

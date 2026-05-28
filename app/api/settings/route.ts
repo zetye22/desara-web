@@ -4,11 +4,11 @@ import { createAdminClient, createClient } from "@/lib/supabase/server"
 // GET — semua settings, opsional filter ?kategori=paket
 export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { searchParams } = new URL(request.url)
   const kategori = searchParams.get("kategori")
 

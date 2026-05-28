@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
   // Cek autentikasi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = params
@@ -30,7 +30,7 @@ export async function PATCH(
   updateData.updated_at = new Date().toISOString()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { error } = await supabase
     .from("portfolio")
     .update(updateData)
@@ -50,13 +50,13 @@ export async function DELETE(
 ) {
   // Cek autentikasi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = params
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Ambil image_url dari DB untuk hapus dari storage
   const { data: row } = await supabase

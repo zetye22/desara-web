@@ -8,6 +8,7 @@ import { formatRupiah } from "@/lib/utils"
 import { ModalPengeluaran } from "./modal-pengeluaran"
 import type { Pengeluaran, KategoriPengeluaran } from "./types"
 import { useRole } from "@/lib/role-context"
+import { useConfirm } from "@/hooks/use-confirm"
 
 interface TabBulanProps {
   items: Pengeluaran[]
@@ -20,6 +21,7 @@ interface TabBulanProps {
 
 export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, onRefresh }: TabBulanProps) {
   const { isAdmin } = useRole()
+  const { confirm, ConfirmDialog } = useConfirm()
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState<Pengeluaran | undefined>(undefined)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -58,7 +60,8 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Yakin ingin menghapus pengeluaran ini?")) return
+    const ok = await confirm({ title: "Hapus Pengeluaran?", message: "Pengeluaran ini akan dihapus secara permanen." })
+    if (!ok) return
     setDeletingId(id)
     try {
       const res = await fetch(`/api/pengeluaran/${id}`, { method: "DELETE" })
@@ -341,6 +344,7 @@ export function TabBulan({ items, kategoriList, bulan, loading, onBulanChange, o
           onSuccess={onRefresh}
         />
       )}
+      <ConfirmDialog />
     </div>
   )
 }

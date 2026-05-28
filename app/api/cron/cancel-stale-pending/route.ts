@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Cek waktu auto-cancel dari settings (default 24 jam)
   const { data: settingData } = await supabase

@@ -11,7 +11,7 @@ export async function PATCH(
   // Hanya admin yang bisa update status
   const supabaseAuth = createClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (supabaseAuth as any).auth.getUser()
+  const { data: { user } } = await (supabaseAuth).auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -37,7 +37,7 @@ export async function PATCH(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { error } = await supabase
     .from("bookings")
     .update(updateData)

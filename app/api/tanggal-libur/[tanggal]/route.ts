@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
 export async function DELETE(
   _: NextRequest,
   { params }: { params: { tanggal: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
   const { tanggal } = params
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { error } = await supabase
     .from("tanggal_libur")
     .delete()

@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Eye, EyeOff, Check, X } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import type { Background } from "./types"
+import { useConfirm } from "@/hooks/use-confirm"
 
 interface TabBackgroundProps {
   items: Background[]
@@ -19,6 +20,7 @@ interface EditState {
 }
 
 export function TabBackground({ items, isOwner, onRefresh }: TabBackgroundProps) {
+  const { confirm, ConfirmDialog } = useConfirm()
   const [editState, setEditState] = useState<EditState | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -82,7 +84,8 @@ export function TabBackground({ items, isOwner, onRefresh }: TabBackgroundProps)
   }
 
   async function handleDelete(bg: Background) {
-    if (!window.confirm(`Hapus background "${bg.nama}"? Tindakan ini tidak bisa dibatalkan.`)) return
+    const ok = await confirm({ title: "Hapus Background?", message: `Hapus background "${bg.nama}"? Tindakan ini tidak bisa dibatalkan.` })
+    if (!ok) return
     try {
       const res = await fetch(`/api/settings/background/${bg.id}`, { method: "DELETE" })
       const data = await res.json()
@@ -177,6 +180,8 @@ export function TabBackground({ items, isOwner, onRefresh }: TabBackgroundProps)
           </div>
         </div>
       )}
+
+      <ConfirmDialog />
 
       {/* Modal Edit / Tambah */}
       {editState && (

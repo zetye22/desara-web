@@ -29,7 +29,7 @@ const DEFAULT_ADDON: AddonKatalog = {
 
 export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const [settingsRes, bgRes] = await Promise.all([
     supabase.from("settings").select("key, value").or("key.like.paket_%,key.like.addon_%"),

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import type { SettingsRow, PaketValue } from "./types"
 import { CETAK_OPTIONS } from "./types"
+import { useConfirm } from "@/hooks/use-confirm"
 
 const KATEGORI_OPTIONS = [
   { value: "wisuda",   label: "Wisuda" },
@@ -124,6 +125,7 @@ function PaketCard({ row, isOwner, onEdit, onDelete }: {
 }
 
 export function TabPaket({ items, isOwner, onRefresh }: TabPaketProps) {
+  const { confirm, ConfirmDialog } = useConfirm()
   const [modal, setModal] = useState<ModalState | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -171,7 +173,11 @@ export function TabPaket({ items, isOwner, onRefresh }: TabPaketProps) {
   }
 
   async function handleDelete(key: string, nama: string) {
-    if (!window.confirm(`Hapus paket "${nama}"?\n\nPaket akan hilang dari halaman booking. Booking yang sudah masuk tidak terpengaruh.`)) return
+    const ok = await confirm({
+      title: "Hapus Paket?",
+      message: `Paket "${nama}" akan hilang dari halaman booking. Booking yang sudah masuk tidak terpengaruh.`,
+    })
+    if (!ok) return
     try {
       const res = await fetch(`/api/settings/${key}`, { method: "DELETE" })
       const data = await res.json()
@@ -251,9 +257,12 @@ export function TabPaket({ items, isOwner, onRefresh }: TabPaketProps) {
     }
 
     if (oldHarga !== hargaNum) {
-      const ok = window.confirm(
-        `Anda akan mengubah harga paket ${modal.value.nama} dari ${formatRupiah(oldHarga)} menjadi ${formatRupiah(hargaNum)}.\n\nPerubahan berlaku untuk booking baru. Booking yang sudah masuk tidak terpengaruh.\n\nLanjutkan?`
-      )
+      const ok = await confirm({
+        title: "Ubah Harga Paket?",
+        message: `Ubah harga paket ${modal.value.nama} dari ${formatRupiah(oldHarga)} ke ${formatRupiah(hargaNum)}? Berlaku untuk booking baru, booking lama tidak terpengaruh.`,
+        variant: "warning",
+        confirmLabel: "Ya, Ubah",
+      })
       if (!ok) return
     }
 
@@ -300,6 +309,8 @@ export function TabPaket({ items, isOwner, onRefresh }: TabPaketProps) {
           <PaketCard key={row.key} row={row} isOwner={isOwner} onEdit={openEdit} onDelete={handleDelete} />
         ))}
       </div>
+
+      <ConfirmDialog />
 
       {/* Modal Edit / Tambah Paket */}
       {modal && (

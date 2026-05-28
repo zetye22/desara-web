@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import type { SettingsRow, AddonValue } from "./types"
 import { ADDON_KEYS } from "./types"
+import { useConfirm } from "@/hooks/use-confirm"
 
 interface TabAddonProps {
   items: SettingsRow[]
@@ -21,6 +22,7 @@ interface TambahState {
 }
 
 export function TabAddon({ items, isOwner, onRefresh }: TabAddonProps) {
+  const { confirm, ConfirmDialog } = useConfirm()
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [formHarga, setFormHarga] = useState("")
   const [formSatuan, setFormSatuan] = useState("")
@@ -47,9 +49,11 @@ export function TabAddon({ items, isOwner, onRefresh }: TabAddonProps) {
 
     const oldHarga = (row.value as AddonValue).harga
     if (oldHarga !== hargaNum) {
-      const ok = window.confirm(
-        `Ubah harga "${row.value.nama}" dari ${formatRupiah(oldHarga)} ke ${formatRupiah(hargaNum)}?`
-      )
+      const ok = await confirm({
+        title: "Ubah Harga Add-on?",
+        message: `Ubah harga "${row.value.nama}" dari ${formatRupiah(oldHarga)} ke ${formatRupiah(hargaNum)}?`,
+        variant: "warning",
+      })
       if (!ok) return
     }
 
@@ -74,7 +78,11 @@ export function TabAddon({ items, isOwner, onRefresh }: TabAddonProps) {
   }
 
   async function handleDelete(row: SettingsRow) {
-    if (!window.confirm(`Hapus add-on "${row.value.nama}"?\n\nAdd-on ini tidak akan tampil di halaman depan. Add-on bawaan (tambahan waktu, orang, dll) tidak akan hilang dari form booking.`)) return
+    const ok = await confirm({
+      title: "Hapus Add-on?",
+      message: `Hapus add-on "${row.value.nama}"? Add-on ini tidak akan tampil di halaman depan.`,
+    })
+    if (!ok) return
     try {
       const res = await fetch(`/api/settings/${row.key}`, { method: "DELETE" })
       const data = await res.json()
@@ -233,6 +241,8 @@ export function TabAddon({ items, isOwner, onRefresh }: TabAddonProps) {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog />
 
       {/* Form tambah add-on baru */}
       {showTambah && (

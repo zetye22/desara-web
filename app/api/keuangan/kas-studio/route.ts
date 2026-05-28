@@ -3,7 +3,7 @@ import { createAdminClient, createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   let body: { periode?: string; saldo_awal?: number; persen_investor?: number }
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from("kas_studio")

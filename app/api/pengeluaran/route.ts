@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
 // GET — list pengeluaran: ?bulan=YYYY-MM
 export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { searchParams } = new URL(request.url)
   const bulan = searchParams.get("bulan") ?? ""
 
@@ -30,14 +31,12 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ items: data ?? [] })
 }
 
-// POST — tambah pengeluaran baru
+// POST — tambah pengeluaran baru (owner only)
 export async function POST(request: NextRequest) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   let body: unknown
   try { body = await request.json() } catch {

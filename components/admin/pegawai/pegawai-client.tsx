@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, UserX, UserCheck, Printer, MessageCircle, RefreshCw } from "lucide-react"
 import { useRole } from "@/lib/role-context"
 import { toast } from "sonner"
+import { useConfirm } from "@/hooks/use-confirm"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import type { PegawaiTetap, PegawaiForm } from "./types"
@@ -16,6 +17,7 @@ interface ModalState {
 
 export function PegawaiClient() {
   const { isAdmin } = useRole()
+  const { confirm, ConfirmDialog } = useConfirm()
   const [items, setItems] = useState<PegawaiTetap[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<ModalState | null>(null)
@@ -72,9 +74,11 @@ export function PegawaiClient() {
     if (modal.id) {
       const existing = items.find((i) => i.id === modal.id)
       if (existing && existing.gaji_bulanan !== f.gaji_bulanan) {
-        const ok = window.confirm(
-          `Ubah gaji "${f.nama}" dari ${formatRupiah(existing.gaji_bulanan)} ke ${formatRupiah(f.gaji_bulanan)}?\n\nBerlaku mulai generate bulan depan.`
-        )
+        const ok = await confirm({
+          title: "Ubah Gaji Pegawai?",
+          message: `Ubah gaji "${f.nama}" dari ${formatRupiah(existing.gaji_bulanan)} ke ${formatRupiah(f.gaji_bulanan)}? Berlaku mulai generate bulan depan.`,
+          variant: "warning",
+        })
         if (!ok) return
       }
     }
@@ -110,7 +114,11 @@ export function PegawaiClient() {
 
   async function handleToggleAktif(p: PegawaiTetap) {
     const label = p.aktif ? "nonaktifkan" : "aktifkan kembali"
-    const ok = window.confirm(`${label.charAt(0).toUpperCase() + label.slice(1)} pegawai "${p.nama}"?`)
+    const ok = await confirm({
+      title: `${label.charAt(0).toUpperCase() + label.slice(1)} Pegawai?`,
+      message: `${label.charAt(0).toUpperCase() + label.slice(1)} pegawai "${p.nama}"?`,
+      variant: p.aktif ? "danger" : "warning",
+    })
     if (!ok) return
 
     try {
@@ -519,6 +527,8 @@ export function PegawaiClient() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog />
 
       {/* Modal Slip Gaji */}
       {slipModal && (

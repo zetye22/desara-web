@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { Star, Plus, Pencil, Trash2, Eye, EyeOff, Loader2, Save, X, ArrowUp, ArrowDown } from "lucide-react"
 import { useRole } from "@/lib/role-context"
+import { useConfirm } from "@/hooks/use-confirm"
 
 interface TestimoniRow {
   id: string
@@ -22,6 +23,7 @@ const EMPTY_FORM = {
 
 export function KontenClient() {
   const { isAdmin } = useRole()
+  const { confirm, ConfirmDialog } = useConfirm()
   const [items, setItems]       = useState<TestimoniRow[]>([])
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -109,7 +111,8 @@ export function KontenClient() {
   }
 
   async function handleDelete(id: string, nama: string) {
-    if (!confirm(`Hapus testimoni dari "${nama}"?`)) return
+    const ok = await confirm({ title: "Hapus Testimoni?", message: `Hapus testimoni dari "${nama}"?` })
+    if (!ok) return
     setDeleting(id)
     try {
       const res = await fetch(`/api/konten/testimoni/${id}`, { method: "DELETE" })
@@ -422,6 +425,7 @@ export function KontenClient() {
           ))}
         </div>
       )}
+      <ConfirmDialog />
     </div>
   )
 }

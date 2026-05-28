@@ -22,13 +22,13 @@ export async function GET(
   const {
     data: { user },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient() as any).auth.getUser()
+  } = await (createClient()).auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const bookingId = params.id
 
   const { data: addons, error } = await supabase
@@ -57,13 +57,13 @@ export async function POST(
   const {
     data: { user },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient() as any).auth.getUser()
+  } = await (createClient()).auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const bookingId = params.id
 
   let body: { jenis?: string; nama_item?: string; qty?: number; harga_satuan?: number; catatan?: string }

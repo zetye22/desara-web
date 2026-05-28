@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Cek apakah tanggal ini diblokir sebagai hari libur
   const { data: liburData } = await supabase

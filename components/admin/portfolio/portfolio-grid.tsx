@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useConfirm } from "@/hooks/use-confirm"
 import {
   DndContext,
   closestCenter,
@@ -112,6 +113,7 @@ interface PortfolioGridProps {
 
 export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
   const { isAdmin } = useRole()
+  const { confirm, ConfirmDialog } = useConfirm()
   const [items, setItems] = useState<PortfolioRow[]>(initialItems)
   const [filter, setFilter] = useState<FilterKategori>("semua")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -219,8 +221,8 @@ export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
 
   // Hapus satu foto
   const handleDelete = useCallback(async (id: string) => {
-    const confirmed = window.confirm("Hapus foto ini? Tindakan ini tidak bisa dibatalkan.")
-    if (!confirmed) return
+    const ok = await confirm({ title: "Hapus Foto?", message: "Hapus foto ini? Tindakan ini tidak bisa dibatalkan." })
+    if (!ok) return
 
     try {
       const res = await fetch(`/api/portfolio/${id}`, { method: "DELETE" })
@@ -231,7 +233,7 @@ export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
     } catch {
       toast.error("Gagal menghapus foto")
     }
-  }, [])
+  }, [confirm])
 
   // Bulk action
   const handleBulkAction = async (action: "aktifkan" | "nonaktifkan" | "hapus") => {
@@ -453,6 +455,7 @@ export function PortfolioGrid({ initialItems }: PortfolioGridProps) {
           onSuccess={handleEditSuccess}
         />
       )}
+      <ConfirmDialog />
     </div>
   )
 }

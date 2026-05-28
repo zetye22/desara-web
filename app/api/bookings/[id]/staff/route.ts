@@ -45,7 +45,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   let body: StaffBody
@@ -56,7 +56,7 @@ export async function PATCH(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Resolve custom staff (find or create di staff_upah)
   let pg1Id    = body.pg1_staff_id    ?? null

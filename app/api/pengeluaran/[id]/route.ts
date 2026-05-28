@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
-// PATCH — update pengeluaran
+// PATCH — update pengeluaran (owner only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   let body: unknown
   try { body = await request.json() } catch {
@@ -63,24 +62,20 @@ export async function PATCH(
   return NextResponse.json({ success: true, item })
 }
 
-// DELETE — hapus pengeluaran
+// DELETE — hapus pengeluaran (owner only)
 export async function DELETE(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
-
+  const supabase = createAdminClient()
   const { error } = await supabase
     .from("pengeluaran")
     .delete()
     .eq("id", params.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
   return NextResponse.json({ success: true })
 }

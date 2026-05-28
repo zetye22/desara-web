@@ -12,13 +12,13 @@ export async function PATCH(
   const {
     data: { user },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient() as any).auth.getUser()
+  } = await (createClient()).auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { addonId } = params
 
   // Ambil data addon dulu untuk verifikasi
@@ -119,13 +119,13 @@ export async function DELETE(
   const {
     data: { user },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = await (createClient() as any).auth.getUser()
+  } = await (createClient()).auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { addonId } = params
 
   // Ambil data addon dulu untuk verifikasi

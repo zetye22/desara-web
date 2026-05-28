@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { ModalPosTetap } from "./modal-pos-tetap"
 import type { PengeluaranTetap, KategoriPengeluaran } from "./types"
+import { useConfirm } from "@/hooks/use-confirm"
 
 interface TabTetapProps {
   items:        PengeluaranTetap[]
@@ -15,6 +16,7 @@ interface TabTetapProps {
 }
 
 export function TabTetap({ items, kategoriList, onRefresh }: TabTetapProps) {
+  const { confirm, ConfirmDialog } = useConfirm()
   const [showModal,  setShowModal]  = useState(false)
   const [editItem,   setEditItem]   = useState<PengeluaranTetap | undefined>(undefined)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -35,7 +37,8 @@ export function TabTetap({ items, kategoriList, onRefresh }: TabTetapProps) {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Yakin ingin menghapus pos tetap ini?")) return
+    const ok = await confirm({ title: "Hapus Pos Tetap?", message: "Pos tetap ini akan dihapus secara permanen." })
+    if (!ok) return
     setDeletingId(id)
     try {
       const res  = await fetch(`/api/pengeluaran/tetap/${id}`, { method: "DELETE" })
@@ -241,6 +244,7 @@ export function TabTetap({ items, kategoriList, onRefresh }: TabTetapProps) {
           onSuccess={onRefresh}
         />
       )}
+      <ConfirmDialog />
     </div>
   )
 }

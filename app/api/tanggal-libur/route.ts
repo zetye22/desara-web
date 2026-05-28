@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { requireOwner } from "@/lib/auth-server"
 
 export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from("tanggal_libur")
     .select("id, tanggal, keterangan, created_at")
@@ -14,9 +15,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireOwner()
+  if (guard) return guard
 
   let body: { tanggal?: string; keterangan?: string }
   try { body = await request.json() } catch {
@@ -28,8 +28,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Format tanggal tidak valid (YYYY-MM-DD)" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { error } = await supabase
     .from("tanggal_libur")
     .insert({ tanggal, keterangan: keterangan ?? null })

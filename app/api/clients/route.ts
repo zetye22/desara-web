@@ -8,11 +8,11 @@ import { createAdminClient, createClient } from "@/lib/supabase/server"
 // &page=1  &limit=30  &sort=total_spending&order=desc
 export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await (createClient()).auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const p = new URL(request.url).searchParams
 
   const search       = p.get("search") ?? ""
