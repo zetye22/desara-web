@@ -30,8 +30,8 @@ export function createClient() {
 
 // Dipakai untuk operasi admin yang bypass RLS (service role)
 // Pakai generic <any> agar bisa akses tabel yang belum ada di generated types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createAdminClient() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return createServerClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,

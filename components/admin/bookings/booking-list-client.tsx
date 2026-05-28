@@ -198,7 +198,6 @@ export default function BookingListClient({
   const [filterBayar, setFilterBayar] = useState("")
   const [filterAddon, setFilterAddon] = useState("")
 
-  const isFiltered = dateFrom !== "" || dateTo !== "" || search !== "" || filterSesi !== "" || filterBayar !== "" || filterAddon !== ""
   const isDefaultRange = dateFrom === getDefaultDateFrom() && dateTo === ""
 
   // State notifikasi browser
