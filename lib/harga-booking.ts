@@ -59,11 +59,11 @@ export function hitungHarga(
       harga: tbg.harga * addons.tambahanBackground,
     })
   }
-  if (addons.cetak12R) {
-    addonItems.push({ nama: "Cetak 12R + Frame", harga: c12.harga })
+  if (addons.cetak12R > 0) {
+    addonItems.push({ nama: `Cetak 12R + Frame ×${addons.cetak12R}`, harga: c12.harga * addons.cetak12R })
   }
-  if (addons.cetak20R) {
-    addonItems.push({ nama: "Cetak 20R + Frame", harga: c20.harga })
+  if (addons.cetak20R > 0) {
+    addonItems.push({ nama: `Cetak 20R + Frame ×${addons.cetak20R}`, harga: c20.harga * addons.cetak20R })
   }
 
   const subtotalAddon = addonItems.reduce((sum, i) => sum + i.harga, 0)

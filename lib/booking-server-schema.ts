@@ -38,8 +38,8 @@ export const createBookingSchema = z.object({
     tambahanWaktu: z.number().int().min(0).max(12),
     tambahanOrang: z.number().int().min(0).max(50),
     tambahanBackground: z.number().int().min(0).max(10),
-    cetak12R: z.boolean(),
-    cetak20R: z.boolean(),
+    cetak12R: z.number().int().min(0).max(10),
+    cetak20R: z.number().int().min(0).max(10),
   }),
   catatan: z.string().max(500).optional(),
 })

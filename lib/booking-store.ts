@@ -7,8 +7,8 @@ export interface AddonState {
   tambahanWaktu: number      // jumlah unit (1 unit = 10 menit)
   tambahanOrang: number      // jumlah orang tambahan
   tambahanBackground: number // jumlah BG tambahan
-  cetak12R: boolean
-  cetak20R: boolean
+  cetak12R: number           // jumlah cetakan 12R
+  cetak20R: number           // jumlah cetakan 20R
 }
 
 export interface BookingResult {
@@ -53,7 +53,7 @@ export interface BookingState {
   setKatalog: (k: KatalogData) => void
   setKategori: (k: KategoriSesi) => void
   setPaketId: (id: string) => void
-  setAddon: (key: keyof AddonState, value: number | boolean) => void
+  setAddon: (key: keyof AddonState, value: number) => void
   setTanggal: (d: string) => void
   setJamMulai: (j: string) => void
   setBackground: (bgs: string[]) => void
@@ -73,8 +73,8 @@ export const DEFAULT_ADDONS: AddonState = {
   tambahanWaktu: 0,
   tambahanOrang: 0,
   tambahanBackground: 0,
-  cetak12R: false,
-  cetak20R: false,
+  cetak12R: 0,
+  cetak20R: 0,
 }
 
 export const useBookingStore = create<BookingState>()(

@@ -60,14 +60,6 @@ export async function POST(request: NextRequest) {
 
   const data = parsed.data
 
-  // Cetak 12R dan 20R tidak boleh dipilih bersamaan
-  if (data.addons.cetak12R && data.addons.cetak20R) {
-    return NextResponse.json(
-      { error: "Hanya boleh pilih satu opsi cetak (12R atau 20R, tidak bisa keduanya)" },
-      { status: 400 }
-    )
-  }
-
   // Cari paket di server (jangan trust paket_id sembarangan)
   const paket = SEMUA_PAKET.find((p) => p.id === data.paket_id)
   if (!paket) {
@@ -97,6 +89,15 @@ export async function POST(request: NextRequest) {
   today.setHours(0, 0, 0, 0)
   if (tglFoto < today) {
     return NextResponse.json({ error: "Tanggal foto tidak boleh di masa lalu" }, { status: 400 })
+  }
+
+  // Validasi slot tidak sudah lewat (khusus hari ini)
+  const jakartaDateNow = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" })
+  const jakartaTimeNow = new Date().toLocaleTimeString("en-GB", {
+    timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit",
+  })
+  if (data.tgl_foto === jakartaDateNow && mulaiMenit <= timeToMinutes(jakartaTimeNow)) {
+    return NextResponse.json({ error: "Slot waktu sudah lewat. Pilih jam berikutnya." }, { status: 400 })
   }
 
   const supabase = createAdminClient()
@@ -217,25 +218,25 @@ export async function POST(request: NextRequest) {
       source: "booking_awal",
     })
   }
-  if (data.addons.cetak12R) {
+  if (data.addons.cetak12R > 0) {
     addonRows.push({
       booking_id: inserted.id,
       jenis: "cetak_12r",
-      nama_item: "Cetak 12R + Frame",
-      qty: 1,
+      nama_item: `Cetak 12R + Frame ×${data.addons.cetak12R}`,
+      qty: data.addons.cetak12R,
       harga_satuan: 150000,
-      subtotal: 150000,
+      subtotal: data.addons.cetak12R * 150000,
       source: "booking_awal",
     })
   }
-  if (data.addons.cetak20R) {
+  if (data.addons.cetak20R > 0) {
     addonRows.push({
       booking_id: inserted.id,
       jenis: "cetak_20r",
-      nama_item: "Cetak 20R + Frame",
-      qty: 1,
+      nama_item: `Cetak 20R + Frame ×${data.addons.cetak20R}`,
+      qty: data.addons.cetak20R,
       harga_satuan: 400000,
-      subtotal: 400000,
+      subtotal: data.addons.cetak20R * 400000,
       source: "booking_awal",
     })
   }

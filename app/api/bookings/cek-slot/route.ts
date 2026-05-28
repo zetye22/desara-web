@@ -84,6 +84,9 @@ export async function GET(request: NextRequest) {
     if (slotSelesai > timeToMinutes("21:00")) {
       return NextResponse.json({ available: false, alasan: "Melebihi jam operasional", bentrok_dengan: null })
     }
+    if (isToday && slotMulai <= nowMinutes) {
+      return NextResponse.json({ available: false, alasan: "Slot sudah lewat", bentrok_dengan: null })
+    }
     const bentrok = cekBentrok(slotMulai)
     return NextResponse.json({
       available: !bentrok,

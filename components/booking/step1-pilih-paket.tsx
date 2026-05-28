@@ -234,18 +234,20 @@ function AddOnPicker() {
         {/* Cetak */}
         {!paket.cetakInclude && (
           <>
-            <CheckboxAddon
-              label={addonData.cetak12R.nama}
-              harga={addonData.cetak12R.harga}
-              checked={addons.cetak12R}
-              onChange={(v) => { setAddon("cetak12R", v); if (v) setAddon("cetak20R", false) }}
-            />
-            <CheckboxAddon
-              label={addonData.cetak20R.nama}
-              harga={addonData.cetak20R.harga}
-              checked={addons.cetak20R}
-              onChange={(v) => { setAddon("cetak20R", v); if (v) setAddon("cetak12R", false) }}
-            />
+            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white">
+              <div>
+                <p className="text-sm font-medium text-gray-700">{addonData.cetak12R.nama}</p>
+                <p className="text-xs text-gray-400">{formatRupiah(addonData.cetak12R.harga)} / lembar</p>
+              </div>
+              <Counter value={addons.cetak12R} min={0} max={10} onChange={(v) => setAddon("cetak12R", v)} />
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white">
+              <div>
+                <p className="text-sm font-medium text-gray-700">{addonData.cetak20R.nama}</p>
+                <p className="text-xs text-gray-400">{formatRupiah(addonData.cetak20R.harga)} / lembar</p>
+              </div>
+              <Counter value={addons.cetak20R} min={0} max={10} onChange={(v) => setAddon("cetak20R", v)} />
+            </div>
           </>
         )}
         {paket.cetakInclude && (
@@ -270,21 +272,6 @@ function Counter({ value, min, max, onChange }: { value: number; min: number; ma
         className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:border-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#C9A84C]"
         aria-label="Tambah">+</button>
     </div>
-  )
-}
-
-function CheckboxAddon({ label, harga, checked, onChange }: { label: string; harga: number; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
-      checked ? "border-[#C9A84C] bg-[#C9A84C]/5" : "border-gray-200 bg-white hover:border-gray-300"
-    }`}>
-      <div>
-        <p className="text-sm font-medium text-gray-700">{label}</p>
-        <p className="text-xs text-gray-400">{formatRupiah(harga)}</p>
-      </div>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)}
-        className="w-4 h-4 accent-[#C9A84C] focus:ring-[#C9A84C]" />
-    </label>
   )
 }
 
