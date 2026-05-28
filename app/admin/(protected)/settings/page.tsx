@@ -10,13 +10,11 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   // Cek autentikasi
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) redirect("/admin/login")
 
   // Cek role — owner atau admin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { data: profile } = await supabase
     .from("admin_profiles")
     .select("role")

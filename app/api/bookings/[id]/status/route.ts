@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
+import { requireAdmin } from "@/lib/auth-server"
 
 const VALID_STATUS_SESI = ["pending", "booked", "selesai_foto", "selesai_edit", "diambil", "cancel"]
 
@@ -8,13 +8,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Hanya admin yang bisa update status
-  const supabaseAuth = createClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (supabaseAuth).auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   let body: { status_sesi?: string; status_pembayaran?: string; dp_dibayar?: number }
   try {
@@ -36,7 +31,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Tidak ada field yang diupdate" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
   const { error } = await supabase
     .from("bookings")

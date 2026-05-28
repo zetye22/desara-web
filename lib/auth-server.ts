@@ -40,3 +40,11 @@ export async function requireOwner(): Promise<NextResponse | null> {
   }
   return null
 }
+
+// Guard: owner atau admin (semua staff yang terdaftar di admin_profiles)
+// Pemakaian: const guard = await requireAdmin(); if (guard) return guard;
+export async function requireAdmin(): Promise<NextResponse | null> {
+  const result = await getSessionUserWithRole()
+  if (!result) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  return null
+}

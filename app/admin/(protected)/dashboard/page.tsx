@@ -16,8 +16,7 @@ function jakartaDate(offsetDays = 0): string {
 }
 
 export default async function DashboardPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const hariIni    = jakartaDate(0)
   const besok      = jakartaDate(1)

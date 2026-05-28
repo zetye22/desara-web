@@ -8,13 +8,11 @@ import { AdminLayoutClient } from "@/components/admin/admin-layout-client"
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Cek sesi — middleware sudah proteksi, ini sebagai double-check
   const supabase = createClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (supabase as any).auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/admin/login")
 
   // Ambil profil admin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const adminSupabase = createAdminClient() as any
+  const adminSupabase = createAdminClient()
   const { data: profile } = await adminSupabase
     .from("admin_profiles")
     .select("nama, role")

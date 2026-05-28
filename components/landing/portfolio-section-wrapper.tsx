@@ -5,8 +5,7 @@ import { PortfolioSection } from "./portfolio-section"
 export const revalidate = 30
 
 export async function PortfolioSectionWrapper() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const { data } = await supabase
     .from("portfolio")

@@ -23,8 +23,7 @@ const ADDON_KEY_MAP: Record<string, keyof AddonKatalog> = {
 }
 
 async function getPageData() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const [settingsRes, bgRes, testimoniRes] = await Promise.all([
     supabase.from("settings").select("key, value"),

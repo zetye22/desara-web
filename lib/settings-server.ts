@@ -4,8 +4,7 @@ import { createAdminClient } from "@/lib/supabase/server"
 type SettingsRow = { key: string; value: any; kategori: string; deskripsi: string | null }
 
 export async function getSettings(keys?: string[]): Promise<Record<string, unknown>> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   let query = supabase.from("settings").select("key, value, kategori, deskripsi")
 
@@ -21,8 +20,7 @@ export async function getSettings(keys?: string[]): Promise<Record<string, unkno
 }
 
 export async function getSettingsByKategori(kategori: string): Promise<SettingsRow[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   const { data } = await supabase
     .from("settings")

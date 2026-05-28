@@ -7,8 +7,7 @@ export default async function KalenderPage({
 }: {
   searchParams: { tanggal?: string }
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) redirect("/admin/login")
 
   // Default tanggal: hari ini (timezone Jakarta)
@@ -18,8 +17,7 @@ export default async function KalenderPage({
 
   const tanggal = searchParams.tanggal ?? todayJakarta
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
   const { data: bookings } = await supabase
     .from("bookings")
     .select("id, kode_booking, nama_client, nama_paket, jam_mulai, jam_selesai, status_sesi")

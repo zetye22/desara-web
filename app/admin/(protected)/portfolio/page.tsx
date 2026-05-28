@@ -9,12 +9,10 @@ export const metadata = {
 
 export default async function PortfolioPage() {
   // Cek autentikasi
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient() as any).auth.getUser()
+  const { data: { user } } = await createClient().auth.getUser()
   if (!user) redirect("/admin/login")
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createAdminClient() as any
+  const supabase = createAdminClient()
 
   // Ambil semua foto portfolio (termasuk non-aktif), sort by urutan
   const { data: items } = await supabase

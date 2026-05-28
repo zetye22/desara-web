@@ -14,8 +14,7 @@ const ADDON_KEY_MAP: Record<string, keyof AddonKatalog> = {
 
 async function fetchKatalog(): Promise<KatalogData> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase = createAdminClient() as any
+    const supabase = createAdminClient()
 
     const [settingsRes, bgRes] = await Promise.all([
       supabase.from("settings").select("key, value").or("key.like.paket_%,key.like.addon_%"),

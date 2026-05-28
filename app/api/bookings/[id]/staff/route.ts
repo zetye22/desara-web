@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { requireAdmin } from "@/lib/auth-server"
 
 interface StaffBody {
   pg1_staff_id?:       string | null
@@ -15,7 +16,7 @@ interface StaffBody {
 
 // Cari staff by nama+role, buat baru jika belum ada
 async function findOrCreateStaff(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- admin client tidak punya generated type untuk staff_upah
   supabase: any,
   nama: string,
   role: "photographer" | "editor",
@@ -44,9 +45,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: { user } } = await (createClient()).auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   let body: StaffBody
   try {
@@ -55,7 +55,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Format tidak valid" }, { status: 400 })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createAdminClient()
 
   // Resolve custom staff (find or create di staff_upah)
