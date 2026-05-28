@@ -2,6 +2,9 @@ import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 import BookingListClient from "@/components/admin/bookings/booking-list-client"
 
+// Paksa halaman selalu fetch ulang dari server, tidak boleh pakai cache router
+export const dynamic = "force-dynamic"
+
 // Tipe data booking
 interface BookingRow {
   id: string

@@ -112,6 +112,10 @@ export default function BookingListClient({
   useEffect(() => { setBookings(initialBookings) }, [initialBookings])
   useEffect(() => { setAddonIds(initialAddonIds) }, [initialAddonIds])
 
+  // Bust router cache saat halaman dikunjungi kembali dari halaman lain
+  // router dari useRouter() adalah referensi stabil — tidak menyebabkan infinite loop
+  useEffect(() => { router.refresh() }, [router])
+
   // ── Realtime subscription ──────────────────────────────────────
   useEffect(() => {
     const supabase = createClient()
