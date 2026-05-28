@@ -95,7 +95,7 @@ export default function TabRiwayat({ bookingId, createdAt, kodeBooking }: TabRiw
 
   // Gabung dan sort semua events
   const events: TimelineEvent[] = [
-    { id: "booking-dibuat", type: "booking_dibuat", created_at: createdAt, data: null },
+    { id: "booking-dibuat", type: "booking_dibuat" as const, created_at: createdAt, data: null },
     ...logs.map((l, i) => ({ id: l.id, type: "reschedule" as const, created_at: l.created_at, data: l, index: i + 1 })),
     ...paymentLogs.map((p) => ({ id: p.id, type: "pembayaran" as const, created_at: p.created_at, data: p })),
   ].sort((a, b) => a.created_at.localeCompare(b.created_at))
