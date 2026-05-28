@@ -130,6 +130,7 @@ export const useBookingStore = create<BookingState>()(
     }),
     {
       name: "desara-booking",
+      version: 2,
       storage: createJSONStorage(() =>
         typeof window !== "undefined" ? sessionStorage : localStorage
       ),
