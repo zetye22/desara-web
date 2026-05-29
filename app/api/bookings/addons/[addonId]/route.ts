@@ -1,7 +1,6 @@
 ﻿import { requireAdmin } from "@/lib/auth-server"
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
 
 // PATCH /api/bookings/addons/[addonId]
 // Update addon lapangan (hanya source='lapangan' yang bisa diedit)

@@ -1,7 +1,6 @@
-﻿import { getSessionUserWithRole } from "@/lib/auth-server"
+﻿import { requireAdmin, getSessionUserWithRole } from "@/lib/auth-server"
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
 
 // Jenis addon yang valid
 const VALID_JENIS = [
@@ -19,11 +18,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
   const bookingId = params.id
@@ -50,11 +46,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   const supabase = createAdminClient()
   const bookingId = params.id

@@ -1,7 +1,6 @@
 ﻿import { requireAdmin } from "@/lib/auth-server"
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
 
 // PATCH — Update urutan portfolio secara bulk (auth required)
 export async function PATCH(request: NextRequest) {

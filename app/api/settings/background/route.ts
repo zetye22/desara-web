@@ -9,7 +9,6 @@ import { createAdminClient } from "@/lib/supabase/server"
 export async function GET() {
   const session = await getSessionUserWithRole()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const user = session.user
 
   const supabase = createAdminClient()
 

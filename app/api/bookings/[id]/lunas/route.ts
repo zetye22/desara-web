@@ -1,7 +1,6 @@
 ﻿import { getSessionUserWithRole } from "@/lib/auth-server"
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
 
 // POST /api/bookings/[id]/lunas
 // Tandai booking sudah lunas — set status_pembayaran = "lunas" dan tgl_pelunasan

@@ -3,14 +3,11 @@ export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { createClient } from "@/lib/supabase/server"
 
 // GET — List semua portfolio (auth required), sort by urutan ASC
 export async function GET() {
-  // Cek autentikasi
   const session = await getSessionUserWithRole()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const user = session.user
 
   const supabase = createAdminClient()
   const { data: items, error } = await supabase
