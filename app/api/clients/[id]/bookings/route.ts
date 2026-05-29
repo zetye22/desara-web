@@ -1,13 +1,14 @@
-﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 // GET — riwayat booking satu client + statistik aktual dari bookings
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 

@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 import type {
   BookingRingkas,
   LaporanData,
@@ -229,10 +230,12 @@ function hitungLaporan(
 }
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AdminSupabase = any
+
 // Ambil bookings dari Supabase untuk satu periode
 async function fetchBookings(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  supabase: AdminSupabase,
   periode: string
 ): Promise<BookingRingkas[]> {
   const [yearStr, monthStr] = periode.split("-")
@@ -296,8 +299,7 @@ async function fetchBookings(
 
 // Ambil pengeluaran manual dari Supabase untuk satu periode
 async function fetchPengeluaran(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  supabase: AdminSupabase,
   periode: string
 ): Promise<PengeluaranRow[]> {
   const { data, error } = await supabase
@@ -312,8 +314,7 @@ async function fetchPengeluaran(
 
 // Ambil semua add-on untuk daftar booking ID
 async function fetchAddonsByBookingIds(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  supabase: AdminSupabase,
   bookingIds: string[]
 ): Promise<AddonRow[]> {
   if (bookingIds.length === 0) return []
@@ -329,8 +330,7 @@ async function fetchAddonsByBookingIds(
 
 // Ambil atau buat data kas_studio untuk periode tertentu
 async function fetchKasStudio(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  supabase: AdminSupabase,
   periode: string
 ): Promise<{ saldo_awal: number; persen_investor: number }> {
   const { data } = await supabase
@@ -393,8 +393,7 @@ function buildHppKeluar(bookings: BookingRingkas[], addons: AddonRow[]): KasKelu
 
 // Ambil semua pembayaran (DP & pelunasan) yang masuk di periode tertentu (cash basis)
 async function fetchPembayaran(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  supabase: AdminSupabase,
   periode: string
 ): Promise<PembayaranRow[]> {
   const [yearStr, monthStr] = periode.split("-")
@@ -546,8 +545,8 @@ function hitungKas(
 
 export async function GET(request: NextRequest) {
   // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 
@@ -574,7 +573,8 @@ export async function GET(request: NextRequest) {
           fetchBookings(supabase, p),
           fetchPengeluaran(supabase, p),
         ])
-        return { periode: p, bookings: b, pengeluaran: e }
+        const a = await fetchAddonsByBookingIds(supabase, b.map((bk) => bk.id))
+        return { periode: p, bookings: b, pengeluaran: e, addons: a }
       }),
     ])
 
@@ -588,9 +588,9 @@ export async function GET(request: NextRequest) {
     // Hitung saldo berjalan & kas studio (cash basis, semua jenis pengeluaran)
     const manualKeluar: KasKeluar[] = pengeluaran.map((p) => ({
       tanggal: p.tanggal,
-      keterangan: p.deskripsi ?? p.kategori ?? "Pengeluaran",
+      keterangan: p.deskripsi ?? p.kategori_pengeluaran?.nama ?? "Pengeluaran",
       nominal: p.nominal,
-      kategori: p.kategori,
+      kategori: p.kategori_pengeluaran?.nama,
     }))
     const hppKeluar  = buildHppKeluar(bookings, addons)
     const allKeluar: KasKeluar[] = [...manualKeluar, ...hppKeluar]
@@ -598,9 +598,9 @@ export async function GET(request: NextRequest) {
     const saldoBerjalan = hitungSaldoBerjalan(kasData.saldo_awal, pembayaran, allKeluar)
     const kas = hitungKas(kasData.saldo_awal, kasData.persen_investor, pembayaran, allKeluar)
 
-    // Hitung tren 6 bulan (tanpa addon detail untuk performa)
+    // Hitung tren 6 bulan (dengan addons agar HPP cetak akurat)
     const tren6Bulan = tren6Results.map((t) => {
-      const l = hitungLaporan(t.bookings, t.pengeluaran, t.periode)
+      const l = hitungLaporan(t.bookings, t.pengeluaran, t.periode, t.addons)
       return {
         periode: t.periode,
         label: labelBulan(t.periode),
@@ -618,7 +618,8 @@ export async function GET(request: NextRequest) {
         fetchBookings(supabase, periodeLalu),
         fetchPengeluaran(supabase, periodeLalu),
       ])
-      const laporanLalu = hitungLaporan(bookingsLalu, pengeluaranLalu, periodeLalu)
+      const addonsLalu = await fetchAddonsByBookingIds(supabase, bookingsLalu.map((b) => b.id))
+      const laporanLalu = hitungLaporan(bookingsLalu, pengeluaranLalu, periodeLalu, addonsLalu)
 
       const deltaPemasukan = laporan.pemasukan.total - laporanLalu.pemasukan.total
       const deltaPengeluaran = laporan.pengeluaran.total - laporanLalu.pengeluaran.total

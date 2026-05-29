@@ -1,4 +1,5 @@
-﻿export const dynamic = "force-dynamic"
+﻿import { getSessionUserWithRole } from "@/lib/auth-server"
+export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
@@ -7,8 +8,9 @@ import { createClient } from "@/lib/supabase/server"
 // GET — List semua portfolio (auth required), sort by urutan ASC
 export async function GET() {
   // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   const supabase = createAdminClient()
   const { data: items, error } = await supabase
@@ -26,8 +28,9 @@ export async function GET() {
 // POST — Upload foto baru (menerima FormData)
 export async function POST(request: NextRequest) {
   // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   const supabase = createAdminClient()
 

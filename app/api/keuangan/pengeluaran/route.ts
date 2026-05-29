@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 // Kategori pengeluaran yang valid
 const KATEGORI_VALID = ["wifi", "pdam", "ipl", "listrik", "cetak", "upah", "lain"] as const
@@ -8,8 +9,8 @@ type KategoriPengeluaran = typeof KATEGORI_VALID[number]
 // GET — List pengeluaran untuk satu periode: ?periode=YYYY-MM
 export async function GET(request: NextRequest) {
   // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 
@@ -36,8 +37,8 @@ export async function GET(request: NextRequest) {
 // POST — Tambah pengeluaran baru
 export async function POST(request: NextRequest) {
   // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 

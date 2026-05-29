@@ -1,11 +1,13 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+﻿import { getSessionUserWithRole } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 // POST — upsert satu setting (untuk tambah data baru yang belum ada)
 export async function POST(request: NextRequest) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   const supabase = createAdminClient()
 

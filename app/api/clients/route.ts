@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 // GET — list clients dengan filter + pagination
 // ?search=nama|wa  &tags=VIP,Loyal  &booking_min=1 &booking_max=5
@@ -7,8 +8,8 @@ import { createAdminClient, createClient } from "@/lib/supabase/server"
 // &inactive_bulan=3  &blacklist=false|true
 // &page=1  &limit=30  &sort=total_spending&order=desc
 export async function GET(request: NextRequest) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
   const p = new URL(request.url).searchParams

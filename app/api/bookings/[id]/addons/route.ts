@@ -1,4 +1,5 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+﻿import { getSessionUserWithRole } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 

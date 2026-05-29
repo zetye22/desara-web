@@ -1,12 +1,13 @@
-﻿import { NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
 
 // POST — perbaiki bukti_transfer_url lama yang masih berupa path relatif
 export async function POST() {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 

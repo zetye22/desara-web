@@ -1,12 +1,13 @@
-﻿export const dynamic = "force-dynamic"
+﻿import { requireAdmin } from "@/lib/auth-server"
+export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 // GET — list semua pos tetap
 export async function GET() {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 
@@ -22,8 +23,8 @@ export async function GET() {
 
 // POST — tambah pos tetap baru
 export async function POST(request: NextRequest) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 

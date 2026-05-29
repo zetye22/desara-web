@@ -1,3 +1,4 @@
+﻿import { requireAdmin } from "@/lib/auth-server"
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
@@ -8,8 +9,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { addonId: string } }
 ) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
   const { addonId } = params
@@ -108,8 +109,8 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { addonId: string } }
 ) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
   const { addonId } = params

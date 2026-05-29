@@ -1,14 +1,16 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+﻿import { getSessionUserWithRole } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 // DELETE — hapus satu setting row (untuk hapus paket)
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: { key: string } }
 ) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   const supabase = createAdminClient()
 
@@ -32,8 +34,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { key: string } }
 ) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   // Cek role — hanya owner yang bisa update settings
   const supabase = createAdminClient()

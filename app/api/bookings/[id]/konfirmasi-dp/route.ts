@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { getSessionUserWithRole } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 import { timeToMinutes } from "@/lib/time-utils"
 import { OPERASIONAL } from "@/lib/constants"
 
@@ -7,8 +8,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const session = await getSessionUserWithRole()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session.user
 
   let body: { nominal?: number; catatan?: string; metode?: string }
   try { body = await request.json() } catch {

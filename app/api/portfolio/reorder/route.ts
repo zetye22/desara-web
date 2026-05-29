@@ -1,12 +1,13 @@
-﻿import { NextRequest, NextResponse } from "next/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 
 // PATCH — Update urutan portfolio secara bulk (auth required)
 export async function PATCH(request: NextRequest) {
   // Cek autentikasi
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   let body: { items: { id: string; urutan: number }[] }
   try {

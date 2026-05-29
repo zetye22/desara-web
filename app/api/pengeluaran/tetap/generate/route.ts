@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient, createClient } from "@/lib/supabase/server"
+﻿import { requireAdmin } from "@/lib/auth-server"
+import { NextRequest, NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
 function labelBulanStr(bulan: string): string {
   const [year, month] = bulan.split("-").map(Number)
@@ -10,8 +11,8 @@ function labelBulanStr(bulan: string): string {
 // POST — generate pengeluaran tetap + gaji pegawai untuk satu bulan
 // Body: { bulan: "YYYY-MM" }
 export async function POST(request: NextRequest) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const guard = await requireAdmin()
+  if (guard) return guard
 
   const supabase = createAdminClient()
 
