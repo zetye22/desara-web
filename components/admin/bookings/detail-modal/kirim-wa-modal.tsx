@@ -66,15 +66,15 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden"
+        className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-green-600">
+        {/* Header — selalu terlihat di atas */}
+        <div className="flex items-center justify-between px-5 py-4 bg-green-600 rounded-t-2xl shrink-0">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-white" />
             <h2 className="text-base font-semibold text-white">Kirim WhatsApp</h2>
@@ -88,7 +88,8 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        {/* Konten — bisa discroll */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 overscroll-contain">
           {/* Info client */}
           <div className="rounded-lg bg-gray-50 px-4 py-2.5 text-sm">
             <span className="text-gray-500">Ke: </span>
@@ -156,10 +157,12 @@ export default function KirimWaModal({ booking, onClose }: KirimWaModalProps) {
               {pesanPreview || <span className="text-gray-400 italic">Pesan kosong</span>}
             </div>
           </div>
+        </div>
 
-          {/* Tombol */}
+        {/* Tombol — selalu terlihat di bawah */}
+        <div className="px-5 py-4 border-t border-gray-100 shrink-0 bg-white rounded-b-2xl">
           <Button
-            className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+            className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white h-12 text-base"
             onClick={handleBukaWaWeb}
             disabled={!pesanPreview.trim()}
           >
