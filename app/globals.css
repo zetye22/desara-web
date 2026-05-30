@@ -190,4 +190,5 @@
   mask-composite: exclude;
   animation: gradient-x 4s ease infinite;
   background-size: 200% auto;
+  pointer-events: none;
 }

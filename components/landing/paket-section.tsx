@@ -41,7 +41,7 @@ function PaketCard({ paket, lebar }: { paket: PaketKatalog; lebar?: "normal" | "
     <article
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className={`relative flex flex-col rounded-2xl bg-white
+      className={`relative flex flex-col rounded-2xl bg-white h-full
         shadow-sm focus-within:ring-2 focus-within:ring-[#C9A84C] focus-within:ring-offset-2
         ${paket.popular
           ? "gradient-border shadow-xl shadow-[#C9A84C]/15"
@@ -285,7 +285,7 @@ export function PaketSection({ katalog }: PaketSectionProps) {
               <TabsContent key={kat} value={kat} className="mt-8">
                 <div className={`grid gap-6 pt-6 ${paketKat.length === 1 ? "" : "grid-cols-1 sm:grid-cols-3"}`} data-stagger="100">
                   {paketKat.map((paket) => (
-                    <div key={paket.id} className="reveal">
+                    <div key={paket.id} className="reveal h-full">
                       <PaketCard
                         paket={paket}
                         lebar={paketKat.length === 1 ? "lega" : "normal"}
