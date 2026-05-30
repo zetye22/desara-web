@@ -62,80 +62,28 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   SCROLL REVEAL SYSTEM
+   SCROLL REVEAL SYSTEM — IntersectionObserver + CSS transition
    ══════════════════════════════════════════════════════════════ */
 
-/* Keyframes */
-@keyframes reveal-fade-up {
-  from { opacity: 0; transform: translateY(55px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes reveal-fade-left {
-  from { opacity: 0; transform: translateX(55px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes reveal-fade-right {
-  from { opacity: 0; transform: translateX(-55px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes reveal-scale-in {
-  from { opacity: 0; transform: scale(0.86); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes reveal-clip-up {
-  from { clip-path: inset(0 0 100% 0 round 8px); }
-  to   { clip-path: inset(0 0 0% 0 round 8px); }
-}
-
-/* ── Base: hidden before reveal ── */
+/* State awal: tersembunyi */
 .reveal, .reveal-left, .reveal-right, .reveal-scale {
   opacity: 0;
-  transition-property: opacity, transform;
-  transition-duration: 0.75s;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: var(--stagger-delay, 0ms);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
-.reveal       { transform: translateY(55px); }
-.reveal-left  { transform: translateX(55px); }
-.reveal-right { transform: translateX(-55px); }
-.reveal-scale { transform: scale(0.86); }
+.reveal       { transform: translateY(60px); }
+.reveal-left  { transform: translateX(60px); }
+.reveal-right { transform: translateX(-60px); }
+.reveal-scale { transform: scale(0.88); }
 
-/* ── JS fallback: add .in-view via IntersectionObserver ── */
-.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view, .reveal-scale.in-view {
+/* State terlihat: tambahkan .in-view via JS */
+.reveal.in-view,
+.reveal-left.in-view,
+.reveal-right.in-view,
+.reveal-scale.in-view {
   opacity: 1;
   transform: none;
-}
-
-/* ── Modern CSS: animation-timeline:view() ── */
-@supports (animation-timeline: view()) {
-  .reveal {
-    animation: reveal-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 38%;
-    animation-delay: var(--stagger-delay, 0ms);
-    opacity: 1; transform: none;
-  }
-  .reveal-left {
-    animation: reveal-fade-left 1s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 38%;
-    animation-delay: var(--stagger-delay, 0ms);
-    opacity: 1; transform: none;
-  }
-  .reveal-right {
-    animation: reveal-fade-right 1s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 38%;
-    animation-delay: var(--stagger-delay, 0ms);
-    opacity: 1; transform: none;
-  }
-  .reveal-scale {
-    animation: reveal-scale-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 35%;
-    animation-delay: var(--stagger-delay, 0ms);
-    opacity: 1; transform: none;
-  }
 }
 
 /* ── Marquee ─────────────────────────────────────────────────── */
