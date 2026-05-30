@@ -1,10 +1,9 @@
+import { unstable_noStore as noStore } from "next/cache"
 import { createAdminClient } from "@/lib/supabase/server"
 import { PortfolioSection } from "./portfolio-section"
 
-// Server Component — fetch portfolio aktif dari DB, revalidate setiap 30 detik
-export const revalidate = 30
-
 export async function PortfolioSectionWrapper() {
+  noStore()
   const supabase = createAdminClient()
 
   const { data } = await supabase

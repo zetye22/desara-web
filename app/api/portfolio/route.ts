@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { createAdminClient } from "@/lib/supabase/server"
 
 // GET — List semua portfolio (auth required), sort by urutan ASC
@@ -119,5 +120,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
 
+  revalidatePath("/")
   return NextResponse.json({ success: true, item })
 }
