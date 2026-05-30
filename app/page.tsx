@@ -134,7 +134,7 @@ export default async function Home() {
 
   return (
     <main className="scroll-smooth">
-      <Navbar mapsUrl={kontak.maps_url} />
+      <Navbar />
       <Hero
         jamBuka={operasional.jam_buka}
         jamTutup={operasional.jam_tutup}

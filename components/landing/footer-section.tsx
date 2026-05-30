@@ -73,15 +73,6 @@ export function FooterSection({ wa = "6281234567890", instagram = "@desarahomest
                   <span>🕐</span>
                   <span className="text-xs">{jamDisplay}</span>
                 </li>
-                {mapsUrl && (
-                  <li>
-                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                      className="hover:text-[#C9A84C] transition-colors flex items-center gap-1.5"
-                    >
-                      <span>📍</span> Google Maps
-                    </a>
-                  </li>
-                )}
               </ul>
             </div>
           </div>
@@ -135,19 +126,6 @@ export function FooterSection({ wa = "6281234567890", instagram = "@desarahomest
                 <span className="text-[#C9A84C] shrink-0">🕐</span>
                 <span>Buka setiap hari, {jamDisplay}</span>
               </li>
-              {mapsUrl && (
-                <li className="flex items-start gap-2.5">
-                  <span className="text-[#C9A84C] shrink-0">📍</span>
-                  <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                    className="hover:text-[#C9A84C] transition-colors leading-relaxed"
-                  >
-                    {alamat ? <span className="block text-xs">{alamat}</span> : null}
-                    <span className="text-xs text-[#C9A84C]/70 hover:text-[#C9A84C] transition-colors">
-                      Buka Google Maps →
-                    </span>
-                  </a>
-                </li>
-              )}
             </ul>
           </div>
         </div>

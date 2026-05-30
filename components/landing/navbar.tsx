@@ -3,13 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X, MapPin } from "lucide-react"
+import { Menu, X } from "lucide-react"
 
-interface NavbarProps {
-  mapsUrl?: string
-}
-
-export function Navbar({ mapsUrl }: NavbarProps) {
+export function Navbar() {
   const [scrolled, setScrolled]   = useState(false)
   const [menuOpen, setMenuOpen]   = useState(false)
   const [activeLink, setActive]   = useState("")
@@ -77,23 +73,6 @@ export function Navbar({ mapsUrl }: NavbarProps) {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Maps link */}
-          {mapsUrl && (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Lihat lokasi di Google Maps"
-              className={`hidden md:inline-flex items-center gap-1.5 rounded-full px-3 h-9 text-xs font-semibold transition-all duration-300 ${
-                scrolled
-                  ? "text-gray-500 hover:text-[#0d1f3c] hover:bg-gray-50 border border-gray-200"
-                  : "text-white/70 hover:text-white hover:bg-white/10 border border-white/15"
-              }`}
-            >
-              <MapPin className="w-3.5 h-3.5" />
-              Lokasi
-            </a>
-          )}
           <Button
             asChild
             className={`hidden md:inline-flex rounded-full px-6 h-9 text-sm font-semibold transition-all duration-300 ${
@@ -143,18 +122,6 @@ export function Navbar({ mapsUrl }: NavbarProps) {
               {link.label}
             </a>
           ))}
-          {mapsUrl && (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 px-4 py-3 text-gray-600 font-medium rounded-xl hover:bg-gray-50 hover:text-[#0d1f3c] transition-colors"
-            >
-              <MapPin className="w-4 h-4 text-[#C9A84C]" />
-              Lihat Lokasi di Maps
-            </a>
-          )}
           <a
             href="#paket"
             onClick={() => setMenuOpen(false)}
