@@ -283,13 +283,14 @@ export function PortfolioSection({ initialItems }: PortfolioSectionProps) {
         </div>
 
         {/* Grid foto — masonry agar landscape & portrait tampil natural */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-3">
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-3" data-stagger="55">
           {visible.map((item, i) => (
-            <FotoCard
-              key={item.id}
-              item={item}
-              onClick={() => setLightbox({ items: visible, index: i })}
-            />
+            <div key={item.id} className="reveal">
+              <FotoCard
+                item={item}
+                onClick={() => setLightbox({ items: visible, index: i })}
+              />
+            </div>
           ))}
         </div>
 

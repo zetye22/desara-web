@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import localFont from "next/font/local"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
+import { ScrollRevealProvider } from "@/components/landing/scroll-reveal-provider"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="id" className="scroll-smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        <ScrollRevealProvider>
+          {children}
+        </ScrollRevealProvider>
         <Toaster />
       </body>
     </html>

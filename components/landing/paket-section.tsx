@@ -25,58 +25,92 @@ const BG_STYLE_MAP: Record<string, string> = {
 
 // ─── Card paket ───────────────────────────────────────────────
 function PaketCard({ paket, lebar }: { paket: PaketKatalog; lebar?: "normal" | "lega" }) {
+  const handleMove = (e: React.MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    const x = (e.clientX - r.left) / r.width - 0.5
+    const y = (e.clientY - r.top) / r.height - 0.5
+    e.currentTarget.style.transition = "transform 0.1s ease"
+    e.currentTarget.style.transform = `perspective(1200px) rotateX(${-y*7}deg) rotateY(${x*7}deg) translateZ(10px)`
+  }
+  const handleLeave = (e: React.MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.transition = "transform 0.6s cubic-bezier(0.16,1,0.3,1)"
+    e.currentTarget.style.transform = "perspective(1200px) rotateX(0) rotateY(0) translateZ(0)"
+  }
+
   return (
     <article
-      className={`relative flex flex-col rounded-2xl border bg-white transition-all duration-200
-        hover:scale-[1.02] hover:shadow-xl focus-within:ring-2 focus-within:ring-[#C9A84C]
-        ${paket.popular ? "border-2 border-[#C9A84C] shadow-lg shadow-[#C9A84C]/10" : "border-gray-200 shadow-sm"}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      className={`relative flex flex-col rounded-2xl bg-white
+        shadow-sm focus-within:ring-2 focus-within:ring-[#C9A84C] focus-within:ring-offset-2
+        ${paket.popular
+          ? "gradient-border shadow-xl shadow-[#C9A84C]/15"
+          : "border border-gray-200 hover:border-gray-300 hover:shadow-xl"
+        }
         ${lebar === "lega" ? "max-w-lg mx-auto w-full" : ""}
       `}
     >
       {paket.popular && (
-        <div className="absolute -top-3.5 right-4">
-          <Badge className="bg-[#C9A84C] hover:bg-[#C9A84C] text-white px-3 py-1 text-xs font-bold shadow-md">
-            ⭐ POPULER
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+          <Badge className="bg-gradient-to-r from-[#C9A84C] to-[#b8963d] hover:from-[#b8963d] hover:to-[#C9A84C] text-white px-4 py-1.5 text-[11px] font-bold shadow-lg tracking-wide whitespace-nowrap">
+            ⭐ PALING POPULER
           </Badge>
         </div>
       )}
 
-      <div className={`rounded-t-2xl px-5 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-5 ${paket.popular ? "bg-[#0d1f3c]" : "bg-gray-50"}`}>
-        <p className={`text-xs font-semibold tracking-widest uppercase mb-1 ${paket.popular ? "text-[#C9A84C]" : "text-gray-400"}`}>
+      {/* Header paket */}
+      <div className={`rounded-t-2xl px-5 sm:px-6 pt-7 sm:pt-9 pb-5 sm:pb-6 relative overflow-hidden ${
+        paket.popular ? "bg-gradient-to-br from-[#0d1f3c] to-[#1a3a6e]" : "bg-gradient-to-br from-gray-50 to-gray-100/50"
+      }`}>
+        {paket.popular && (
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#C9A84C]/8 blur-2xl pointer-events-none" />
+        )}
+        <p className={`text-[10px] font-bold tracking-[0.2em] uppercase mb-2 ${paket.popular ? "text-[#C9A84C]" : "text-gray-400"}`}>
           {KATEGORI_LABEL[paket.kategori]}
         </p>
-        <h3 className={`text-xl sm:text-2xl font-bold mb-2 sm:mb-3 ${paket.popular ? "text-white" : "text-[#0d1f3c]"}`}>
+        <h3 className={`text-xl sm:text-2xl font-bold mb-3 ${paket.popular ? "text-white" : "text-[#0d1f3c]"}`}>
           {paket.nama}
         </h3>
         <div>
           {paket.hargaMulaiDari && (
-            <span className={`text-xs block mb-0.5 ${paket.popular ? "text-blue-200/60" : "text-gray-400"}`}>
+            <span className={`text-xs block mb-0.5 ${paket.popular ? "text-blue-200/50" : "text-gray-400"}`}>
               Mulai dari
             </span>
           )}
-          <span className="text-3xl sm:text-4xl font-bold text-[#C9A84C]">{formatRupiah(paket.harga)}</span>
+          <span className={`text-3xl sm:text-4xl font-bold ${paket.popular ? "text-gradient-gold" : "text-[#C9A84C]"}`}>
+            {formatRupiah(paket.harga)}
+          </span>
         </div>
       </div>
 
-      <div className="px-5 sm:px-6 py-4 sm:py-5 flex flex-col flex-1">
-        <ul className="space-y-3 mb-5">
+      <div className="px-5 sm:px-6 py-5 flex flex-col flex-1">
+        {/* Specs */}
+        <ul className="space-y-2.5 mb-4">
           <li className="flex items-center gap-3 text-sm text-gray-700">
-            <Clock className="w-4 h-4 text-[#C9A84C] shrink-0" />
+            <span className="w-7 h-7 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center shrink-0">
+              <Clock className="w-3.5 h-3.5 text-[#C9A84C]" />
+            </span>
             <span>{paket.durasiMenit} menit sesi foto</span>
           </li>
           <li className="flex items-center gap-3 text-sm text-gray-700">
-            <ImageIcon className="w-4 h-4 text-[#C9A84C] shrink-0" />
+            <span className="w-7 h-7 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center shrink-0">
+              <ImageIcon className="w-3.5 h-3.5 text-[#C9A84C]" />
+            </span>
             <span>{paket.jumlahBackground} background pilihan</span>
           </li>
           {paket.maxOrang && (
             <li className="flex items-center gap-3 text-sm text-gray-700">
-              <Users className="w-4 h-4 text-[#C9A84C] shrink-0" />
+              <span className="w-7 h-7 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center shrink-0">
+                <Users className="w-3.5 h-3.5 text-[#C9A84C]" />
+              </span>
               <span>Maks. {paket.maxOrang} orang</span>
             </li>
           )}
           {paket.cetakInclude && (
             <li className="flex items-center gap-3 text-sm text-gray-700">
-              <Printer className="w-4 h-4 text-[#C9A84C] shrink-0" />
+              <span className="w-7 h-7 rounded-lg bg-[#C9A84C]/10 flex items-center justify-center shrink-0">
+                <Printer className="w-3.5 h-3.5 text-[#C9A84C]" />
+              </span>
               <span>Cetak {paket.cetakInclude} + Frame</span>
             </li>
           )}
@@ -84,10 +118,13 @@ function PaketCard({ paket, lebar }: { paket: PaketKatalog; lebar?: "normal" | "
 
         <div className="border-t border-dashed border-gray-200 my-4" />
 
+        {/* Includes */}
         <ul className="space-y-2 mb-6">
           {INCLUDED_ALL_PAKET.map((item) => (
             <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
-              <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+              <span className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                <Check className="w-2.5 h-2.5 text-green-600" strokeWidth={3} />
+              </span>
               <span>{item}</span>
             </li>
           ))}
@@ -95,13 +132,13 @@ function PaketCard({ paket, lebar }: { paket: PaketKatalog; lebar?: "normal" | "
 
         <Button
           asChild
-          className={`mt-auto w-full rounded-full font-semibold h-11 ${
+          className={`mt-auto w-full rounded-full font-semibold h-11 transition-all duration-300 ${
             paket.popular
-              ? "bg-[#C9A84C] hover:bg-[#b8963d] text-white"
+              ? "bg-[#C9A84C] hover:bg-[#b8963d] text-white shadow-md hover:shadow-lg hover:shadow-[#C9A84C]/30"
               : "bg-[#0d1f3c] hover:bg-[#1a3a6e] text-white"
           }`}
         >
-          <a href={`/booking?paket=${paket.id}`}>Pilih Paket {paket.nama}</a>
+          <a href={`/booking?paket=${paket.id}`}>Pilih Paket Ini</a>
         </Button>
       </div>
     </article>
@@ -212,12 +249,12 @@ export function PaketSection({ katalog }: PaketSectionProps) {
   return (
     <section id="paket" className="py-16 sm:py-20 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8 sm:mb-12">
-          <span className="text-[#C9A84C] text-sm font-semibold tracking-widest uppercase">
+        <div className="text-center mb-10 sm:mb-14 reveal">
+          <span className="inline-block text-[#C9A84C] text-xs font-bold tracking-[0.25em] uppercase mb-4 px-4 py-1.5 rounded-full bg-[#C9A84C]/8 border border-[#C9A84C]/15">
             Pilih Paket
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0d1f3c] mt-3 mb-3 sm:mb-4">
-            Pilih Paket Sesuai Momenmu
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0d1f3c] mt-1 mb-4">
+            Paket Sesuai <span className="text-[#C9A84C]">Momenmu</span>
           </h2>
           <p className="text-gray-500 text-sm sm:text-base max-w-xl mx-auto">
             Sudah include <span className="font-semibold text-gray-700">all edit foto</span> + link Google Drive max 1×12 jam
@@ -246,13 +283,14 @@ export function PaketSection({ katalog }: PaketSectionProps) {
             const paketKat = paketList.filter((p) => p.kategori === kat)
             return (
               <TabsContent key={kat} value={kat} className="mt-8">
-                <div className={`grid gap-6 pt-6 ${paketKat.length === 1 ? "" : "grid-cols-1 sm:grid-cols-3"}`}>
+                <div className={`grid gap-6 pt-6 ${paketKat.length === 1 ? "" : "grid-cols-1 sm:grid-cols-3"}`} data-stagger="100">
                   {paketKat.map((paket) => (
-                    <PaketCard
-                      key={paket.id}
-                      paket={paket}
-                      lebar={paketKat.length === 1 ? "lega" : "normal"}
-                    />
+                    <div key={paket.id} className="reveal">
+                      <PaketCard
+                        paket={paket}
+                        lebar={paketKat.length === 1 ? "lega" : "normal"}
+                      />
+                    </div>
                   ))}
                 </div>
               </TabsContent>

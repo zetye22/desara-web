@@ -8,6 +8,7 @@ import { TentangSection } from "@/components/landing/tentang-section"
 import { TestimoniSection } from "@/components/landing/testimoni-section"
 import { FooterSection } from "@/components/landing/footer-section"
 import { MobileBookingBar } from "@/components/landing/mobile-booking-bar"
+import { MarqueeStrip } from "@/components/landing/marquee-strip"
 import { createAdminClient } from "@/lib/supabase/server"
 import { SEMUA_PAKET, ADD_ONS, BACKGROUNDS } from "@/lib/constants"
 import type { KatalogData, PaketKatalog, AddonKatalog, AddonItem } from "@/lib/katalog-types"
@@ -140,6 +141,7 @@ export default async function Home() {
         jumlahBackground={bgCount}
         jumlahPaket={katalog.paket.length}
       />
+      <MarqueeStrip />
       <PaketSection katalog={katalog} />
       <PortfolioSectionWrapper />
       <TentangSection

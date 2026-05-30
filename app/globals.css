@@ -56,4 +56,138 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLL REVEAL SYSTEM
+   ══════════════════════════════════════════════════════════════ */
+
+/* Keyframes */
+@keyframes reveal-fade-up {
+  from { opacity: 0; transform: translateY(55px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-fade-left {
+  from { opacity: 0; transform: translateX(55px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes reveal-fade-right {
+  from { opacity: 0; transform: translateX(-55px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes reveal-scale-in {
+  from { opacity: 0; transform: scale(0.86); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes reveal-clip-up {
+  from { clip-path: inset(0 0 100% 0 round 8px); }
+  to   { clip-path: inset(0 0 0% 0 round 8px); }
+}
+
+/* ── Base: hidden before reveal ── */
+.reveal, .reveal-left, .reveal-right, .reveal-scale {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transition-duration: 0.75s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--stagger-delay, 0ms);
+}
+.reveal       { transform: translateY(55px); }
+.reveal-left  { transform: translateX(55px); }
+.reveal-right { transform: translateX(-55px); }
+.reveal-scale { transform: scale(0.86); }
+
+/* ── JS fallback: add .in-view via IntersectionObserver ── */
+.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view, .reveal-scale.in-view {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Modern CSS: animation-timeline:view() ── */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: reveal-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 38%;
+    animation-delay: var(--stagger-delay, 0ms);
+    opacity: 1; transform: none;
+  }
+  .reveal-left {
+    animation: reveal-fade-left 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 38%;
+    animation-delay: var(--stagger-delay, 0ms);
+    opacity: 1; transform: none;
+  }
+  .reveal-right {
+    animation: reveal-fade-right 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 38%;
+    animation-delay: var(--stagger-delay, 0ms);
+    opacity: 1; transform: none;
+  }
+  .reveal-scale {
+    animation: reveal-scale-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+    animation-delay: var(--stagger-delay, 0ms);
+    opacity: 1; transform: none;
+  }
+}
+
+/* ── Marquee ─────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+.animate-marquee:hover { animation-play-state: paused; }
+
+/* ── Gradient text utility ───────────────────────────────────── */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #C9A84C 0%, #f0c97a 50%, #C9A84C 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Glass card utility ──────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.glass-dark {
+  background: rgba(13,31,60,0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ── Gradient border (popular card) ─────────────────────────── */
+.gradient-border {
+  position: relative;
+  background: white;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #C9A84C, #f0c97a, #b8963d);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: gradient-x 4s ease infinite;
+  background-size: 200% auto;
 }

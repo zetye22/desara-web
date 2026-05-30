@@ -13,8 +13,11 @@ export function FooterSection({ wa = "6281234567890", instagram = "@desarahomest
   const instagramHandle = instagram.startsWith("@") ? instagram : `@${instagram}`
 
   return (
-    <footer className="bg-[#0d1f3c] text-white pt-12 pb-24 sm:pb-12 px-4">
-      <div className="max-w-6xl mx-auto">
+    <footer className="bg-gradient-to-br from-[#070f1e] via-[#0d1f3c] to-[#0a1528] text-white pt-14 pb-24 sm:pb-14 px-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#C9A84C]/4 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-blue-500/4 blur-[80px] pointer-events-none" />
+      <div className="max-w-6xl mx-auto relative z-10">
 
         {/* Mobile: stacked compact | Desktop: 3-col grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10 mb-8 sm:mb-10">
@@ -125,11 +128,11 @@ export function FooterSection({ wa = "6281234567890", instagram = "@desarahomest
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p className="text-blue-200/40 text-xs sm:text-sm">
-            © 2026 Desara Home Studio. All rights reserved.
+        <div className="border-t border-white/8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
+          <p className="text-blue-200/35 text-xs sm:text-sm">
+            © 2026 Desara Home Studio · All rights reserved.
           </p>
-          <p className="text-blue-200/30 text-xs">Dibuat dengan ♥ untuk momen istimewa</p>
+          <p className="text-[#C9A84C]/40 text-xs">Dibuat dengan ♥ untuk momen istimewa</p>
         </div>
       </div>
     </footer>
