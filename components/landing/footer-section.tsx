@@ -1,13 +1,11 @@
 interface FooterProps {
   wa?: string
   instagram?: string
-  alamat?: string
-  mapsUrl?: string
   jamBuka?: string
   jamTutup?: string
 }
 
-export function FooterSection({ wa = "6281234567890", instagram = "@desarahomestudio", alamat, mapsUrl, jamBuka = "10:00", jamTutup = "21:00" }: FooterProps) {
+export function FooterSection({ wa = "6281234567890", instagram = "@desarahomestudio", jamBuka = "10:00", jamTutup = "21:00" }: FooterProps) {
   const waDisplay = wa.startsWith("62")
     ? `+${wa.slice(0, 2)} ${wa.slice(2, 5)}-${wa.slice(5, 9)}-${wa.slice(9)}`
     : wa

@@ -155,8 +155,6 @@ export default async function Home() {
       <FooterSection
         wa={kontak.wa}
         instagram={kontak.instagram}
-        alamat={kontak.alamat}
-        mapsUrl={kontak.maps_url}
         jamBuka={operasional.jam_buka}
         jamTutup={operasional.jam_tutup}
       />
