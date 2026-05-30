@@ -1,10 +1,11 @@
-import { Clock, Camera, MapPin, ChevronRight, Zap, CheckCircle2 } from "lucide-react"
+import { Clock, Camera, MapPin, ChevronRight, Zap, CheckCircle2, ExternalLink } from "lucide-react"
 
 interface TentangProps {
   jamBuka?: string
   jamTutup?: string
   jumlahBackground?: number
   alamat?: string
+  mapsUrl?: string
 }
 
 export function TentangSection({
@@ -12,6 +13,7 @@ export function TentangSection({
   jamTutup = "21:00",
   jumlahBackground = 4,
   alamat,
+  mapsUrl,
 }: TentangProps) {
   const jamDisplay = `${jamBuka.replace(":00",".00")} – ${jamTutup.replace(":00",".00")}`
 
@@ -97,13 +99,25 @@ export function TentangSection({
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center">
               <MapPin className="w-5 h-5 text-emerald-500" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-1">Lokasi Studio</p>
               <p className="text-xl font-black text-[#0d1f3c]">Desara Home Studio</p>
               <p className="text-sm text-gray-500 mt-1 leading-relaxed">
                 {alamat ?? "Hubungi kami via WhatsApp untuk alamat lengkap"}
               </p>
             </div>
+            {mapsUrl && (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors group mt-1"
+              >
+                <MapPin className="w-4 h-4" />
+                Buka di Google Maps
+                <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+              </a>
+            )}
           </div>
 
           {/* [E] Quick facts */}

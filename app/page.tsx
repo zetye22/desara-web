@@ -39,7 +39,7 @@ async function getPageData() {
     jam_buka?: string; jam_tutup?: string
   }
   const kontak = (rows.find((r) => r.key === "kontak")?.value ?? {}) as {
-    wa?: string; instagram?: string; alamat?: string
+    wa?: string; instagram?: string; alamat?: string; maps_url?: string
   }
 
   // ── Paket dari settings ───────────────────────────────────
@@ -134,7 +134,7 @@ export default async function Home() {
 
   return (
     <main className="scroll-smooth">
-      <Navbar />
+      <Navbar mapsUrl={kontak.maps_url} />
       <Hero
         jamBuka={operasional.jam_buka}
         jamTutup={operasional.jam_tutup}
@@ -149,11 +149,14 @@ export default async function Home() {
         jamTutup={operasional.jam_tutup}
         jumlahBackground={bgCount}
         alamat={kontak.alamat}
+        mapsUrl={kontak.maps_url}
       />
       <TestimoniSection items={testimoni} />
       <FooterSection
         wa={kontak.wa}
         instagram={kontak.instagram}
+        alamat={kontak.alamat}
+        mapsUrl={kontak.maps_url}
         jamBuka={operasional.jam_buka}
         jamTutup={operasional.jam_tutup}
       />
