@@ -140,41 +140,38 @@ function FotoCard({
   onClick: () => void
 }) {
   return (
-    <div className="mb-3 break-inside-avoid">
-      <button
-        onClick={onClick}
-        className="group relative w-full overflow-hidden rounded-xl bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 transition-shadow hover:shadow-lg block"
-        aria-label={`Buka foto: ${item.alt}`}
-      >
-        <Image
-          src={item.src}
-          alt={item.alt}
-          width={800}
-          height={1000}
-          loading="lazy"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
-          placeholder="blur"
-          blurDataURL={BLUR_URL}
-        />
+    <button
+      onClick={onClick}
+      className="group relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#C9A84C] focus:ring-offset-2 hover:shadow-xl transition-shadow duration-300"
+      aria-label={`Buka foto: ${item.alt}`}
+    >
+      <Image
+        src={item.src}
+        alt={item.alt}
+        fill
+        loading="lazy"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+        placeholder="blur"
+        blurDataURL={BLUR_URL}
+      />
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/55 transition-colors duration-300">
-          {/* Zoom icon — tengah */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <ZoomIn className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          {/* Label kategori — pojok bawah */}
-          <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="inline-block bg-[#C9A84C] text-white text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize">
-              {KATEGORI_LABEL[item.kategori as KategoriSesi]}
-            </span>
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {/* Zoom icon */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+            <ZoomIn className="w-5 h-5 text-white" />
           </div>
         </div>
-      </button>
-    </div>
+        {/* Label kategori */}
+        <div className="absolute bottom-3 left-3 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+          <span className="inline-block bg-[#C9A84C] text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
+            {KATEGORI_LABEL[item.kategori as KategoriSesi]}
+          </span>
+        </div>
+      </div>
+    </button>
   )
 }
 
@@ -282,8 +279,8 @@ export function PortfolioSection({ initialItems }: PortfolioSectionProps) {
           ))}
         </div>
 
-        {/* Grid foto — masonry agar landscape & portrait tampil natural */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-3" data-stagger="55">
+        {/* Grid foto — 4/5 aspect ratio seragam, object-cover tengah */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" data-stagger="55">
           {visible.map((item, i) => (
             <div key={item.id} className="reveal">
               <FotoCard
