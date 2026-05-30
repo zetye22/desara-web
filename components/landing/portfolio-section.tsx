@@ -280,14 +280,13 @@ export function PortfolioSection({ initialItems }: PortfolioSectionProps) {
         </div>
 
         {/* Grid foto — 4/5 aspect ratio seragam, object-cover tengah */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" data-stagger="55">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {visible.map((item, i) => (
-            <div key={item.id} className="reveal">
-              <FotoCard
-                item={item}
-                onClick={() => setLightbox({ items: visible, index: i })}
-              />
-            </div>
+            <FotoCard
+              key={item.id}
+              item={item}
+              onClick={() => setLightbox({ items: visible, index: i })}
+            />
           ))}
         </div>
 
