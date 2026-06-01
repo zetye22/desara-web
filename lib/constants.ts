@@ -162,7 +162,7 @@ export const BIAYA_TETAP_BULANAN = {
 }
 
 export const OPERASIONAL = {
-  jamBuka: "10:00",
+  jamBuka: "06:00",
   jamTutup: "21:00",
   jumlahBackground: 4,
   dpMinimum: 100000,

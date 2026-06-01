@@ -9,7 +9,7 @@ interface TentangProps {
 }
 
 export function TentangSection({
-  jamBuka = "10:00",
+  jamBuka = "06:00",
   jamTutup = "21:00",
   jumlahBackground = 4,
   alamat,

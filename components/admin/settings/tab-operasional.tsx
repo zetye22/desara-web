@@ -14,7 +14,7 @@ interface TabOperasionalProps {
 }
 
 const DEFAULT: OperasionalValue = {
-  jam_buka: "10:00",
+  jam_buka: "06:00",
   jam_tutup: "21:00",
   dp_minimum: 100000,
   toleransi_terlambat: 15,

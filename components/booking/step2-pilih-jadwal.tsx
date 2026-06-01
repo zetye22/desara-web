@@ -278,7 +278,7 @@ export function Step2PilihJadwal() {
     <div>
       <h2 className="text-xl font-bold text-[#0d1f3c] mb-1">Pilih Tanggal & Jam</h2>
       <p className="text-sm text-gray-500 mb-6">
-        Jam operasional studio: <span className="font-medium text-gray-700">10:00 – 21:00 WIB</span>
+        Jam operasional studio: <span className="font-medium text-gray-700">06:00 – 21:00 WIB</span>
       </p>
 
       <div className="grid md:grid-cols-2 gap-6">

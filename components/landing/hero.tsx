@@ -73,7 +73,7 @@ interface HeroProps {
 }
 
 export function Hero({
-  jamBuka = "10:00",
+  jamBuka = "06:00",
   jamTutup = "21:00",
   jumlahBackground = 4,
   jumlahPaket = 6,
