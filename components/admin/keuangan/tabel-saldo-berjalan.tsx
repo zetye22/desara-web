@@ -44,13 +44,14 @@ export function TabelSaldoBerjalan({ saldoBerjalan, saldoAwal, pembayaran }: Tab
       </div>
 
       {/* Tabel */}
-      <div className="overflow-hidden rounded-xl border border-gray-100">
+      <div className="rounded-xl border border-gray-100 overflow-hidden">
         {saldoBerjalan.length === 0 ? (
           <div className="py-12 text-center text-gray-300 text-sm">
             Belum ada transaksi kas bulan ini
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
                 <th className="px-5 py-2.5 text-left font-medium">Tanggal</th>
@@ -106,6 +107,7 @@ export function TabelSaldoBerjalan({ saldoBerjalan, saldoAwal, pembayaran }: Tab
               </tr>
             </tfoot>
           </table>
+          </div>
         )}
       </div>
     </div>

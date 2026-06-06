@@ -49,8 +49,9 @@ export function TabelPembayaran({ pembayaran }: TabelPembayaranProps) {
             {dpRows.length} transaksi · {formatRupiah(totalDp)}
           </span>
         </div>
-        <div className="overflow-hidden rounded-xl border border-gray-100">
-          <table className="w-full text-sm">
+        <div className="rounded-xl border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[420px] text-sm">
             <thead>
               <tr className="bg-blue-50/60 text-gray-400 text-xs uppercase tracking-wide">
                 <th className="px-5 py-2.5 text-left font-medium">Tgl Bayar DP</th>
@@ -99,6 +100,7 @@ export function TabelPembayaran({ pembayaran }: TabelPembayaranProps) {
               </tfoot>
             )}
           </table>
+          </div>
         </div>
       </div>
 
@@ -111,8 +113,9 @@ export function TabelPembayaran({ pembayaran }: TabelPembayaranProps) {
             {lunasRows.length} transaksi · {formatRupiah(totalLunas)}
           </span>
         </div>
-        <div className="overflow-hidden rounded-xl border border-gray-100">
-          <table className="w-full text-sm">
+        <div className="rounded-xl border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[420px] text-sm">
             <thead>
               <tr className="bg-emerald-50/60 text-gray-400 text-xs uppercase tracking-wide">
                 <th className="px-5 py-2.5 text-left font-medium">Tgl Pelunasan</th>
@@ -161,6 +164,7 @@ export function TabelPembayaran({ pembayaran }: TabelPembayaranProps) {
               </tfoot>
             )}
           </table>
+          </div>
         </div>
       </div>
     </div>

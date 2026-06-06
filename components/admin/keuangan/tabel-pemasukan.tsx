@@ -37,8 +37,9 @@ export function TabelPemasukan({ data, detailAddonLapangan, addonInsight }: Tabe
   return (
     <div className="space-y-4">
       {/* Sumber Pemasukan */}
-      <div className="overflow-hidden rounded-xl border border-gray-100">
-        <table className="w-full text-sm">
+      <div className="rounded-xl border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[480px] text-sm">
           <thead>
             <tr className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
               <th className="px-5 py-3 text-left font-medium">Sumber Pendapatan</th>
@@ -106,15 +107,17 @@ export function TabelPemasukan({ data, detailAddonLapangan, addonInsight }: Tabe
             </tr>
           </tfoot>
         </table>
+        </div>
       </div>
 
       {/* Per Kategori Sesi */}
       {data.perKategori.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-gray-100">
+        <div className="rounded-xl border border-gray-100 overflow-hidden">
           <div className="px-5 py-3 bg-gray-50 border-b border-gray-100">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Breakdown per Kategori Sesi</p>
           </div>
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[420px] text-sm">
             <thead>
               <tr className="text-gray-400 text-xs uppercase tracking-wide">
                 <th className="px-5 py-2.5 text-left font-medium">Kategori</th>
@@ -134,6 +137,7 @@ export function TabelPemasukan({ data, detailAddonLapangan, addonInsight }: Tabe
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

@@ -24,9 +24,10 @@ export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
   return (
     <div className="space-y-4">
       {/* A. HPP */}
-      <div className="overflow-hidden rounded-xl border border-gray-100">
+      <div className="rounded-xl border border-gray-100 overflow-hidden">
         <SectionHeader label="A. Harga Pokok Produksi (HPP)" color="bg-gray-50" />
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[380px] text-sm">
           <thead>
             <tr className="text-gray-400 text-xs uppercase tracking-wide">
               <th className="px-5 py-2.5 text-left font-medium">Item</th>
@@ -72,12 +73,14 @@ export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
             </tr>
           </tfoot>
         </table>
+        </div>
       </div>
 
       {/* B. Operasional */}
-      <div className="overflow-hidden rounded-xl border border-gray-100">
+      <div className="rounded-xl border border-gray-100 overflow-hidden">
         <SectionHeader label="B. Biaya Operasional Tetap" color="bg-gray-50" />
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[320px] text-sm">
           <tbody className="divide-y divide-gray-50">
             {data.operasional.biayaTetap.length === 0 ? (
               <tr>
@@ -97,6 +100,7 @@ export function TabelPengeluaran({ data }: TabelPengeluaranProps) {
             </tr>
           </tfoot>
         </table>
+        </div>
       </div>
 
       {/* Total */}

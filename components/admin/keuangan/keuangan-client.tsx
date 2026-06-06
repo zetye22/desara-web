@@ -190,23 +190,25 @@ export function KeuanganClient({ initialPeriode }: { initialPeriode: string }) {
                     {data.pemasukan.perKategori.length === 0 ? (
                       <p className="text-sm text-gray-300 text-center py-6">Tidak ada booking</p>
                     ) : (
-                      <div className="space-y-2">
-                        {data.pemasukan.perKategori.map((k) => {
-                          const pct = data.pemasukan.total > 0 ? (k.total / data.pemasukan.total) * 100 : 0
-                          const label: Record<string, string> = { wisuda: "Wisuda", prewed: "Prewedding", keluarga: "Keluarga", group: "Group", portrait: "Portrait" }
-                          return (
-                            <div key={k.kategori} className="flex items-center gap-3">
-                              <span className="text-sm text-gray-600 w-28 shrink-0">{label[k.kategori] ?? k.kategori}</span>
-                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#0d1f3c] rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="overflow-x-auto -mx-1">
+                        <div className="space-y-2 min-w-[320px] px-1">
+                          {data.pemasukan.perKategori.map((k) => {
+                            const pct = data.pemasukan.total > 0 ? (k.total / data.pemasukan.total) * 100 : 0
+                            const label: Record<string, string> = { wisuda: "Wisuda", prewed: "Prewedding", keluarga: "Keluarga", group: "Group", portrait: "Portrait" }
+                            return (
+                              <div key={k.kategori} className="flex items-center gap-3">
+                                <span className="text-sm text-gray-600 w-24 shrink-0">{label[k.kategori] ?? k.kategori}</span>
+                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden min-w-[60px]">
+                                  <div className="h-full bg-[#0d1f3c] rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className="text-sm font-semibold text-gray-700 text-right shrink-0">
+                                  {new Intl.NumberFormat("id-ID").format(k.total)}
+                                </span>
+                                <span className="text-xs text-gray-400 w-8 text-right shrink-0">{pct.toFixed(0)}%</span>
                               </div>
-                              <span className="text-sm font-semibold text-gray-700 w-28 text-right shrink-0">
-                                {new Intl.NumberFormat("id-ID").format(k.total)}
-                              </span>
-                              <span className="text-xs text-gray-400 w-10 text-right shrink-0">{pct.toFixed(0)}%</span>
-                            </div>
-                          )
-                        })}
+                            )
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
