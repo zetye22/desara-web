@@ -1,7 +1,6 @@
 ﻿import { getSessionUserWithRole } from "@/lib/auth-server"
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { timeToMinutes } from "@/lib/time-utils"
 import { OPERASIONAL } from "@/lib/constants"
 
 export async function POST(
