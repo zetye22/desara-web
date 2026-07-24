@@ -17,14 +17,19 @@ export async function PATCH(
     alasan?: string
     tambah_charge?: boolean
   }
-  try { body = await request.json() } catch {
+  try {
+    body = await request.json()
+  } catch {
     return NextResponse.json({ error: "Format tidak valid" }, { status: 400 })
   }
 
   const { tgl_foto_baru, jam_mulai_baru, alasan, tambah_charge } = body
 
   if (!tgl_foto_baru || !jam_mulai_baru) {
-    return NextResponse.json({ error: "tgl_foto_baru dan jam_mulai_baru wajib diisi" }, { status: 400 })
+    return NextResponse.json(
+      { error: "tgl_foto_baru dan jam_mulai_baru wajib diisi" },
+      { status: 400 }
+    )
   }
 
   const supabase = createAdminClient()
@@ -41,7 +46,7 @@ export async function PATCH(
   }
 
   // 2. Hitung durasi dari booking lama, terapkan ke jam baru
-  const durasiMenit  = timeToMinutes(booking.jam_selesai) - timeToMinutes(booking.jam_mulai)
+  const durasiMenit = timeToMinutes(booking.jam_selesai) - timeToMinutes(booking.jam_mulai)
   const jamSelesaiBaru = minutesToTime(timeToMinutes(jam_mulai_baru) + durasiMenit)
 
   // Validasi jam selesai tidak melewati 21:00
@@ -52,73 +57,61 @@ export async function PATCH(
     )
   }
 
-  // 3. Cek ketersediaan slot baru (exclude booking ini sendiri)
-  const { data: existingBookings } = await supabase
-    .from("bookings")
-    .select("id, kode_booking, jam_mulai, jam_selesai, nama_client")
-    .eq("tgl_foto", tgl_foto_baru)
-    .neq("status_sesi", "cancel")
-    .neq("id", params.id)
-
-  const newMulai   = timeToMinutes(jam_mulai_baru)
-  const newSelesai = timeToMinutes(jamSelesaiBaru)
-
-  const bentrok = (existingBookings ?? []).find((b: { jam_mulai: string; jam_selesai: string }) => {
-    const bMulai   = timeToMinutes(b.jam_mulai)
-    const bSelesai = timeToMinutes(b.jam_selesai)
-    return bMulai < newSelesai && bSelesai > newMulai
-  }) as { kode_booking: string; jam_mulai: string; jam_selesai: string } | undefined
-
-  if (bentrok) {
-    return NextResponse.json(
-      { error: `Slot bentrok dengan booking ${bentrok.kode_booking} (${bentrok.jam_mulai}–${bentrok.jam_selesai})` },
-      { status: 409 }
-    )
-  }
-
-  // 4. Update booking
+  // 3. Update data booking utama
   const { error: updateErr } = await supabase
     .from("bookings")
     .update({
-      tgl_foto:   tgl_foto_baru,
-      jam_mulai:  jam_mulai_baru,
+      tgl_foto: tgl_foto_baru,
+      jam_mulai: jam_mulai_baru,
       jam_selesai: jamSelesaiBaru,
     })
     .eq("id", params.id)
 
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
-  // 5. Catat ke log reschedule
-  await supabase.from("booking_reschedule_log").insert({
-    booking_id:       params.id,
-    tgl_foto_lama:    booking.tgl_foto,
-    jam_mulai_lama:   booking.jam_mulai,
+  // 4. Catat ke log reschedule
+  const { error: logErr } = await supabase.from("booking_reschedule_log").insert({
+    booking_id: params.id,
+    tgl_foto_lama: booking.tgl_foto,
+    jam_mulai_lama: booking.jam_mulai,
     jam_selesai_lama: booking.jam_selesai,
     tgl_foto_baru,
     jam_mulai_baru,
     jam_selesai_baru: jamSelesaiBaru,
-    alasan:           alasan ?? null,
-    oleh_admin:       user.id,
+    alasan: alasan ?? null,
+    oleh_admin: user.id,
   })
 
-  // 6. Tambah charge reschedule mendadak jika dipilih
+  if (logErr) {
+    console.error("Gagal mencatat reschedule log:", logErr.message)
+  }
+
+  // 5. Tambah charge reschedule mendadak jika dipilih
   if (tambah_charge) {
     const chargeAmount = 50000
-    await supabase.from("booking_addons").insert({
-      booking_id:    params.id,
-      jenis:         "lainnya",
-      nama_item:     "Charge Reschedule Mendadak",
-      qty:           1,
-      harga_satuan:  chargeAmount,
-      subtotal:      chargeAmount,
-      source:        "lapangan",
-      catatan:       "Reschedule H-1 atau hari-H",
+    const { error: addonErr } = await supabase.from("booking_addons").insert({
+      booking_id: params.id,
+      jenis: "lainnya",
+      nama_item: "Charge Reschedule Mendadak",
+      qty: 1,
+      harga_satuan: chargeAmount,
+      subtotal: chargeAmount,
+      source: "lapangan",
+      catatan: "Reschedule H-1 atau hari-H",
     })
-    // Update total di bookings
-    await supabase.from("bookings").update({
-      subtotal_addon: (booking.subtotal_addon ?? 0) + chargeAmount,
-      total_tagihan:  (booking.total_tagihan ?? 0) + chargeAmount,
-    }).eq("id", params.id)
+
+    if (addonErr) {
+      console.error("Gagal menambah addon charge:", addonErr.message)
+    } else {
+      // Update total tagihan di tabel bookings
+      await supabase
+        .from("bookings")
+        .update({
+          subtotal_addon: (booking.subtotal_addon ?? 0) + chargeAmount,
+          total_tagihan: (booking.total_tagihan ?? 0) + chargeAmount,
+        })
+        .eq("id", params.id)
+    }
   }
 
   return NextResponse.json({ success: true, jam_selesai_baru: jamSelesaiBaru })
