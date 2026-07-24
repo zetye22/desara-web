@@ -44,30 +44,30 @@ export async function POST(
 
   // 2. Anti-bentrok: cek slot terhadap booking BOOKED atau PENDING lain
   // Include "pending" untuk cegah race condition saat 2 admin confirm DP bersamaan
-  const { data: existingBookings } = await supabase
-    .from("bookings")
-    .select("id, kode_booking, jam_mulai, jam_selesai, nama_client")
-    .eq("tgl_foto", booking.tgl_foto)
-    .in("status_sesi", ["booked", "pending"])
-    .neq("id", params.id)
+  // const { data: existingBookings } = await supabase
+  //   .from("bookings")
+  //   .select("id, kode_booking, jam_mulai, jam_selesai, nama_client")
+  //   .eq("tgl_foto", booking.tgl_foto)
+  //   .in("status_sesi", ["booked", "pending"])
+  //   .neq("id", params.id)
 
-  const mulai   = timeToMinutes(booking.jam_mulai)
-  const selesai = timeToMinutes(booking.jam_selesai)
+  // const mulai   = timeToMinutes(booking.jam_mulai)
+  // const selesai = timeToMinutes(booking.jam_selesai)
 
-  const bentrok = (existingBookings ?? []).find((b: { jam_mulai: string; jam_selesai: string }) => {
-    return timeToMinutes(b.jam_mulai) < selesai && timeToMinutes(b.jam_selesai) > mulai
-  }) as { kode_booking: string; jam_mulai: string; jam_selesai: string; nama_client: string } | undefined
+  // const bentrok = (existingBookings ?? []).find((b: { jam_mulai: string; jam_selesai: string }) => {
+  //   return timeToMinutes(b.jam_mulai) < selesai && timeToMinutes(b.jam_selesai) > mulai
+  // }) as { kode_booking: string; jam_mulai: string; jam_selesai: string; nama_client: string } | undefined
 
-  if (bentrok) {
-    return NextResponse.json(
-      {
-        error: `Slot sudah diambil oleh ${bentrok.nama_client} (${bentrok.kode_booking}, ${bentrok.jam_mulai}–${bentrok.jam_selesai}). Konfirmasi DP ditolak — silakan reschedule booking ini ke slot lain.`,
-        bentrok: true,
-        bentrok_dengan: bentrok.kode_booking,
-      },
-      { status: 409 }
-    )
-  }
+  // if (bentrok) {
+  //   return NextResponse.json(
+  //     {
+  //       error: `Slot sudah diambil oleh ${bentrok.nama_client} (${bentrok.kode_booking}, ${bentrok.jam_mulai}–${bentrok.jam_selesai}). Konfirmasi DP ditolak — silakan reschedule booking ini ke slot lain.`,
+  //       bentrok: true,
+  //       bentrok_dengan: bentrok.kode_booking,
+  //     },
+  //     { status: 409 }
+  //   )
+  // }
 
   // 3. Tentukan status pembayaran baru
   const statusPembayaran = nominal >= booking.total_tagihan ? "lunas" : "dp_ok"

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Loader2, Upload, X, FileImage } from "lucide-react"
+import { ChevronLeft, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { useBookingStore } from "@/lib/booking-store"
@@ -14,48 +14,29 @@ import type { PaketKatalog } from "@/lib/katalog-types"
 
 export function Step4Konfirmasi() {
   const router = useRouter()
-  const store  = useBookingStore()
+  const store = useBookingStore()
 
-  const [loading, setLoading]   = useState(false)
-  const [fileBukti, setFileBukti] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [loading, setLoading] = useState(false)
 
-  const rincian   = hitungHarga(store.paketId, store.addons, store.katalog)
+  const rincian = hitungHarga(store.paketId, store.addons, store.katalog)
 
   const semuaPaket: PaketKatalog[] = store.katalog?.paket ?? SEMUA_PAKET.map((p) => ({
-    key: `paket_${p.id}`, id: p.id, nama: p.nama, kategori: p.kategori,
-    harga: p.harga, hargaMulaiDari: p.hargaMulaiDari, durasiMenit: p.durasiMenit,
-    jumlahBackground: p.jumlahBackground, maxOrang: p.maxOrang,
-    cetakInclude: p.cetakInclude ?? null, popular: p.popular ?? false,
+    key: `paket_${p.id}`,
+    id: p.id,
+    nama: p.nama,
+    kategori: p.kategori,
+    harga: p.harga,
+    hargaMulaiDari: p.hargaMulaiDari,
+    durasiMenit: p.durasiMenit,
+    jumlahBackground: p.jumlahBackground,
+    maxOrang: p.maxOrang,
+    cetakInclude: p.cetakInclude ?? null,
+    popular: p.popular ?? false,
   }))
   const paket = semuaPaket.find((p) => p.id === store.paketId)
 
   const semuaBg = store.katalog?.backgrounds ?? BACKGROUNDS.map((b) => ({ id: b.id, nama: b.nama, warna: b.warna }))
   const bgDipilih = semuaBg.filter((b) => store.backgroundDipilih.includes(b.id))
-
-  // ── File upload handler ────────────────────────────────────────
-  const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Ukuran file maksimal 5 MB")
-      return
-    }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error("Format file harus JPG, PNG, atau WebP")
-      return
-    }
-    setFileBukti(file)
-  }
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (file) {
-      const fake = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>
-      handleFilePick(fake)
-    }
-  }
 
   // ── Submit booking ─────────────────────────────────────────────
   const handleSubmit = async () => {
@@ -75,21 +56,21 @@ export function Step4Konfirmasi() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          kategori_sesi:      store.kategori,
-          paket_id:           store.paketId,
-          tgl_foto:           store.tanggalFoto,
-          jam_mulai:          store.jamMulai,
-          nama_client:        store.namaClient,
-          no_wa:              store.noWa,
-          email:              store.email || "",
-          jumlah_orang:       store.jumlahOrang,
+          kategori_sesi: store.kategori,
+          paket_id: store.paketId,
+          tgl_foto: store.tanggalFoto,
+          jam_mulai: store.jamMulai,
+          nama_client: store.namaClient,
+          no_wa: store.noWa,
+          email: store.email || "",
+          jumlah_orang: store.jumlahOrang,
           background_dipilih: store.backgroundDipilih,
-          addons:             store.addons,
-          catatan:            store.catatan || undefined,
+          addons: store.addons,
+          catatan: store.catatan || undefined,
         }),
       })
 
-      const json = await res.json() as {
+      const json = (await res.json()) as {
         success?: boolean
         kode_booking?: string
         total_tagihan?: number
@@ -106,33 +87,18 @@ export function Step4Konfirmasi() {
 
       // Simpan hasil ke store untuk halaman sukses
       store.setBookingResult({
-        kode_booking:  json.kode_booking,
+        kode_booking: json.kode_booking,
         total_tagihan: json.total_tagihan ?? rincian.total,
-        dp_minimum:    json.dp_minimum ?? rincian.dpMinimum,
-        sisa_bayar:    json.sisa_bayar ?? rincian.sisaBayar,
-        nama_client:   store.namaClient,
-        no_wa:         store.noWa,
-        tgl_foto:      store.tanggalFoto,
-        jam_mulai:     store.jamMulai,
-        nama_paket:    json.nama_paket ?? paket?.nama ?? "",
+        dp_minimum: json.dp_minimum ?? rincian.dpMinimum,
+        sisa_bayar: json.sisa_bayar ?? rincian.sisaBayar,
+        nama_client: store.namaClient,
+        no_wa: store.noWa,
+        tgl_foto: store.tanggalFoto,
+        jam_mulai: store.jamMulai,
+        nama_paket: json.nama_paket ?? paket?.nama ?? "",
       })
 
-      // 2. Upload bukti transfer (opsional, tidak block jika gagal)
-      if (fileBukti) {
-        try {
-          const fd = new FormData()
-          fd.append("file", fileBukti)
-          fd.append("kode_booking", json.kode_booking)
-          const uploadRes = await fetch("/api/bookings/upload-bukti", { method: "POST", body: fd })
-          if (!uploadRes.ok) {
-            toast.warning("Booking berhasil tapi bukti transfer gagal terupload. Kirim ulang via WhatsApp ke admin ya.")
-          }
-        } catch {
-          toast.warning("Booking berhasil tapi bukti transfer gagal terupload. Kirim ulang via WhatsApp ke admin ya.")
-        }
-      }
-
-      // 3. Redirect ke halaman sukses
+      // 2. Redirect ke halaman sukses
       router.push(`/booking/sukses?kode=${encodeURIComponent(json.kode_booking)}`)
     } catch (err) {
       console.error(err)
@@ -194,52 +160,6 @@ export function Step4Konfirmasi() {
             <span>{formatRupiah(rincian.sisaBayar)}</span>
           </div>
         </div>
-
-        {/* Upload bukti transfer (opsional) */}
-        <div className="border-t pt-4">
-          <p className="text-sm font-semibold text-gray-700 mb-2">
-            Upload Bukti Transfer DP{" "}
-            <span className="font-normal text-gray-400">(opsional, bisa dikirim via WA)</span>
-          </p>
-
-          {fileBukti ? (
-            <div className="flex items-center gap-3 border border-green-200 bg-green-50 rounded-xl px-4 py-3">
-              <FileImage className="w-5 h-5 text-green-600 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-green-800 truncate">{fileBukti.name}</p>
-                <p className="text-xs text-green-600">{(fileBukti.size / 1024).toFixed(0)} KB</p>
-              </div>
-              <button
-                onClick={() => { setFileBukti(null); if (fileInputRef.current) fileInputRef.current.value = "" }}
-                className="text-gray-400 hover:text-red-500 transition-colors"
-                aria-label="Hapus file"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center cursor-pointer hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 transition-colors"
-            >
-              <Upload className="w-6 h-6 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">
-                Drag & drop atau <span className="text-[#C9A84C] font-medium">klik untuk pilih file</span>
-              </p>
-              <p className="text-xs text-gray-300 mt-1">JPG, PNG, WebP • Max 5 MB</p>
-            </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFilePick}
-          />
-        </div>
       </div>
 
       {/* Navigasi */}
@@ -258,7 +178,7 @@ export function Step4Konfirmasi() {
               Memproses…
             </>
           ) : (
-            "Konfirmasi & Kirim Booking"
+            "Lanjut Payment & Konfirmasi"
           )}
         </Button>
       </div>
