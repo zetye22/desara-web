@@ -79,7 +79,7 @@ const TEMPLATES: Record<JenisTemplate, (d: TemplateData) => string> = {
     `Halo Kak ${d.nama} ✨\nFoto Anda sudah selesai diedit! 📸\nUntuk paket ${d.paket} dengan ${d.jumlah_foto ?? "foto pilihan"}.\nBisa diambil di studio jam 10-21 WIB, atau kirim via GoSend (ongkir client).`,
 
   kirim_link_foto: (d) =>
-    `Halo Kak ${d.nama}! 🌟\n\nKabar gembira — foto Anda sudah selesai diedit dan siap dinikmati! 🎉\n\n📸 Paket: ${d.paket}\n🔗 Link hasil foto:\n${d.link_foto ?? "[link belum diisi]"}\n\nCara download:\nBuka link → pilih semua foto → klik tombol Download ⬇️\n\n⏳ Link aktif selama *30 hari* ya Kak, jangan lupa segera disimpan!\n\nSemoga foto-fotonya sesuai harapan Kak ${d.nama} 🙏✨\nKalau ada yang kurang berkenan, langsung kabari kami — kami siap bantu!\n\nTerima kasih sudah memilih Desara Home Studio 💛`,
+    `Halo Kak ${d.nama}! 🌟\n\nTerima kasih sudah foto di Desara Home Studio. 🤍\n\nBerikut link Google Drive untuk hasil fotonya:\n${d.link_foto ?? "[link belum diisi]"}\n\nJangan lupa follow & tag kami di Instagram dan TikTok @desarahomestudio ✨\n\nTerima kasih, semoga suka dengan hasil fotonya. Sampai jumpa di sesi berikutnya! 😊`,
 
   follow_up_review: (d) =>
     `Halo Kak ${d.nama} 💝\nTerima kasih sudah memilih Desara Studio!\nMohon bantuannya kasih review di:\n[Link Google Maps]\nBonus diskon 10% untuk booking next!`,
