@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { CalendarClock, MessageCircle, CalendarPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatRupiah, formatTanggal } from "@/lib/utils"
+import { formatRupiah, formatTanggal, parseKampusFromCatatan } from "@/lib/utils"
 import TabAddon from "./tab-addon"
 import TabRiwayat from "./tab-riwayat"
 import TabStaff from "./tab-staff"
@@ -345,39 +345,45 @@ export default function DetailModal({
         {/* Konten tab */}
         <div className="flex-1 overflow-y-auto">
           {/* ============ TAB 1: Info Client ============ */}
-          {activeTab === "info_client" && (
-            <div className="space-y-4 p-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <InfoField label="Nama Client" value={booking.nama_client} />
-                <InfoField
-                  label="No. WhatsApp"
-                  value={
-                    <a
-                      href={formatWaLink(booking.no_wa)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 font-medium text-green-600 hover:underline"
-                    >
-                      {booking.no_wa}
-                      <span className="text-xs">↗</span>
-                    </a>
-                  }
-                />
-                {booking.email && (
-                  <InfoField label="Email" value={booking.email} />
-                )}
-                <InfoField
-                  label="Jumlah Orang"
-                  value={`${booking.jumlah_orang} orang`}
-                />
-                {booking.catatan && (
-                  <div className="sm:col-span-2">
-                    <InfoField label="Catatan" value={booking.catatan} />
-                  </div>
-                )}
+          {activeTab === "info_client" && (() => {
+            const { kampus, catatanBersih } = parseKampusFromCatatan(booking.catatan)
+            return (
+              <div className="space-y-4 p-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <InfoField label="Nama Client" value={booking.nama_client} />
+                  <InfoField
+                    label="No. WhatsApp"
+                    value={
+                      <a
+                        href={formatWaLink(booking.no_wa)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 font-medium text-green-600 hover:underline"
+                      >
+                        {booking.no_wa}
+                        <span className="text-xs">↗</span>
+                      </a>
+                    }
+                  />
+                  {kampus && (
+                    <InfoField label="Kampus / Instansi" value={kampus} />
+                  )}
+                  {booking.email && (
+                    <InfoField label="Email" value={booking.email} />
+                  )}
+                  <InfoField
+                    label="Jumlah Orang"
+                    value={`${booking.jumlah_orang} orang`}
+                  />
+                  {catatanBersih && (
+                    <div className="sm:col-span-2">
+                      <InfoField label="Catatan" value={catatanBersih} />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* ============ TAB 2: Info Booking ============ */}
           {activeTab === "info_booking" && (

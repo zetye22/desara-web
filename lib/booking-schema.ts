@@ -20,6 +20,7 @@ export const detailSchema = z.object({
     .number()
     .int()
     .min(1, "Minimal 1 orang"),
+  kampus: z.string().max(100, "Nama kampus terlalu panjang").optional(),
   catatan: z.string().max(300, "Catatan maksimal 300 karakter").optional(),
 })
 

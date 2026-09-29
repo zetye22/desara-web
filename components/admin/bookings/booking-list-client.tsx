@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Download } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { formatRupiah, formatTanggal } from "@/lib/utils"
+import { formatRupiah, formatTanggal, parseKampusFromCatatan } from "@/lib/utils"
 import DetailModal from "./detail-modal"
 import { createClient } from "@/lib/supabase/client"
 
@@ -19,7 +19,7 @@ function getDefaultDateFrom() {
 
 function exportToCsv(rows: BookingRow[]) {
   const headers = [
-    "Kode", "Nama Client", "No WA", "Tanggal Foto", "Jam Mulai", "Jam Selesai",
+    "Kode", "Nama Client", "Kampus", "No WA", "Tanggal Foto", "Jam Mulai", "Jam Selesai",
     "Paket", "Kategori", "Jumlah Orang", "Status Sesi", "Status Bayar",
     "Total Tagihan", "DP Dibayar",
   ]
@@ -29,14 +29,17 @@ function exportToCsv(rows: BookingRow[]) {
       ? `"${s.replace(/"/g, '""')}"`
       : s
   }
-  const csvRows = rows.map((b) => [
-    b.kode_booking, b.nama_client, b.no_wa, b.tgl_foto, b.jam_mulai, b.jam_selesai,
-    b.nama_paket, b.kategori_sesi, b.jumlah_orang, b.status_sesi, b.status_pembayaran,
-    b.total_tagihan, b.dp_dibayar,
-  ].map(escape).join(","))
+  const csvRows = rows.map((b) => {
+    const { kampus } = parseKampusFromCatatan(b.catatan)
+    return [
+      b.kode_booking, b.nama_client, kampus ?? "-", b.no_wa, b.tgl_foto, b.jam_mulai, b.jam_selesai,
+      b.nama_paket, b.kategori_sesi, b.jumlah_orang, b.status_sesi, b.status_pembayaran,
+      b.total_tagihan, b.dp_dibayar,
+    ].map(escape).join(",")
+  })
 
   const csv = [headers.join(","), ...csvRows].join("\r\n")
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" })
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement("a")
   a.href     = url
@@ -214,12 +217,14 @@ export default function BookingListClient({
   // Filter data client-side
   const filtered = useMemo(() => {
     return bookings.filter((b) => {
-      // Filter pencarian: nama atau kode
+      // Filter pencarian: nama, kode, atau kampus
       if (search.trim()) {
         const q = search.toLowerCase()
+        const { kampus } = parseKampusFromCatatan(b.catatan)
         const match =
           b.nama_client.toLowerCase().includes(q) ||
-          b.kode_booking.toLowerCase().includes(q)
+          b.kode_booking.toLowerCase().includes(q) ||
+          (kampus && kampus.toLowerCase().includes(q))
         if (!match) return false
       }
 
@@ -463,16 +468,29 @@ export default function BookingListClient({
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-800">
-                          {booking.nama_client}
-                        </span>
-                        {addonLapanganIds.has(booking.id) && (
-                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
-                            +addon
-                          </span>
-                        )}
-                      </div>
+                      {(() => {
+                        const { kampus } = parseKampusFromCatatan(booking.catatan)
+                        return (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-800">
+                                {booking.nama_client}
+                              </span>
+                              {addonLapanganIds.has(booking.id) && (
+                                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
+                                  +addon
+                                </span>
+                              )}
+                            </div>
+                            {kampus && (
+                              <p className="text-[11px] text-[#0d1f3c] font-medium mt-0.5 flex items-center gap-1">
+                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />
+                                🎓 {kampus}
+                              </p>
+                            )}
+                          </>
+                        )
+                      })()}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {formatTanggal(booking.tgl_foto)}
@@ -524,16 +542,28 @@ export default function BookingListClient({
               {/* Header card */}
               <div className="mb-3 flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-gray-800">
-                      {booking.nama_client}
-                    </p>
-                    {addonLapanganIds.has(booking.id) && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
-                        +addon
-                      </span>
-                    )}
-                  </div>
+                  {(() => {
+                    const { kampus } = parseKampusFromCatatan(booking.catatan)
+                    return (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-800">
+                            {booking.nama_client}
+                          </p>
+                          {addonLapanganIds.has(booking.id) && (
+                            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
+                              +addon
+                            </span>
+                          )}
+                        </div>
+                        {kampus && (
+                          <p className="text-xs text-[#0d1f3c] font-medium mt-0.5">
+                            🎓 {kampus}
+                          </p>
+                        )}
+                      </>
+                    )
+                  })()}
                   <p className="mt-0.5 font-mono text-xs text-gray-400">
                     {booking.kode_booking}
                   </p>

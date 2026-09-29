@@ -4,20 +4,21 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard, CalendarDays, CalendarRange, Users, ImageIcon,
-  TrendingUp, Settings, LogOut, X, Receipt, LayoutTemplate,
+  TrendingUp, Settings, LogOut, X, Receipt, LayoutTemplate, ClipboardList,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 const NAV_ITEMS = [
-  { href: "/admin/dashboard",   label: "Dashboard",   icon: LayoutDashboard },
-  { href: "/admin/bookings",    label: "Booking",     icon: CalendarDays },
-  { href: "/admin/kalender",    label: "Kalender",    icon: CalendarRange },
-  { href: "/admin/clients",     label: "Data Client", icon: Users },
-  { href: "/admin/portfolio",   label: "Portfolio",   icon: ImageIcon },
-  { href: "/admin/pengeluaran", label: "Pengeluaran", icon: Receipt },
-  { href: "/admin/konten",      label: "Konten Web",  icon: LayoutTemplate },
-  { href: "/admin/keuangan",    label: "Laporan",     icon: TrendingUp },
-  { href: "/admin/settings",    label: "Pengaturan",  icon: Settings },
+  { href: "/admin/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/admin/bookings",     label: "Booking",      icon: CalendarDays },
+  { href: "/admin/waiting-list", label: "Waiting List", icon: ClipboardList },
+  { href: "/admin/kalender",     label: "Kalender",     icon: CalendarRange },
+  { href: "/admin/clients",      label: "Data Client",  icon: Users },
+  { href: "/admin/portfolio",    label: "Portfolio",    icon: ImageIcon },
+  { href: "/admin/pengeluaran",  label: "Pengeluaran",  icon: Receipt },
+  { href: "/admin/konten",       label: "Konten Web",   icon: LayoutTemplate },
+  { href: "/admin/keuangan",     label: "Laporan",      icon: TrendingUp },
+  { href: "/admin/settings",     label: "Pengaturan",   icon: Settings },
 ]
 
 interface SidebarProps {

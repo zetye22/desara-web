@@ -301,6 +301,25 @@ export function PaketSection({ katalog }: PaketSectionProps) {
         <AddOnSection katalog={katalog} />
         <BackgroundSection backgrounds={backgrounds} />
 
+        {/* Banner Ajakan Waiting List */}
+        <div className="mt-12 bg-gradient-to-r from-[#0d1f3c] to-[#152e5a] rounded-2xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
+          <div className="space-y-1.5 text-center sm:text-left">
+            <span className="text-xs uppercase font-bold tracking-wider text-[#C9A84C] bg-[#C9A84C]/15 px-3 py-1 rounded-full border border-[#C9A84C]/30 inline-block">
+              Jadwal Belum Pasti?
+            </span>
+            <h3 className="text-lg sm:text-xl font-bold">Daftar Antrean Waiting List Kami</h3>
+            <p className="text-sm text-blue-100/70 max-w-xl">
+              Pilih paket & background favoritmu sekarang tanpa bayar DP terlebih dahulu. Admin kami akan menghubungi saat slot tersedia sesuai perkiraan jadwalmu!
+            </p>
+          </div>
+          <a
+            href="/waiting-list"
+            className="shrink-0 bg-[#C9A84C] hover:bg-[#b8963d] text-white font-semibold px-6 py-3 rounded-full text-sm transition-all hover:shadow-lg hover:shadow-[#C9A84C]/30"
+          >
+            Isi Form Waiting List
+          </a>
+        </div>
+
         <p className="text-center text-xs sm:text-sm text-gray-400 mt-8 sm:mt-10">
           DP minimum Rp 100.000 · Pembayaran via transfer · Konfirmasi via WhatsApp
         </p>

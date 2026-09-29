@@ -114,7 +114,7 @@ function PilihBackground() {
 
 export function Step3Detail() {
   const {
-    paketId, addons, namaClient, noWa, email, jumlahOrang, catatan, katalog,
+    paketId, addons, namaClient, noWa, email, jumlahOrang, kampus, catatan, katalog,
     setFormDetail, nextStep, prevStep, backgroundDipilih,
   } = useBookingStore()
 
@@ -130,7 +130,7 @@ export function Step3Detail() {
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<DetailFormValues>({
     resolver: zodResolver(detailSchema),
-    defaultValues: { namaClient, noWa, email, jumlahOrang, catatan },
+    defaultValues: { namaClient, noWa, email, jumlahOrang, kampus, catatan },
   })
 
   // State lookup client
@@ -225,6 +225,13 @@ export function Step3Detail() {
           <Input id="email" type="email" placeholder="email@contoh.com" className="mt-1.5"
             {...register("email")} />
           {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
+        </div>
+
+        <div>
+          <Label htmlFor="kampus">Kampus / Instansi (opsional)</Label>
+          <Input id="kampus" placeholder="Contoh: UGM, UNY, UIN, Telkom, Dsb." className="mt-1.5"
+            {...register("kampus")} />
+          {errors.kampus && <p className="text-xs text-red-500 mt-1">{errors.kampus.message}</p>}
         </div>
 
         {paket?.maxOrang && (

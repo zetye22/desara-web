@@ -43,6 +43,7 @@ export function FooterSection({ wa = "6281234567890", instagram = "@desarahomest
                   { label: "Tentang", href: "#tentang" },
                   { label: "Testimoni", href: "#testimoni" },
                   { label: "Booking", href: "/booking" },
+                  { label: "Waiting List", href: "/waiting-list" },
                 ].map((l) => (
                   <li key={l.label}>
                     <a href={l.href} className="hover:text-[#C9A84C] transition-colors">
@@ -86,6 +87,7 @@ export function FooterSection({ wa = "6281234567890", instagram = "@desarahomest
                 { label: "Tentang Studio", href: "#tentang" },
                 { label: "Testimoni", href: "#testimoni" },
                 { label: "Booking Sekarang", href: "/booking" },
+                { label: "Waiting List Antrean", href: "/waiting-list" },
               ].map((l) => (
                 <li key={l.label}>
                   <a href={l.href} className="hover:text-[#C9A84C] transition-colors">

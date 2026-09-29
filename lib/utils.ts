@@ -50,3 +50,18 @@ export function generateNomorBooking(urutan: number): string {
     .replace(/\//g, "")
   return `DSR-${tanggal}-${String(urutan).padStart(3, "0")}`
 }
+
+// Parse kampus dari string catatan (format: [Kampus/Instansi]: NamaKampus)
+export function parseKampusFromCatatan(catatan: string | null | undefined): {
+  kampus: string | null
+  catatanBersih: string | null
+} {
+  if (!catatan) return { kampus: null, catatanBersih: null }
+  const match = catatan.match(/\[Kampus\/Instansi\]:\s*([^\n\r]+)/)
+  const kampus = match ? match[1].trim() : null
+  const catatanBersih = catatan
+    .replace(/(?:\[Client\]:\s*)?\[Kampus\/Instansi\]:\s*[^\n\r]+(\r?\n)?/, "")
+    .trim() || null
+  return { kampus, catatanBersih }
+}
+

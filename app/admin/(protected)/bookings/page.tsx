@@ -92,20 +92,31 @@
       <div className="min-h-screen" style={{ backgroundColor: "#F8F5F0" }}>
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* ===== Heading ===== */}
-          <div className="mb-6">
-            <h1
-              className="text-2xl font-bold sm:text-3xl"
-              style={{ color: "#0d1f3c" }}
-            >
-              Manajemen Booking
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Total{" "}
-              <span className="font-semibold text-gray-700">
-                {allBookings.length}
-              </span>{" "}
-              booking aktif
-            </p>
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1
+                className="text-2xl font-bold sm:text-3xl"
+                style={{ color: "#0d1f3c" }}
+              >
+                Manajemen Booking
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Total{" "}
+                <span className="font-semibold text-gray-700">
+                  {allBookings.length}
+                </span>{" "}
+                booking aktif
+              </p>
+            </div>
+            <div>
+              <a
+                href="/admin/waiting-list"
+                className="inline-flex items-center gap-2 bg-[#C9A84C] hover:bg-[#b8963d] text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm"
+              >
+                <span>Lihat Antrean Waiting List</span>
+                <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full font-bold">→</span>
+              </a>
+            </div>
           </div>
 
           {/* ===== List Booking ===== */}

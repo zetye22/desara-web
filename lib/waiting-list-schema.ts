@@ -7,14 +7,9 @@ function normalizeWA(wa: string): string {
   return cleaned
 }
 
-export const createBookingSchema = z.object({
+export const createWaitingListSchema = z.object({
   kategori_sesi: z.enum(["wisuda", "prewed", "keluarga", "group", "portrait", "couple", "custom"]),
   paket_id: z.string().min(1, "Paket harus dipilih"),
-  tgl_foto: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format tanggal tidak valid")
-    .refine((d) => new Date(d) >= new Date(new Date().toDateString()), "Tanggal sudah lewat"),
-  jam_mulai: z.string().regex(/^\d{2}:\d{2}$/, "Format jam tidak valid"),
   nama_client: z
     .string()
     .min(2, "Nama minimal 2 karakter")
@@ -41,8 +36,9 @@ export const createBookingSchema = z.object({
     cetak12R: z.number().int().min(0).max(10),
     cetak20R: z.number().int().min(0).max(10),
   }),
+  preferensi_jadwal: z.string().max(200, "Preferensi jadwal maksimal 200 karakter").optional(),
   kampus: z.string().max(100).optional(),
   catatan: z.string().max(500).optional(),
 })
 
-export type CreateBookingInput = z.infer<typeof createBookingSchema>
+export type CreateWaitingListInput = z.infer<typeof createWaitingListSchema>
