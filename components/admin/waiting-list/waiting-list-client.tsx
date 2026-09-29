@@ -1,18 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
-  CalendarClock,
   Search,
-  Filter,
   MessageCircle,
   CalendarCheck,
   Ban,
   Clock,
   CheckCircle2,
-  AlertCircle,
   Eye,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -31,6 +28,10 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
   const [search, setSearch] = useState("")
   const [filterStatus, setFilterStatus] = useState<"semua" | "menunggu" | "dijadwalkan" | "batal">("menunggu")
   const [selectedItem, setSelectedItem] = useState<WaitingListRow | null>(null)
+
+  useEffect(() => {
+    setItems(initialItems)
+  }, [initialItems])
 
   // Filter pencarian & status
   const filtered = items.filter((item) => {
@@ -70,6 +71,7 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
         body: JSON.stringify({ status: "batal" }),
       })
       if (!res.ok) throw new Error()
+      setItems((prev) => prev.map((it) => it.id === id ? { ...it, status: "batal" } : it))
       toast.success("Antrean dibatalkan")
       router.refresh()
     } catch {

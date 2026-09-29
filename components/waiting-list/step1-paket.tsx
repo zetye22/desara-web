@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, Clock, ImageIcon, Users, Printer, ChevronRight, AlertCircle } from "lucide-react"
+import { Check, Clock, ImageIcon, Users, Printer, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useWaitingListStore } from "@/lib/waiting-list-store"
 import { INCLUDED_ALL_PAKET, KATEGORI_LABEL, SEMUA_PAKET, ADD_ONS } from "@/lib/constants"

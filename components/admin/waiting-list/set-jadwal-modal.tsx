@@ -3,11 +3,11 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Calendar, Clock, X, Loader2, CheckCircle, ArrowRight } from "lucide-react"
+import { Calendar, X, Loader2, CheckCircle, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { formatRupiah, formatTanggal, parseKampusFromCatatan } from "@/lib/utils"
+import { formatRupiah, parseKampusFromCatatan } from "@/lib/utils"
 import { generateSlotJam } from "@/lib/time-utils"
 import type { WaitingListRow } from "./types"
 

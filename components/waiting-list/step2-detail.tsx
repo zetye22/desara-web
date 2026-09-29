@@ -20,6 +20,7 @@ const detailWaitingListSchema = z.object({
   email: z.string().email("Format email tidak valid").optional().or(z.literal("")),
   jumlahOrang: z.number().int().min(1, "Minimal 1 orang"),
   preferensiJadwal: z.string().max(200, "Maksimal 200 karakter").optional(),
+  kampus: z.string().max(100, "Nama kampus terlalu panjang").optional(),
   catatan: z.string().max(300, "Catatan maksimal 300 karakter").optional(),
 })
 

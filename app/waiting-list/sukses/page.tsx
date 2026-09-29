@@ -4,7 +4,6 @@ import { Suspense, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle2, MessageCircle, Home, Calendar, Clock, Loader2, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useWaitingListStore } from "@/lib/waiting-list-store"
 
 const WA_STUDIO = "6282148832027"
