@@ -36,9 +36,20 @@ function SuksesContent() {
 
   const nama = waitingListResult?.nama_client || "Client"
   const paket = waitingListResult?.nama_paket || "Paket Foto"
+  const dpMinimum = waitingListResult?.dp_minimum ?? 0
 
   const pesanWA = encodeURIComponent(
-    `Halo Desara Home Studio, saya sudah mendaftar antrean Waiting List atas nama *${nama}* untuk paket *${paket}*. Mohon infonya jika ada jadwal/slot yang tersedia. Terima kasih!`
+    [
+      `Halo Desara Home Studio 👋`,
+      ``,
+      `Saya sudah mendaftar antrean *Waiting List* dengan detail berikut:`,
+      ``,
+      `👤 Nama : ${nama}`,
+      `📦 Paket : ${paket}`,
+      dpMinimum > 0 ? `💳 DP wajib : Rp ${dpMinimum.toLocaleString("id-ID")}` : null,
+      ``,
+      `Mohon info jika ada jadwal / slot yang tersedia. Terima kasih! 🙏`,
+    ].filter(Boolean).join("\n")
   )
 
   const waLink = `https://wa.me/${WA_STUDIO}?text=${pesanWA}`

@@ -51,14 +51,33 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
     return cocokStatus && cocokQuery
   })
 
-  // Format WA Link
+  // Format WA Link — Template konfirmasi penerimaan data waiting list
   const getWaLink = (item: WaitingListRow) => {
     const digits = item.no_wa.replace(/\D/g, "")
     const num = digits.startsWith("0") ? "62" + digits.slice(1) : digits
-    const pesan = encodeURIComponent(
-      `Halo Kak ${item.nama_client}, dari Desara Home Studio terkait antrean Waiting List untuk paket *${item.nama_paket}*. Apakah jadwalnya sudah ada kepastian? Kami siap bantu atur slot sesinya 🙏`
-    )
-    return `https://wa.me/${num}?text=${pesan}`
+
+    const dpMinimum = 100000
+    const baris = [
+      `Halo Kak *${item.nama_client}* 👋`,
+      ``,
+      `Kami dari *Desara Home Studio* ingin mengonfirmasi bahwa data pendaftaran Waiting List Anda sudah kami terima ✅`,
+      ``,
+      `📋 *Ringkasan Antrean:*`,
+      `• Paket : ${item.nama_paket}`,
+      `• Jumlah peserta : ${item.jumlah_orang} orang`,
+      item.preferensi_jadwal ? `• Preferensi jadwal : ${item.preferensi_jadwal}` : null,
+      `• Estimasi total : Rp ${item.total_tagihan.toLocaleString("id-ID")}`,
+      `• DP wajib : Rp ${dpMinimum.toLocaleString("id-ID")}`,
+      ``,
+      `📌 *Langkah Selanjutnya:*`,
+      `Kami akan segera menghubungi Kakak untuk mencocokkan jadwal sesi foto yang tersedia. Setelah jadwal disepakati, Kakak diminta melakukan pembayaran DP untuk mengunci slot booking.`,
+      ``,
+      `Terima kasih sudah mendaftar, Kak! Sampai ketemu di sesi fotonya 📸`,
+      ``,
+      `— Tim Desara Home Studio`,
+    ].filter((b) => b !== null).join("\n")
+
+    return `https://wa.me/${num}?text=${encodeURIComponent(baris)}`
   }
 
   // Aksi batalkan antrean
@@ -209,12 +228,12 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
                       {/* Aksi */}
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Chat WhatsApp */}
+                          {/* Chat WhatsApp — Kirim Konfirmasi Penerimaan Data */}
                           <a
                             href={getWaLink(item)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="Hubungi Client via WA"
+                            title="Kirim konfirmasi WA ke client bahwa data waiting list sudah diterima"
                             className="p-2 rounded-xl border border-gray-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
                           >
                             <MessageCircle className="w-4 h-4" />
