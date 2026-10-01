@@ -80,6 +80,7 @@ function Lightbox({
             src={item.src}
             alt={item.alt}
             fill
+            unoptimized
             className="object-contain"
             sizes="(max-width: 640px) 100vw, 672px"
             priority
@@ -149,6 +150,7 @@ function FotoCard({
         src={item.src}
         alt={item.alt}
         fill
+        unoptimized
         loading="lazy"
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
