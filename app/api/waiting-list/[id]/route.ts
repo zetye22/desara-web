@@ -25,6 +25,17 @@ export async function GET(
   return NextResponse.json({ item: data })
 }
 
+interface WaitingListPatchBody {
+  status?: "menunggu" | "batal"
+  action?: string
+  nama_client?: string
+  no_wa?: string
+  email?: string | null
+  preferensi_jadwal?: string | null
+  jam_diinginkan?: string | null
+  catatan?: string | null
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -34,9 +45,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  let body: Record<string, any>
+  let body: WaitingListPatchBody
   try {
-    body = await request.json()
+    body = (await request.json()) as WaitingListPatchBody
   } catch {
     return NextResponse.json({ error: "Format request tidak valid" }, { status: 400 })
   }
@@ -62,7 +73,16 @@ export async function PATCH(
   }
 
   // Jika update data client / form edit
-  const updateData: Record<string, any> = {
+  const updateData: {
+    updated_at: string
+    nama_client?: string
+    no_wa?: string
+    email?: string | null
+    preferensi_jadwal?: string | null
+    jam_diinginkan?: string | null
+    catatan?: string | null
+    status?: "menunggu" | "batal"
+  } = {
     updated_at: new Date().toISOString(),
   }
 
