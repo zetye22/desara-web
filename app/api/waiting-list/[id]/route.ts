@@ -34,28 +34,82 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  let body: { status: "menunggu" | "batal" }
+  let body: Record<string, any>
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: "Format request tidak valid" }, { status: 400 })
   }
 
-  if (!["menunggu", "batal"].includes(body.status)) {
-    return NextResponse.json({ error: "Status tidak valid" }, { status: 400 })
+  const supabase = createAdminClient()
+
+  // Jika hanya update status sederhana
+  if (body.status && !body.nama_client && !body.action) {
+    if (!["menunggu", "batal"].includes(body.status)) {
+      return NextResponse.json({ error: "Status tidak valid" }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from("waiting_list")
+      .update({ status: body.status, updated_at: new Date().toISOString() })
+      .eq("id", params.id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
   }
 
-  const supabase = createAdminClient()
+  // Jika update data client / form edit
+  const updateData: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  }
+
+  if (typeof body.nama_client === "string") {
+    if (!body.nama_client.trim()) {
+      return NextResponse.json({ error: "Nama client tidak boleh kosong" }, { status: 400 })
+    }
+    updateData.nama_client = body.nama_client.trim()
+  }
+
+  if (typeof body.no_wa === "string") {
+    if (!body.no_wa.trim()) {
+      return NextResponse.json({ error: "No WhatsApp tidak boleh kosong" }, { status: 400 })
+    }
+    updateData.no_wa = body.no_wa.trim()
+  }
+
+  if (body.email !== undefined) {
+    updateData.email = body.email ? String(body.email).trim() : null
+  }
+
+  if (body.preferensi_jadwal !== undefined) {
+    updateData.preferensi_jadwal = body.preferensi_jadwal ? String(body.preferensi_jadwal).trim() : null
+  }
+
+  if (body.jam_diinginkan !== undefined) {
+    updateData.jam_diinginkan = body.jam_diinginkan ? String(body.jam_diinginkan).trim() : null
+  }
+
+  if (body.catatan !== undefined) {
+    updateData.catatan = body.catatan ? String(body.catatan).trim() : null
+  }
+
+  if (body.status && ["menunggu", "batal"].includes(body.status)) {
+    updateData.status = body.status
+  }
+
   const { error } = await supabase
     .from("waiting_list")
-    .update({ status: body.status, updated_at: new Date().toISOString() })
+    .update(updateData)
     .eq("id", params.id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, updated: updateData })
 }
 
 export async function DELETE(

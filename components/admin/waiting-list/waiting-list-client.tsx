@@ -11,11 +11,13 @@ import {
   Clock,
   CheckCircle2,
   Eye,
+  Pencil,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatRupiah, formatTanggal, parseKampusFromCatatan } from "@/lib/utils"
 import { SetJadwalModal } from "./set-jadwal-modal"
+import { EditModal } from "./edit-modal"
 import type { WaitingListRow } from "./types"
 
 interface WaitingListClientProps {
@@ -28,6 +30,7 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
   const [search, setSearch] = useState("")
   const [filterStatus, setFilterStatus] = useState<"semua" | "menunggu" | "dijadwalkan" | "batal">("menunggu")
   const [selectedItem, setSelectedItem] = useState<WaitingListRow | null>(null)
+  const [editingItem, setEditingItem] = useState<WaitingListRow | null>(null)
 
   useEffect(() => {
     setItems(initialItems)
@@ -245,6 +248,15 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
                             <MessageCircle className="w-4 h-4" />
                           </a>
 
+                          {/* Edit Data Client */}
+                          <button
+                            onClick={() => setEditingItem(item)}
+                            title="Edit Data Client"
+                            className="p-2 rounded-xl border border-gray-200 text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+
                           {/* Tombol Set Jadwal (Hanya jika masih status menunggu) */}
                           {item.status === "menunggu" ? (
                             <>
@@ -293,6 +305,18 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
         onSuccess={() => {
+          router.refresh()
+        }}
+      />
+
+      {/* Modal Edit Data Waiting List */}
+      <EditModal
+        item={editingItem}
+        onClose={() => setEditingItem(null)}
+        onSuccess={(updated) => {
+          setItems((prev) =>
+            prev.map((it) => (it.id === editingItem?.id ? { ...it, ...updated } : it))
+          )
           router.refresh()
         }}
       />
