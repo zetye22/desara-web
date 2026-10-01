@@ -65,7 +65,8 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
       `📋 *Ringkasan Antrean:*`,
       `• Paket : ${item.nama_paket}`,
       `• Jumlah peserta : ${item.jumlah_orang} orang`,
-      item.preferensi_jadwal ? `• Preferensi jadwal : ${item.preferensi_jadwal}` : null,
+      item.preferensi_jadwal ? `• Preferensi hari : ${item.preferensi_jadwal}` : null,
+      item.jam_diinginkan ? `• Jam yang diinginkan : ${item.jam_diinginkan} WIB` : null,
       `• Estimasi total : Rp ${item.total_tagihan.toLocaleString("id-ID")}`,
       `• DP wajib : Rp ${dpMinimum.toLocaleString("id-ID")}`,
       ``,
@@ -198,6 +199,11 @@ export function WaitingListClient({ initialItems }: WaitingListClientProps) {
                           </span>
                         ) : (
                           <span className="text-xs text-gray-400 italic">Belum ada estimasi</span>
+                        )}
+                        {item.jam_diinginkan && (
+                          <span className="mt-1 flex items-center gap-1 text-xs text-purple-700 bg-purple-50 border border-purple-100 rounded-lg px-2 py-0.5 w-fit">
+                            🕐 {item.jam_diinginkan} WIB
+                          </span>
                         )}
                       </td>
 

@@ -24,6 +24,7 @@ export interface WaitingListRow {
   subtotal_addon: number
   total_tagihan: number
   preferensi_jadwal: string | null
+  jam_diinginkan: string | null
   status: "menunggu" | "dijadwalkan" | "batal"
   booking_id: string | null
   dijadwalkan_pada: string | null

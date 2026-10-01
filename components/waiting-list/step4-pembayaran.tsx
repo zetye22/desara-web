@@ -47,6 +47,7 @@ export function Step4PembayaranWaitingList() {
           background_dipilih: store.backgroundDipilih,
           addons: store.addons,
           preferensi_jadwal: store.preferensiJadwal || undefined,
+          jam_diinginkan: store.jamDiinginkan || undefined,
           catatan: [
             store.kampus ? `[Kampus/Instansi]: ${store.kampus}` : "",
             store.catatan || "",

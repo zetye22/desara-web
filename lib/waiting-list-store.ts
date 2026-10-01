@@ -28,6 +28,7 @@ export interface WaitingListState {
   email: string
   jumlahOrang: number
   preferensiJadwal: string
+  jamDiinginkan: string
   kampus: string
   catatan: string
 
@@ -47,7 +48,7 @@ export interface WaitingListState {
     data: Partial<
       Pick<
         WaitingListState,
-        "namaClient" | "noWa" | "email" | "jumlahOrang" | "preferensiJadwal" | "kampus" | "catatan"
+        "namaClient" | "noWa" | "email" | "jumlahOrang" | "preferensiJadwal" | "jamDiinginkan" | "kampus" | "catatan"
       >
     >
   ) => void
@@ -72,6 +73,7 @@ export const useWaitingListStore = create<WaitingListState>()(
       email: "",
       jumlahOrang: 1,
       preferensiJadwal: "",
+      jamDiinginkan: "",
       kampus: "",
       catatan: "",
       waitingListResult: null,
@@ -102,6 +104,7 @@ export const useWaitingListStore = create<WaitingListState>()(
           email: "",
           jumlahOrang: 1,
           preferensiJadwal: "",
+          jamDiinginkan: "",
           kampus: "",
           catatan: "",
           waitingListResult: null,

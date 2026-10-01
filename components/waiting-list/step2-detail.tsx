@@ -10,7 +10,14 @@ import { Label } from "@/components/ui/label"
 import { useWaitingListStore } from "@/lib/waiting-list-store"
 import { SEMUA_PAKET, BACKGROUNDS, ADD_ONS } from "@/lib/constants"
 import { formatRupiah } from "@/lib/utils"
+import { generateSlotJam } from "@/lib/time-utils"
 import type { BgKatalog, PaketKatalog } from "@/lib/katalog-types"
+
+// Slot jam studio: 10:00 – 20:30 (per 30 menit), dari generateSlotJam (06:00–20:00)
+const SLOT_JAM_STUDIO = generateSlotJam().filter((j) => {
+  const [h] = j.split(":").map(Number)
+  return h >= 10
+})
 
 const noWaRegex = /^(\+62|62|0)8[1-9][0-9]{7,11}$/
 
@@ -20,6 +27,7 @@ const detailWaitingListSchema = z.object({
   email: z.string().email("Format email tidak valid").optional().or(z.literal("")),
   jumlahOrang: z.number().int().min(1, "Minimal 1 orang"),
   preferensiJadwal: z.string().max(200, "Maksimal 200 karakter").optional(),
+  jamDiinginkan: z.string().max(20).optional(),
   kampus: z.string().max(100, "Nama kampus terlalu panjang").optional(),
   catatan: z.string().max(300, "Catatan maksimal 300 karakter").optional(),
 })
@@ -127,6 +135,7 @@ export function Step2DetailWaitingList() {
     email,
     jumlahOrang,
     preferensiJadwal,
+    jamDiinginkan,
     kampus,
     catatan,
     backgroundDipilih,
@@ -147,6 +156,7 @@ export function Step2DetailWaitingList() {
       email,
       jumlahOrang: jumlahOrang || 1,
       preferensiJadwal,
+      jamDiinginkan,
       kampus,
       catatan,
     },
@@ -160,6 +170,7 @@ export function Step2DetailWaitingList() {
       email: values.email ?? "",
       jumlahOrang: values.jumlahOrang,
       preferensiJadwal: values.preferensiJadwal ?? "",
+      jamDiinginkan: values.jamDiinginkan ?? "",
       kampus: values.kampus ?? "",
       catatan: values.catatan ?? "",
     })
@@ -262,22 +273,50 @@ export function Step2DetailWaitingList() {
         </div>
 
         {/* Preferensi Jadwal */}
-        <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-4">
-          <Label htmlFor="preferensiJadwal" className="text-sm font-semibold text-[#0d1f3c]">
-            Perkiraan Tanggal / Preferensi Hari
-          </Label>
-          <p className="text-xs text-gray-500 mt-0.5 mb-2">
-            Contoh: &quot;Akhir bulan ini&quot;, &quot;Weekend sore sekitar tgl 15-20&quot;, atau &quot;Tergantung info wisuda kampus&quot;
-          </p>
-          <Input
-            id="preferensiJadwal"
-            placeholder="Tuliskan rentang atau hari yang Anda inginkan..."
-            {...register("preferensiJadwal")}
-            className="h-11 bg-white rounded-xl"
-          />
-          {errors.preferensiJadwal && (
-            <p className="text-xs text-red-500 mt-1">{errors.preferensiJadwal.message}</p>
-          )}
+        <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-4 space-y-4">
+          <div>
+            <Label htmlFor="preferensiJadwal" className="text-sm font-semibold text-[#0d1f3c]">
+              Perkiraan Tanggal / Preferensi Hari
+            </Label>
+            <p className="text-xs text-gray-500 mt-0.5 mb-2">
+              Contoh: &quot;Akhir bulan ini&quot;, &quot;Weekend sore sekitar tgl 15-20&quot;, atau &quot;Tergantung info wisuda kampus&quot;
+            </p>
+            <Input
+              id="preferensiJadwal"
+              placeholder="Tuliskan rentang atau hari yang Anda inginkan..."
+              {...register("preferensiJadwal")}
+              className="h-11 bg-white rounded-xl"
+            />
+            {errors.preferensiJadwal && (
+              <p className="text-xs text-red-500 mt-1">{errors.preferensiJadwal.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="jamDiinginkan" className="text-sm font-semibold text-[#0d1f3c]">
+              Jam yang Diinginkan <span className="text-gray-400 font-normal">(opsional)</span>
+            </Label>
+            <p className="text-xs text-gray-500 mt-0.5 mb-2">
+              Pilih rentang jam sesi foto yang paling Anda inginkan
+            </p>
+            <select
+              id="jamDiinginkan"
+              {...register("jamDiinginkan")}
+              className="h-11 w-full bg-white rounded-xl border border-gray-200 px-3 text-sm focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
+            >
+              <option value="">— Tidak ada preferensi jam —</option>
+              {SLOT_JAM_STUDIO.map((jam) => {
+                const [h] = jam.split(":").map(Number)
+                const label =
+                  h < 12 ? "Pagi" : h < 15 ? "Siang" : h < 18 ? "Sore" : "Malam"
+                return (
+                  <option key={jam} value={jam}>
+                    {jam} WIB ({label})
+                  </option>
+                )
+              })}
+            </select>
+          </div>
         </div>
 
         {/* Catatan */}

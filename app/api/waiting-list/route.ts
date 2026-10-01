@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
       subtotal_addon: rincian.subtotalAddon,
       total_tagihan: rincian.total,
       preferensi_jadwal: data.preferensi_jadwal ?? null,
+      jam_diinginkan: data.jam_diinginkan ?? null,
       catatan: data.catatan ?? null,
       status: "menunggu",
     })

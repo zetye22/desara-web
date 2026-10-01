@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS waiting_list (
 
   -- Preferensi jadwal dari client (opsional / fleksibel)
   preferensi_jadwal   TEXT,
+  jam_diinginkan      TEXT,                  -- Rentang jam yang diinginkan client, contoh: "14:00–15:00"
 
   -- Status antrean: 'menunggu', 'dijadwalkan', 'batal'
   status              TEXT        NOT NULL DEFAULT 'menunggu'

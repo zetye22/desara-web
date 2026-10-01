@@ -37,6 +37,7 @@ export const createWaitingListSchema = z.object({
     cetak20R: z.number().int().min(0).max(10),
   }),
   preferensi_jadwal: z.string().max(200, "Preferensi jadwal maksimal 200 karakter").optional(),
+  jam_diinginkan: z.string().max(20, "Format jam tidak valid").optional(),
   kampus: z.string().max(100).optional(),
   catatan: z.string().max(500).optional(),
 })

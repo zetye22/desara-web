@@ -68,8 +68,13 @@ export function Step3KonfirmasiWaitingList() {
         {store.kampus && <DetailRow label="Kampus / Instansi">{store.kampus}</DetailRow>}
         <DetailRow label="Jumlah Peserta">{store.jumlahOrang} orang</DetailRow>
         {store.preferensiJadwal && (
-          <DetailRow label="Preferensi Waktu">
+          <DetailRow label="Preferensi Hari">
             <span className="text-[#C9A84C] font-semibold">{store.preferensiJadwal}</span>
+          </DetailRow>
+        )}
+        {store.jamDiinginkan && (
+          <DetailRow label="Jam yang Diinginkan">
+            <span className="text-[#C9A84C] font-semibold">🕐 {store.jamDiinginkan} WIB</span>
           </DetailRow>
         )}
         {store.catatan && <DetailRow label="Catatan">{store.catatan}</DetailRow>}

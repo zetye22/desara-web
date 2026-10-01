@@ -122,9 +122,17 @@ export function SetJadwalModal({ item, onClose, onSuccess }: SetJadwalModalProps
             </div>
             {item.preferensi_jadwal && (
               <div className="pt-2 border-t border-gray-200 mt-2">
-                <span className="text-gray-500 block mb-0.5 font-medium">Preferensi Client:</span>
+                <span className="text-gray-500 block mb-0.5 font-medium">Preferensi Hari:</span>
                 <span className="text-blue-900 bg-blue-100/70 px-2 py-0.5 rounded font-medium inline-block">
                   &quot;{item.preferensi_jadwal}&quot;
+                </span>
+              </div>
+            )}
+            {item.jam_diinginkan && (
+              <div className="pt-2 border-t border-gray-200 mt-2">
+                <span className="text-gray-500 block mb-0.5 font-medium">Jam yang Diinginkan:</span>
+                <span className="text-purple-900 bg-purple-100/70 px-2 py-0.5 rounded font-medium inline-block">
+                  🕐 {item.jam_diinginkan} WIB
                 </span>
               </div>
             )}
